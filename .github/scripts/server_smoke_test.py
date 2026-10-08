@@ -56,6 +56,12 @@ def resolve_build(project, requested, repo_root):
 
 def prepare_server(workdir, jar, server_url, port):
     workdir.mkdir(parents=True, exist_ok=True)
+    for stale in ("world", "world_nether", "world_the_end", "crash-reports", "session.lock"):
+        stale_path = workdir / stale
+        if stale_path.is_dir():
+            shutil.rmtree(stale_path, ignore_errors=True)
+        elif stale_path.is_file():
+            stale_path.unlink(missing_ok=True)
     plugins = workdir / "plugins"
     if plugins.exists():
         shutil.rmtree(plugins)
@@ -124,7 +130,10 @@ def run(args):
     jar = Path(args.jar).resolve()
     workdir = Path(args.workdir).resolve()
     version, build, url = resolve_build(args.project, args.version, repo_root)
-    print(f"{args.project} {version} build {build}")
+    print("=" * 64)
+    print(f"  Server Smoke Test: {args.project} {version} (build {build})")
+    print(f"  Port: {args.port} | Java: {args.java}")
+    print("=" * 64)
     server_jar = prepare_server(workdir, jar, url, args.port)
     log_path = workdir / "console.log"
     with open(log_path, "w", encoding="utf-8") as log:
@@ -133,6 +142,7 @@ def run(args):
         try:
             text = wait_for(log_path, lambda t: "Done (" in t or process.poll() is not None, args.boot_timeout)
             if "Done (" not in text:
+                print("Server failed to boot within timeout:")
                 print(text[-4000:])
                 return 1, version, None, None
             process.stdin.write("bp debug\n")
@@ -153,14 +163,43 @@ def run(args):
     text = read_log(log_path)
     match = SUMMARY_RE.search(text)
     plugin_errors = plugin_error_lines(text)
-    for line in plugin_errors:
-        print(f"plugin error: {line}")
+    if plugin_errors:
+        print("  Plugin errors detected:")
+        for line in plugin_errors:
+            print(f"    ! {line}")
     if match is None:
-        print("Diagnostics summary not found")
+        print("  Diagnostics summary not found in console output")
         return 1, version, None, None
     passed, failed, total = (int(g) for g in match.groups())
-    print(f"{args.project} {version}: {passed} passed, {failed} failed ({total} total)")
+    print(f"  Diagnostics: {passed} passed, {failed} failed ({total} total)")
+    if args.players:
+        p_state = "PASS" if players_ok else ("SKIP" if players_ok is None else "FAIL")
+        print(f"  Simulated Players: {p_state}")
+    print("=" * 64)
     return (0 if failed == 0 and not plugin_errors and players_ok is not False else 1), version, (passed, failed, total), players_ok
+
+
+def append_or_update_summary(summary_file, label, version, status, detail):
+    target_prefix = f"| {label} {version} |"
+    new_row = f"| {label} {version} | {status} | {detail} |\n"
+    summary_path = Path(summary_file)
+    if not summary_path.exists():
+        with open(summary_path, "w", encoding="utf-8") as out:
+            out.write(new_row)
+        return
+    content = summary_path.read_text(encoding="utf-8")
+    lines = content.splitlines(keepends=True)
+    updated = False
+    new_lines = []
+    for line in lines:
+        if line.startswith(target_prefix):
+            new_lines.append(new_row)
+            updated = True
+        else:
+            new_lines.append(line)
+    if not updated:
+        new_lines.append(new_row)
+    summary_path.write_text("".join(new_lines), encoding="utf-8")
 
 
 def main():
@@ -186,9 +225,8 @@ def main():
             detail += ", two-player test skipped (no client protocol data)"
         elif args.players and players:
             detail += ", two-player test passed"
-        with open(args.summary, "a", encoding="utf-8") as out:
-            label = args.summary_title or args.project.capitalize()
-            out.write(f"| {label} {version} | {status} | {detail} |\n")
+        label = args.summary_title or args.project.capitalize()
+        append_or_update_summary(args.summary, label, version, status, detail)
     sys.exit(code)
 
 

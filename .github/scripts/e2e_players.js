@@ -10,10 +10,12 @@ if (!require('minecraft-data')(version)) {
   process.exit(2);
 }
 const failures = [];
+let totalChecks = 0;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function check(name, ok, detail) {
+  totalChecks++;
   console.log(`E2E ${ok ? 'PASS' : 'FAIL'}: ${name}${detail ? ` (${detail})` : ''}`);
   if (!ok) {
     failures.push(name);
@@ -21,6 +23,7 @@ function check(name, ok, detail) {
 }
 
 async function safeRun(name, fn) {
+  console.log(`\n--- [Step] ${name} ---`);
   try {
     await fn();
   } catch (error) {
@@ -257,4 +260,16 @@ main()
     console.log(`E2E FAIL: ${error.message}`);
     failures.push(error.message);
   })
-  .finally(() => process.exit(failures.length ? 1 : 0));
+  .finally(() => {
+    const passed = totalChecks - failures.length;
+    console.log('\n============================================================');
+    console.log(`  Simulated Players Summary: ${passed}/${totalChecks} passed (${failures.length} failed)`);
+    if (failures.length > 0) {
+      console.log('  Failures:');
+      for (const f of failures) {
+        console.log(`    - ${f}`);
+      }
+    }
+    console.log('============================================================\n');
+    process.exit(failures.length ? 1 : 0);
+  });

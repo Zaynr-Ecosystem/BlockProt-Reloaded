@@ -168,10 +168,17 @@ tasks.test {
 }
 
 tasks.runServer {
+    val mcVer = project.findProperty("mcVersion") as? String ?: "26.3"
+    minecraftVersion(mcVer)
+    jvmArgs(
+        "-Dfile.encoding=UTF-8",
+        "-Dsun.stdout.encoding=UTF-8",
+        "-Dsun.stderr.encoding=UTF-8",
+        "-Dterminal.ansi=true"
+    )
     downloadPlugins {
         url("https://download.luckperms.net/1561/bukkit/loader/LuckPerms-Bukkit-5.5.71.jar")
     }
-    minecraftVersion("26.3")
 }
 
 publishing {
