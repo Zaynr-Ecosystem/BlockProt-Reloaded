@@ -182,17 +182,14 @@ public final class AuditLogger {
     }
 
     @NotNull
-    public List<AuditEntry> getEntriesForBlock(@NotNull String world, int x, int y, int z, int limit) {
+    public List<AuditEntry> getRecentEntries(int limit, int offset) {
         List<AuditEntry> entries = new ArrayList<>();
         try {
             Connection conn = acquire();
             try (PreparedStatement ps = conn.prepareStatement(
-                    "SELECT * FROM audit_log WHERE world=? AND x=? AND y=? AND z=? ORDER BY timestamp DESC LIMIT ?")) {
-                ps.setString(1, world);
-                ps.setInt(2, x);
-                ps.setInt(3, y);
-                ps.setInt(4, z);
-                ps.setInt(5, limit);
+                    "SELECT * FROM audit_log ORDER BY timestamp DESC LIMIT ? OFFSET ?")) {
+                ps.setInt(1, limit);
+                ps.setInt(2, offset);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) entries.add(mapRow(rs));
                 }
@@ -205,15 +202,40 @@ public final class AuditLogger {
         return entries;
     }
 
+    public int countEntries() {
+        try {
+            Connection conn = acquire();
+            try (PreparedStatement ps = conn.prepareStatement("SELECT COUNT(*) FROM audit_log")) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            BlockProt.getInstance().getLogger().warning(
+                Translator.get(TranslationKey.CONSOLE__AUDIT_LOGGER_FAILED)
+                    .replace("{error}", e.getMessage()));
+        }
+        return 0;
+    }
+
     @NotNull
-    public List<AuditEntry> getEntriesForPlayer(@NotNull UUID player, int limit) {
+    public List<AuditEntry> getEntriesForBlock(@NotNull String world, int x, int y, int z, int limit) {
+        return getEntriesForBlock(world, x, y, z, limit, 0);
+    }
+
+    @NotNull
+    public List<AuditEntry> getEntriesForBlock(@NotNull String world, int x, int y, int z, int limit, int offset) {
         List<AuditEntry> entries = new ArrayList<>();
         try {
             Connection conn = acquire();
             try (PreparedStatement ps = conn.prepareStatement(
-                    "SELECT * FROM audit_log WHERE player_uuid=? ORDER BY timestamp DESC LIMIT ?")) {
-                ps.setString(1, player.toString());
-                ps.setInt(2, limit);
+                    "SELECT * FROM audit_log WHERE world=? AND x=? AND y=? AND z=? ORDER BY timestamp DESC LIMIT ? OFFSET ?")) {
+                ps.setString(1, world);
+                ps.setInt(2, x);
+                ps.setInt(3, y);
+                ps.setInt(4, z);
+                ps.setInt(5, limit);
+                ps.setInt(6, offset);
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) entries.add(mapRow(rs));
                 }
@@ -224,6 +246,72 @@ public final class AuditLogger {
                     .replace("{error}", e.getMessage()));
         }
         return entries;
+    }
+
+    public int countEntriesForBlock(@NotNull String world, int x, int y, int z) {
+        try {
+            Connection conn = acquire();
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "SELECT COUNT(*) FROM audit_log WHERE world=? AND x=? AND y=? AND z=?")) {
+                ps.setString(1, world);
+                ps.setInt(2, x);
+                ps.setInt(3, y);
+                ps.setInt(4, z);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            BlockProt.getInstance().getLogger().warning(
+                Translator.get(TranslationKey.CONSOLE__AUDIT_LOGGER_FAILED)
+                    .replace("{error}", e.getMessage()));
+        }
+        return 0;
+    }
+
+    @NotNull
+    public List<AuditEntry> getEntriesForPlayer(@NotNull UUID player, int limit) {
+        return getEntriesForPlayer(player, limit, 0);
+    }
+
+    @NotNull
+    public List<AuditEntry> getEntriesForPlayer(@NotNull UUID player, int limit, int offset) {
+        List<AuditEntry> entries = new ArrayList<>();
+        try {
+            Connection conn = acquire();
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "SELECT * FROM audit_log WHERE player_uuid=? ORDER BY timestamp DESC LIMIT ? OFFSET ?")) {
+                ps.setString(1, player.toString());
+                ps.setInt(2, limit);
+                ps.setInt(3, offset);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) entries.add(mapRow(rs));
+                }
+            }
+        } catch (SQLException e) {
+            BlockProt.getInstance().getLogger().warning(
+                Translator.get(TranslationKey.CONSOLE__AUDIT_LOGGER_FAILED)
+                    .replace("{error}", e.getMessage()));
+        }
+        return entries;
+    }
+
+    public int countEntriesForPlayer(@NotNull UUID player) {
+        try {
+            Connection conn = acquire();
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "SELECT COUNT(*) FROM audit_log WHERE player_uuid=?")) {
+                ps.setString(1, player.toString());
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            BlockProt.getInstance().getLogger().warning(
+                Translator.get(TranslationKey.CONSOLE__AUDIT_LOGGER_FAILED)
+                    .replace("{error}", e.getMessage()));
+        }
+        return 0;
     }
 
     private AuditEntry mapRow(ResultSet rs) throws SQLException {

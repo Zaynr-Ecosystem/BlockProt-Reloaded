@@ -40,6 +40,16 @@ public class PistonEventListener implements Listener {
         }
 
         for (Block block : event.getBlocks()) {
+            Block target = block.getRelative(event.getDirection());
+            if (ProtectedBlockCache.isProtected(target)
+                    && BlockProt.getDefaultConfig().isLockable(target.getType(), target.getWorld())) {
+                BlockNBTHandler targetNbt = new BlockNBTHandler(target);
+                if (targetNbt.isProtected()) {
+                    event.setCancelled(true);
+                    return;
+                }
+            }
+
             if (!ProtectedBlockCache.isProtected(block)) continue;
 
             if (BlockProt.getDefaultConfig().isLockableShulkerBox(block.getType(), block.getWorld())) {

@@ -289,7 +289,14 @@ public final class BlockNBTHandler extends FriendSupportingHandler<NBTCompound> 
      */
     public boolean canAccess(@NotNull final String player) {
         Optional<FriendHandler> friend = getFriend(player);
-        return isNotProtected() || getOwner().equals(player) || (friend.isPresent() && friend.get().canRead());
+        if (isNotProtected() || getOwner().equals(player)) return true;
+        if (friend.isEmpty()) return false;
+        FriendHandler fh = friend.get();
+        if (fh.getLevel() != FriendHandler.LEVEL_CUSTOM) return true;
+        if (block != null && BlockProt.getDefaultConfig().isLockableDoor(block.getType(), block.getWorld())) {
+            return fh.canOpenContainer() || fh.canUseRedstone();
+        }
+        return fh.canOpenContainer();
     }
 
     /**
@@ -301,7 +308,12 @@ public final class BlockNBTHandler extends FriendSupportingHandler<NBTCompound> 
      * @return {@code true} if the block is unprotected or {@code friend} has read permission.
      */
     public boolean canAccess(@NotNull final FriendHandler friend) {
-        return isNotProtected() || friend.canRead();
+        if (isNotProtected()) return true;
+        if (friend.getLevel() != FriendHandler.LEVEL_CUSTOM) return true;
+        if (block != null && BlockProt.getDefaultConfig().isLockableDoor(block.getType(), block.getWorld())) {
+            return friend.canOpenContainer() || friend.canUseRedstone();
+        }
+        return friend.canOpenContainer();
     }
 
     /**

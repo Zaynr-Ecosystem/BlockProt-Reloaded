@@ -46,6 +46,10 @@ public final class FriendHandler extends NBTHandler<NBTCompound> {
     public static final int FLAG_VIEW_AUDIT = 1 << 3;
     public static final int FLAG_INSPECT = 1 << 4;
     public static final int FLAG_MANAGE_FRIENDS = 1 << 5;
+    public static final int FLAG_DEPOSIT = 1 << 6;
+    public static final int FLAG_WITHDRAW = 1 << 7;
+    public static final int FLAG_REDSTONE = 1 << 8;
+    public static final int FLAG_OPEN_CONTAINER = 1 << 9;
 
     public FriendHandler(@NotNull final NBTCompound compound) {
         super();
@@ -95,7 +99,19 @@ public final class FriendHandler extends NBTHandler<NBTCompound> {
     }
 
     public boolean canOpenContainer() {
-        return true;
+        return getLevel() != LEVEL_CUSTOM || hasFlag(FLAG_OPEN_CONTAINER);
+    }
+
+    public boolean canDeposit() {
+        return getLevel() != LEVEL_CUSTOM || hasFlag(FLAG_DEPOSIT);
+    }
+
+    public boolean canWithdraw() {
+        return getLevel() != LEVEL_CUSTOM || hasFlag(FLAG_WITHDRAW);
+    }
+
+    public boolean canUseRedstone() {
+        return getLevel() != LEVEL_CUSTOM || hasFlag(FLAG_REDSTONE);
     }
 
     public boolean canOpenMenu() {

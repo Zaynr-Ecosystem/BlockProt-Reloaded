@@ -119,9 +119,25 @@ public class InventoryEventListener implements Listener {
                 if (handler.isProtected() && !handler.isOwner(playerUuid)) {
                     final var friend = handler.getFriend(playerUuid);
                     if (friend.isPresent()) {
-                        if (!friend.get().canWrite()) {
+                        FriendHandler friendHandler = friend.get();
+                        if (!friendHandler.canOpenContainer()) {
                             event.setCancelled(true);
-                        } else if (!friend.get().canRead()) {
+                            player.closeInventory();
+                            return;
+                        }
+                        if (TAKE_ACTIONS.contains(event.getAction()) && !friendHandler.canWithdraw()) {
+                            event.setCancelled(true);
+                            sendMessage(player, Translator.get(TranslationKey.MESSAGES__CUSTOM_PERM_NO_WITHDRAW));
+                            return;
+                        }
+                        if (PLACE_ACTIONS.contains(event.getAction()) && !friendHandler.canDeposit()) {
+                            event.setCancelled(true);
+                            sendMessage(player, Translator.get(TranslationKey.MESSAGES__CUSTOM_PERM_NO_DEPOSIT));
+                            return;
+                        }
+                        if (!friendHandler.canWrite()) {
+                            event.setCancelled(true);
+                        } else if (!friendHandler.canRead()) {
                             event.setCancelled(true);
                             player.closeInventory();
                         } else {

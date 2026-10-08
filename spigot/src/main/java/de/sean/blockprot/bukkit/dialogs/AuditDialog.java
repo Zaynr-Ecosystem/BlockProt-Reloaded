@@ -36,6 +36,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -131,11 +132,12 @@ public final class AuditDialog {
         for (AuditLogger.AuditEntry entry : pageEntries) {
             String actionStr = actionLabel(entry.action());
             String timeStr = DATE_FMT.format(new Date(entry.timestamp()));
+            TextColor color = actionColor(entry.action());
             body.add(DialogBodyEntry.text(Component.text()
                 .append(Component.text(timeStr, SOFT_GRAY))
                 .append(Component.text(" ", SOFT_GRAY))
-                .append(Component.text(actionStr, NamedTextColor.WHITE))
-                .append(Component.text(" - " + entry.playerName(), TextColor.color(0x888888)))
+                .append(Component.text(actionStr, color))
+                .append(Component.text(" - " + entry.playerName(), NamedTextColor.WHITE))
                 .build()));
         }
 
@@ -166,6 +168,126 @@ public final class AuditDialog {
             backAction != null ? p -> backAction.run() : null);
 
         bridge.showMultiAction(player, title, body, buttons, exitBtn, 1);
+    }
+
+    public static void showAllLogs(@NotNull Player player, int page) {
+        showLogs(player, null, null, null, null, null, page, null);
+    }
+
+    public static void showPlayerLogs(@NotNull Player player, @NotNull UUID targetPlayer, int page) {
+        showLogs(player, null, null, null, null, targetPlayer.toString(), page, null);
+    }
+
+    public static void showLogs(@NotNull Player player,
+                                @Nullable String world, @Nullable Integer x, @Nullable Integer y, @Nullable Integer z,
+                                @Nullable String filterPlayerUuid, int page,
+                                @Nullable Runnable backAction) {
+        DialogBridge bridge = DialogBridgeFactory.getBridge();
+        if (bridge == null) return;
+
+        AuditLogger audit = BlockProt.getAuditLogger();
+        if (audit == null) {
+            bridge.showNotice(player,
+                Component.text(stripColor(Translator.get(TranslationKey.INVENTORIES__AUDIT__TITLE)),
+                    SOFT_BLUE, TextDecoration.BOLD),
+                List.of(Component.text(stripColor(Translator.get(TranslationKey.INVENTORIES__AUDIT__NO_ENTRIES)),
+                    SOFT_GRAY)),
+                new DialogButton("exit",
+                    Component.text(stripColor(Translator.get(backAction != null ? TranslationKey.DIALOGS__BACK : TranslationKey.DIALOGS__CLOSE)), SOFT_GRAY),
+                    Component.text(stripColor(Translator.get(TranslationKey.DIALOGS__RETURN_PREVIOUS)), TextColor.color(0x888888)),
+                    backAction != null ? p -> backAction.run() : null));
+            return;
+        }
+
+        List<AuditLogger.AuditEntry> allEntries;
+        if (world != null && x != null && y != null && z != null) {
+            allEntries = audit.getEntriesForBlock(world, x, y, z, 500);
+        } else if (filterPlayerUuid != null) {
+            try {
+                allEntries = audit.getEntriesForPlayer(UUID.fromString(filterPlayerUuid), 500);
+            } catch (IllegalArgumentException e) {
+                allEntries = new ArrayList<>();
+            }
+        } else {
+            allEntries = audit.getRecentEntries(500, 0);
+        }
+
+        if (allEntries.isEmpty()) {
+            bridge.showNotice(player,
+                Component.text(stripColor(Translator.get(TranslationKey.INVENTORIES__AUDIT__TITLE)),
+                    SOFT_BLUE, TextDecoration.BOLD),
+                List.of(Component.text(stripColor(Translator.get(TranslationKey.INVENTORIES__AUDIT__NO_ENTRIES)),
+                    SOFT_GRAY)),
+                new DialogButton("exit",
+                    Component.text(stripColor(Translator.get(backAction != null ? TranslationKey.DIALOGS__BACK : TranslationKey.DIALOGS__CLOSE)), SOFT_GRAY),
+                    Component.text(stripColor(Translator.get(TranslationKey.DIALOGS__RETURN_PREVIOUS)), TextColor.color(0x888888)),
+                    backAction != null ? p -> backAction.run() : null));
+            return;
+        }
+
+        int totalPages = Math.max(1, (int) Math.ceil(allEntries.size() / (double) PER_PAGE));
+        int safePage = Math.max(0, Math.min(page, totalPages - 1));
+        int from = safePage * PER_PAGE;
+        int to = Math.min(from + PER_PAGE, allEntries.size());
+        List<AuditLogger.AuditEntry> pageEntries = allEntries.subList(from, to);
+
+        Component title = Component.text(
+            stripColor(Translator.get(TranslationKey.INVENTORIES__AUDIT__TITLE)),
+            SOFT_BLUE, TextDecoration.BOLD
+        );
+
+        List<DialogBodyEntry> body = new ArrayList<>();
+        body.add(DialogBodyEntry.text(Component.text(
+            stripColor(Translator.get(TranslationKey.DIALOGS__PAGE))
+                .replace("{current}", String.valueOf(safePage + 1))
+                .replace("{total}", String.valueOf(totalPages)),
+            TextColor.color(0x888888))));
+
+        for (AuditLogger.AuditEntry entry : pageEntries) {
+            String actionStr = actionLabel(entry.action());
+            String timeStr = DATE_FMT.format(new Date(entry.timestamp()));
+            TextColor color = actionColor(entry.action());
+            body.add(DialogBodyEntry.text(Component.text()
+                .append(Component.text(timeStr, SOFT_GRAY))
+                .append(Component.text(" ", SOFT_GRAY))
+                .append(Component.text(actionStr, color))
+                .append(Component.text(" - " + entry.playerName(), NamedTextColor.WHITE))
+                .build()));
+        }
+
+        List<DialogButton> buttons = new ArrayList<>();
+
+        if (safePage > 0) {
+            int prev = safePage - 1;
+            buttons.add(new DialogButton("prev",
+                Component.text(stripColor(Translator.get(TranslationKey.DIALOGS__PREV)), SOFT_GRAY),
+                Component.text(stripColor(Translator.get(TranslationKey.DIALOGS__PREV_HINT)), TextColor.color(0x888888)),
+                p -> showLogs(player, world, x, y, z, filterPlayerUuid, prev, backAction)));
+        }
+        if (safePage + 1 < totalPages) {
+            int next = safePage + 1;
+            buttons.add(new DialogButton("next",
+                Component.text(stripColor(Translator.get(TranslationKey.DIALOGS__NEXT)), SOFT_GRAY),
+                Component.text(stripColor(Translator.get(TranslationKey.DIALOGS__NEXT_HINT)), TextColor.color(0x888888)),
+                p -> showLogs(player, world, x, y, z, filterPlayerUuid, next, backAction)));
+        }
+
+        DialogButton exitBtn = new DialogButton("exit",
+            Component.text(stripColor(Translator.get(backAction != null ? TranslationKey.DIALOGS__BACK : TranslationKey.DIALOGS__CLOSE)), SOFT_GRAY),
+            Component.text(stripColor(Translator.get(TranslationKey.DIALOGS__RETURN_PREVIOUS)), TextColor.color(0x888888)),
+            backAction != null ? p -> backAction.run() : null);
+
+        bridge.showMultiAction(player, title, body, buttons, exitBtn, 1);
+    }
+
+    private static TextColor actionColor(AuditLogger.Action action) {
+        return switch (action) {
+            case ACCESS_DENIED, RAID_EXPLOSION -> PASTEL_CORAL;
+            case OPENED -> SOFT_BLUE;
+            case ITEM_TAKEN -> PASTEL_GOLD;
+            case ITEM_PLACED -> PASTEL_MINT;
+            default -> NamedTextColor.WHITE;
+        };
     }
 
     private static String actionLabel(AuditLogger.Action action) {

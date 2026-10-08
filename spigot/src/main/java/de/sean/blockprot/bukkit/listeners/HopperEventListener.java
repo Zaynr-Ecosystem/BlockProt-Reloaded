@@ -113,40 +113,49 @@ public class HopperEventListener implements Listener {
 
     @EventHandler
     public void onItemMove(InventoryMoveItemEvent event) {
-        if (event.getSource().getHolder() == null) return;
-        if (BlockProt.getDefaultConfig().isWorldExcluded(event.getSource().getHolder())) return;
-        if (event.getDestination().getType() != InventoryType.HOPPER
-                && event.getSource().getType() != InventoryType.HOPPER) return;
-
-        Block source = getBlock(event.getSource().getHolder());
-        if (source == null) return;
-        if (!BlockProt.getDefaultConfig().isLockable(source.getType(), source.getWorld())) return;
-
-        // Early-exit: skip NBT if this location has never been protected.
-        if (!ProtectedBlockCache.isProtected(source)) return;
-
+        InventoryHolder sourceHolder = event.getSource().getHolder();
+        InventoryHolder destHolder = event.getDestination().getHolder();
+        if (sourceHolder == null && destHolder == null) return;
         if (BlockProt.getDefaultConfig().isSimplifiedHopperLogic()) return;
 
-        CacheEntry sourceEntry = getEntry(source);
-        if (sourceEntry == null || !sourceEntry.isProtected()) return;
-
-        if (!sourceEntry.hopperProtection()) return;
-
-        // Source is protected and hopper-protection is on.
-        // Allow the move only when the destination is a container owned by the same player.
-        InventoryHolder destinationHolder = event.getDestination().getHolder();
-        if (destinationHolder instanceof Container || destinationHolder instanceof DoubleChest) {
-            Block destination = getBlock(destinationHolder);
-            // Guard: only attempt NBT read if the destination is a known lockable type.
-            // Without this check, getEntry() would construct a BlockNBTHandler for non-lockable
-            // containers (e.g. minecart chests) and throw a RuntimeException caught silently by Paper.
-            if (destination != null && BlockProt.getDefaultConfig().isLockable(destination.getType(), destination.getWorld())) {
-                CacheEntry destEntry = getEntry(destination);
-                if (destEntry != null && destEntry.owner().equals(sourceEntry.owner())) return;
+        // Check source container (preventing unauthorized extraction / siphoning)
+        if (sourceHolder != null && !BlockProt.getDefaultConfig().isWorldExcluded(sourceHolder)) {
+            Block source = getBlock(sourceHolder);
+            if (source != null && ProtectedBlockCache.isProtected(source)
+                    && BlockProt.getDefaultConfig().isLockable(source.getType(), source.getWorld())) {
+                CacheEntry sourceEntry = getEntry(source);
+                if (sourceEntry != null && sourceEntry.isProtected() && sourceEntry.hopperProtection()) {
+                    if (!isMatchingOwner(destHolder, sourceEntry.owner())) {
+                        event.setCancelled(true);
+                        return;
+                    }
+                }
             }
         }
 
-        event.setCancelled(true);
+        // Check destination container (preventing unauthorized insertion into protected blocks)
+        if (destHolder != null && !BlockProt.getDefaultConfig().isWorldExcluded(destHolder)) {
+            Block dest = getBlock(destHolder);
+            if (dest != null && ProtectedBlockCache.isProtected(dest)
+                    && BlockProt.getDefaultConfig().isLockable(dest.getType(), dest.getWorld())) {
+                CacheEntry destEntry = getEntry(dest);
+                if (destEntry != null && destEntry.isProtected() && destEntry.hopperProtection()) {
+                    if (!isMatchingOwner(sourceHolder, destEntry.owner())) {
+                        event.setCancelled(true);
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean isMatchingOwner(@Nullable InventoryHolder holder, @NotNull String ownerUuid) {
+        if (holder == null) return false;
+        Block block = getBlock(holder);
+        if (block != null && BlockProt.getDefaultConfig().isLockable(block.getType(), block.getWorld())) {
+            CacheEntry entry = getEntry(block);
+            return entry != null && entry.isProtected() && entry.owner().equals(ownerUuid);
+        }
+        return false;
     }
 
     @Nullable

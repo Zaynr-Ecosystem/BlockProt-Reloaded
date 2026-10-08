@@ -179,6 +179,38 @@ public final class FriendDetailDialog {
                     handler.applyToOtherContainer();
                     showForBlock(player, block, handler, friendUuid, page);
                 });
+
+            addCustomFlagButton(buttons, friend, FriendHandler.FLAG_OPEN_CONTAINER,
+                stripColor(Translator.get(TranslationKey.DIALOGS__FRIENDS__FLAG_OPEN_CONTAINER)),
+                colorblind, () -> {
+                    handler.notifyFriendsMutated();
+                    handler.applyToOtherContainer();
+                    showForBlock(player, block, handler, friendUuid, page);
+                });
+
+            addCustomFlagButton(buttons, friend, FriendHandler.FLAG_DEPOSIT,
+                stripColor(Translator.get(TranslationKey.DIALOGS__FRIENDS__FLAG_DEPOSIT)),
+                colorblind, () -> {
+                    handler.notifyFriendsMutated();
+                    handler.applyToOtherContainer();
+                    showForBlock(player, block, handler, friendUuid, page);
+                });
+
+            addCustomFlagButton(buttons, friend, FriendHandler.FLAG_WITHDRAW,
+                stripColor(Translator.get(TranslationKey.DIALOGS__FRIENDS__FLAG_WITHDRAW)),
+                colorblind, () -> {
+                    handler.notifyFriendsMutated();
+                    handler.applyToOtherContainer();
+                    showForBlock(player, block, handler, friendUuid, page);
+                });
+
+            addCustomFlagButton(buttons, friend, FriendHandler.FLAG_REDSTONE,
+                stripColor(Translator.get(TranslationKey.DIALOGS__FRIENDS__FLAG_REDSTONE)),
+                colorblind, () -> {
+                    handler.notifyFriendsMutated();
+                    handler.applyToOtherContainer();
+                    showForBlock(player, block, handler, friendUuid, page);
+                });
         }
 
         buttons.add(new DialogButton("remove_friend",

@@ -191,6 +191,25 @@ public final class VehicleProtectionListener implements Listener {
             + entity.getType().name() + " entity=" + entity.getUniqueId());
     }
 
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onHopperPushToVehicle(@NotNull InventoryMoveItemEvent event) {
+        InventoryHolder destHolder = event.getDestination().getHolder();
+        if (!(destHolder instanceof Entity entity)) return;
+        if (!isProtectedVehicleType(entity)) return;
+
+        if (entity.getWorld() != null
+                && BlockProt.getDefaultConfig().isWorldExcluded(entity.getWorld())) return;
+
+        EntityNBTHandler handler = new EntityNBTHandler(entity);
+        if (!handler.isProtected()) return;
+        if (!handler.isHopperProtectionEnabled()) return;
+        if (BlockProt.getDefaultConfig().isSimplifiedHopperLogic()) return;
+
+        event.setCancelled(true);
+        BlockProtLogger.log("entity-protection", "BLOCKED hopper insertion into "
+            + entity.getType().name() + " entity=" + entity.getUniqueId());
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onVehicleDamage(@NotNull VehicleDamageEvent event) {
         Entity vehicle = event.getVehicle();

@@ -82,6 +82,7 @@ public final class HelpCommand implements CommandExecutor {
             if (isAdmin) {
                 send(sender, Translator.get(TranslationKey.HELP__ADMIN_INFO));
                 send(sender, Translator.get(TranslationKey.HELP__UNLOCK));
+                send(sender, Translator.get(TranslationKey.HELP__LOGS));
             }
             if (isOp) {
                 send(sender, Translator.get(TranslationKey.HELP__INTEGRATIONS));
