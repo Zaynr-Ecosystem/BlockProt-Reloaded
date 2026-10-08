@@ -25,17 +25,16 @@ import de.sean.blockprot.bukkit.BlockProtLogger;
 import de.sean.blockprot.bukkit.TranslationKey;
 import de.sean.blockprot.bukkit.Translator;
 import de.sean.blockprot.bukkit.VersionCompat;
-import de.sean.blockprot.bukkit.tasks.ConfigFileWatcher;
 import de.sean.blockprot.bukkit.util.ComponentMessages;
 import de.tr7zw.changeme.nbtapi.utils.MinecraftVersion;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.BlockInventoryHolder;
 import org.bukkit.inventory.InventoryHolder;
@@ -44,20 +43,24 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.*;
 
-/**
- * The default config of the {@link BlockProt} plugin.
- */
 public final class DefaultConfig extends BlockProtConfig {
+
+    public static final List<String> BLOCKS_YML_KEY_ORDER = BlocksConfigStorage.BLOCKS_YML_KEY_ORDER;
 
     private final ArrayList<Material> lockableTileEntities = new ArrayList<>();
     private final ArrayList<Material> shulkerBoxes = new ArrayList<>();
     private final ArrayList<Material> lockableBlocks = new ArrayList<>();
     private final ArrayList<Material> lockableDoors = new ArrayList<>();
     private final ArrayList<Material> lockableEntities = new ArrayList<>();
+
+    private final Set<Material> lockableTileEntitiesSet = EnumSet.noneOf(Material.class);
+    private final Set<Material> shulkerBoxesSet = EnumSet.noneOf(Material.class);
+    private final Set<Material> lockableBlocksSet = EnumSet.noneOf(Material.class);
+    private final Set<Material> lockableDoorsSet = EnumSet.noneOf(Material.class);
+    private final Set<Material> lockableEntitiesSet = EnumSet.noneOf(Material.class);
+    private final Set<Material> allLockableSet = EnumSet.noneOf(Material.class);
 
     private final ArrayList<Material> inactiveTileEntities = new ArrayList<>();
     private final ArrayList<Material> inactiveShulkerBoxes = new ArrayList<>();
@@ -93,8 +96,7 @@ public final class DefaultConfig extends BlockProtConfig {
     private final File dataFolder;
     private YamlConfiguration blocksConfig = null;
     private YamlConfiguration mysqlConfig  = null;
-
-
+    private volatile Set<Material> cachedAutoDropBlocks = null;
 
     public DefaultConfig(@NotNull final FileConfiguration config) {
         this(config, null);
@@ -119,11 +121,11 @@ public final class DefaultConfig extends BlockProtConfig {
             try {
                 if (blocksFile.exists()) {
                     this.blocksConfig = YamlConfiguration.loadConfiguration(blocksFile);
-                    this.patchBlocksFileIfNeeded(blocksFile, this.blocksConfig);
+                    BlocksConfigStorage.patchBlocksFileIfNeeded(blocksFile, this.blocksConfig);
                 } else {
                     File parent = blocksFile.getParentFile();
                     if (parent != null && !parent.exists()) parent.mkdirs();
-                    this.createBlocksFileWithHeader(blocksFile);
+                    BlocksConfigStorage.createBlocksFileWithHeader(blocksFile);
                     this.blocksConfig = YamlConfiguration.loadConfiguration(blocksFile);
                     BlockProtLogger.log("blocks", "Created empty blocks.yml at " + blocksFile.getPath());
                 }
@@ -149,11 +151,29 @@ public final class DefaultConfig extends BlockProtConfig {
         }
     }
 
-    /**
-     * Loads a block list from blocks.yml (or config.yml fallback).
-     * Family expressions ([*], [* -X], [-*X]) are always parsed regardless of the modern_family_blocks flag.
-     * The flag only controls whether flat lists are auto-converted to expressions on startup.
-     */
+    private void syncLockableSets() {
+        lockableTileEntitiesSet.clear();
+        lockableTileEntitiesSet.addAll(lockableTileEntities);
+
+        shulkerBoxesSet.clear();
+        shulkerBoxesSet.addAll(shulkerBoxes);
+
+        lockableBlocksSet.clear();
+        lockableBlocksSet.addAll(lockableBlocks);
+
+        lockableDoorsSet.clear();
+        lockableDoorsSet.addAll(lockableDoors);
+
+        lockableEntitiesSet.clear();
+        lockableEntitiesSet.addAll(lockableEntities);
+
+        allLockableSet.clear();
+        allLockableSet.addAll(lockableTileEntitiesSet);
+        allLockableSet.addAll(shulkerBoxesSet);
+        allLockableSet.addAll(lockableBlocksSet);
+        allLockableSet.addAll(lockableDoorsSet);
+    }
+
     private void loadBlockListFromConfig(
             @NotNull String key, @NotNull final ArrayList<Material> activeList,
             @NotNull final ArrayList<Material> inactiveList,
@@ -276,6 +296,35 @@ public final class DefaultConfig extends BlockProtConfig {
                 return name.contains("CHEST_BOAT") || name.contains("CHEST_RAFT") || name.equals("CHEST_MINECART") || name.equals("HOPPER_MINECART")
                     || name.equals("ITEM_FRAME") || name.equals("GLOW_ITEM_FRAME");
             });
+
+        syncLockableSets();
+        refreshAutoDropCache();
+    }
+
+    private void refreshAutoDropCache() {
+        List<?> raw = null;
+        if (blocksConfig != null && blocksConfig.contains("auto_drop_to_inventory.blocks"))
+            raw = blocksConfig.getList("auto_drop_to_inventory.blocks");
+        if (raw == null) raw = config.getList("auto_drop_to_inventory.blocks");
+        if (raw == null) {
+            this.cachedAutoDropBlocks = Collections.emptySet();
+            return;
+        }
+
+        Set<Material> result = new LinkedHashSet<>();
+        for (Object o : raw) {
+            if (!(o instanceof String s)) continue;
+            String trimmed = s.trim();
+            if (BlockFamilyParser.isFamilyExpression(trimmed)) {
+                for (BlockFamilyParser.Family f : BlockFamilyParser.Family.values()) {
+                    result.addAll(BlockFamilyParser.parseFamilyExpressionSilent(trimmed, f));
+                }
+            } else {
+                Material m = Material.matchMaterial(trimmed);
+                if (m != null) BlockFamilyParser.addMaterialWithPlacementVariants(m, result);
+            }
+        }
+        this.cachedAutoDropBlocks = Collections.unmodifiableSet(result);
     }
 
     @Nullable public String getLanguageFile() { return config.getString("language_file"); }
@@ -299,9 +348,6 @@ public final class DefaultConfig extends BlockProtConfig {
         }
         if (listContainsIgnoreCase(excludedWorlds, world.getName())) return true;
         try {
-            // NamespacedKey#value() is a Paper-only accessor; Spigot only has getKey().
-            // Catching Throwable (not Exception) is required: NoSuchMethodError is an
-            // Error, not an Exception, and was silently escaping this guard before.
             String keyVal = world.getKey().value();
             if (listContainsIgnoreCase(excludedWorlds, keyVal)) return true;
         } catch (Throwable ignored) {}
@@ -393,12 +439,6 @@ public final class DefaultConfig extends BlockProtConfig {
         return config.getBoolean("use_dialogs", false);
     }
 
-    /**
-     * True only when use_dialogs is enabled in config.yml and the running
-     * server actually exposes the Paper dialog API. Call sites that open a
-     * dialog-based menu should check this instead of isDialogsEnabled()
-     * directly, so a server below the API floor always falls back safely.
-     */
     public boolean shouldUseDialogs() {
         return isDialogsEnabled() && VersionCompat.hasDialogApi();
     }
@@ -476,7 +516,7 @@ public final class DefaultConfig extends BlockProtConfig {
     public boolean isWorldExpiryEnabled()               { return config.getBoolean("world_expiry.enabled", false); }
     public int getWorldExpiryCheckInterval()            { return config.getInt("world_expiry.check_interval_minutes", 10); }
     public java.util.Map<String, String> getWorldExpiryDurations() {
-        org.bukkit.configuration.ConfigurationSection section = config.getConfigurationSection("world_expiry.worlds");
+        ConfigurationSection section = config.getConfigurationSection("world_expiry.worlds");
         if (section == null) return java.util.Map.of();
         java.util.Map<String, String> result = new java.util.LinkedHashMap<>();
         for (String key : section.getKeys(false)) {
@@ -505,101 +545,40 @@ public final class DefaultConfig extends BlockProtConfig {
             BlockProtLogger.log("config", key + " changed from " + oldValue + " to " + value);
         }
         if ("use_menus".equals(key)) {
-            org.bukkit.Bukkit.getOnlinePlayers().forEach(org.bukkit.entity.Player::updateCommands);
+            org.bukkit.Bukkit.getOnlinePlayers().forEach(Player::updateCommands);
         }
         if (plugin.getFileWatcher() != null) {
             plugin.getFileWatcher().requestProgrammaticReload();
         }
     }
 
-    public void setLockOnPlaceByDefault(boolean value) {
-        setAndSave("lock_on_place_by_default", value);
-    }
-
-    public void setPublicIsFriendByDefault(boolean value) {
-        setAndSave("public_is_friend_by_default", value);
-    }
-
-    public void setSimplifiedHopperLogic(boolean value) {
-        setAndSave("simplified_hopper_logic", value);
-    }
-
-    public void setProtectFromExplosions(boolean value) {
-        setAndSave("protect_locked_blocks_from_explosions", value);
-    }
-
-    public void setBlockPistonMovement(boolean value) {
-        setAndSave("block_protected_block_piston_movement", value);
-    }
-
-    public void setClearProtectionOnShulkerBreak(boolean value) {
-        setAndSave("clear_protection_on_shulker_break", value);
-    }
-
-    public void setAllowBreakProtectedBlocks(boolean value) {
-        setAndSave("allow_break_protected_blocks", value);
-    }
-
-    public void setRespectSpawnProtection(boolean value) {
-        setAndSave("respect_spawn_protection", value);
-    }
-
-    public void setLockEffects(boolean value) {
-        setAndSave("block_lock_effects", value);
-    }
-
-    public void setLockSounds(boolean value) {
-        setAndSave("block_lock_sounds", value);
-    }
-
-    public void setWorldExpiryEnabled(boolean value) {
-        setAndSave("world_expiry.enabled", value);
-    }
-
-    public void setEntityProtectionEnabled(boolean value) {
-        setAndSave("entity_protection.enabled", value);
-    }
-
-    public void setNotifyOpOfUpdates(boolean value) {
-        setAndSave("notify_op_of_updates", value);
-    }
-
-    public void setSessionLogEnabled(boolean value) {
-        setAndSave("enable_session_log", value);
-    }
-
-    public void setBackupsEnabled(boolean value) {
-        setAndSave("enable_backups", value);
-    }
-
-    public void setAutoReloadConfigs(boolean value) {
-        setAndSave("auto_reload_configs", value);
-    }
+    public void setLockOnPlaceByDefault(boolean value) { setAndSave("lock_on_place_by_default", value); }
+    public void setPublicIsFriendByDefault(boolean value) { setAndSave("public_is_friend_by_default", value); }
+    public void setSimplifiedHopperLogic(boolean value) { setAndSave("simplified_hopper_logic", value); }
+    public void setProtectFromExplosions(boolean value) { setAndSave("protect_locked_blocks_from_explosions", value); }
+    public void setBlockPistonMovement(boolean value) { setAndSave("block_protected_block_piston_movement", value); }
+    public void setClearProtectionOnShulkerBreak(boolean value) { setAndSave("clear_protection_on_shulker_break", value); }
+    public void setAllowBreakProtectedBlocks(boolean value) { setAndSave("allow_break_protected_blocks", value); }
+    public void setRespectSpawnProtection(boolean value) { setAndSave("respect_spawn_protection", value); }
+    public void setLockEffects(boolean value) { setAndSave("block_lock_effects", value); }
+    public void setLockSounds(boolean value) { setAndSave("block_lock_sounds", value); }
+    public void setWorldExpiryEnabled(boolean value) { setAndSave("world_expiry.enabled", value); }
+    public void setEntityProtectionEnabled(boolean value) { setAndSave("entity_protection.enabled", value); }
+    public void setNotifyOpOfUpdates(boolean value) { setAndSave("notify_op_of_updates", value); }
+    public void setSessionLogEnabled(boolean value) { setAndSave("enable_session_log", value); }
+    public void setBackupsEnabled(boolean value) { setAndSave("enable_backups", value); }
+    public void setAutoReloadConfigs(boolean value) { setAndSave("auto_reload_configs", value); }
 
     public void setAutoReloadDelaySeconds(int value) {
         int clamped = Math.max(0, Math.min(5, value));
         setAndSave("auto_reload_delay_seconds", clamped);
     }
 
-    public void setRedstoneDisallowedByDefault(boolean value) {
-        setAndSave("redstone_disallowed_by_default", value);
-    }
-
-    public void setLanguageFile(@NotNull String value) {
-        setAndSave("language_file", value);
-    }
-
-    public void setPlayerMaxLockedBlockCount(int value) {
-        setAndSave("player_max_locked_block_count", value);
-    }
-
-    public void setLockHintCooldown(int value) {
-        setAndSave("lock_hint_cooldown_in_seconds", value);
-    }
-
-    public void setFriendSearchSimilarity(double value) {
-        setAndSave("friend_search_similarity", value);
-    }
+    public void setRedstoneDisallowedByDefault(boolean value) { setAndSave("redstone_disallowed_by_default", value); }
+    public void setLanguageFile(@NotNull String value) { setAndSave("language_file", value); }
+    public void setPlayerMaxLockedBlockCount(int value) { setAndSave("player_max_locked_block_count", value); }
+    public void setLockHintCooldown(int value) { setAndSave("lock_hint_cooldown_in_seconds", value); }
+    public void setFriendSearchSimilarity(double value) { setAndSave("friend_search_similarity", value); }
 
     public boolean isOwnerNotificationsEnabled() { return config.getBoolean("owner_notifications.enabled", true); }
     public boolean isNotifyOnOpen()               { return isOwnerNotificationsEnabled() && config.getBoolean("owner_notifications.notify_on_open", true); }
@@ -619,58 +598,16 @@ public final class DefaultConfig extends BlockProtConfig {
         return config.getBoolean("auto_drop_to_inventory.enabled", true);
     }
 
-    /**
-     * Returns the set of materials that should be delivered to the breaker's inventory.
-     *
-     * <p>Each entry in the blocks list is resolved as follows:
-     * <ul>
-     *   <li>Plain material name: resolved directly.</li>
-     *   <li>Family expression: resolved against every known family in order.
-     *       Each family contributes independently; results are unioned.
-     *       This means {@code [*]} expands to every lockable material across all families,
-     *       and {@code [-*SHULKERS]} subtracts shulker boxes from the SHULKER_BOXES family
-     *       (which is the only family that owns that sub-family), yielding an empty set for
-     *       that family: effectively disabling shulker auto-drop.</li>
-     * </ul>
-     *
-     * <p>To disable auto-drop for shulkers while keeping it for everything else, list each
-     * family explicitly and omit shulkers, or use:
-     * <pre>
-     *   blocks:
-     *     - '[* -*SHULKERS]'   # all TILE_ENTITIES, none for SHULKER_BOXES (no star there)
-     * </pre>
-     * Note that {@code [-*SHULKERS]} alone yields an empty set because there is no base
-     * inclusion ({@code *}) before the exclusion: the result is intentionally empty.
-     */
     @NotNull
     public Set<Material> getAutoDropToInventoryBlocks() {
-        List<?> raw = null;
-        if (blocksConfig != null && blocksConfig.contains("auto_drop_to_inventory.blocks"))
-            raw = blocksConfig.getList("auto_drop_to_inventory.blocks");
-        if (raw == null) raw = config.getList("auto_drop_to_inventory.blocks");
-        if (raw == null) return Set.of();
-
-        Set<Material> result = new LinkedHashSet<>();
-        for (Object o : raw) {
-            if (!(o instanceof String s)) continue;
-            String trimmed = s.trim();
-            if (BlockFamilyParser.isFamilyExpression(trimmed)) {
-                for (BlockFamilyParser.Family f : BlockFamilyParser.Family.values()) {
-                    result.addAll(BlockFamilyParser.parseFamilyExpressionSilent(trimmed, f));
-                }
-            } else {
-                Material m = Material.matchMaterial(trimmed);
-                if (m != null) BlockFamilyParser.addMaterialWithPlacementVariants(m, result);
-            }
-        }
-        return result;
+        Set<Material> cached = this.cachedAutoDropBlocks;
+        return cached != null ? cached : Collections.emptySet();
     }
 
     public boolean isAutoDropToInventory(@NotNull Material type) {
         return isAutoDropToInventoryEnabled() && getAutoDropToInventoryBlocks().contains(type);
     }
 
-    /** Per-world override: true if the world has auto-drop enabled (defaults to global setting). */
     public boolean isAutoDropToInventoryEnabled(@NotNull World world) {
         WorldsConfig wc = BlockProt.getWorldsConfig();
         if (isWorldsConfigEnabled() && wc != null && wc.hasWorldConfig(world))
@@ -697,7 +634,6 @@ public final class DefaultConfig extends BlockProtConfig {
         return m == null ? Material.STICK : m;
     }
 
-    @NotNull
     public List<String> getProtectableEntities() {
         List<String> raw = null;
         if (blocksConfig != null && blocksConfig.contains("protectable_entities")) {
@@ -708,7 +644,7 @@ public final class DefaultConfig extends BlockProtConfig {
         if (raw == null || raw.isEmpty()) return List.of();
         List<String> filtered = new ArrayList<>();
         for (String s : raw) {
-            if (s != null && !isPlaceholderEntry(s)) {
+            if (s != null && !BlocksConfigStorage.isPlaceholderEntry(s)) {
                 filtered.add(s.trim());
             }
         }
@@ -724,19 +660,10 @@ public final class DefaultConfig extends BlockProtConfig {
         return config.getBoolean("villager_workstation_protection.enabled", true);
     }
 
-    /**
-     * Search radius (in blocks, horizontal) used to find a protected workstation near
-     * a block being broken or interacted with. Clamped to [0, 8] to bound the cost of
-     * the surrounding-block scan.
-     */
     public int getVillagerWorkstationProtectionRadius() {
         return Math.max(0, Math.min(8, config.getInt("villager_workstation_protection.radius", 2)));
     }
 
-    /**
-     * Vertical search radius (in blocks) used together with {@link #getVillagerWorkstationProtectionRadius()}.
-     * Clamped to [0, 4].
-     */
     public int getVillagerWorkstationProtectionVerticalRadius() {
         return Math.max(0, Math.min(4, config.getInt("villager_workstation_protection.vertical_radius", 1)));
     }
@@ -756,10 +683,10 @@ public final class DefaultConfig extends BlockProtConfig {
 
     @NotNull
     public String getEntityProtectionDeniedMessage() {
-        return de.sean.blockprot.bukkit.Translator.get(de.sean.blockprot.bukkit.TranslationKey.MESSAGES__ENTITY_DENIED);
+        return Translator.get(TranslationKey.MESSAGES__ENTITY_DENIED);
     }
 
-    public boolean isLockable(Material type) { return isLockableBlock(type) || isLockableTileEntity(type) || isLockableDoor(type); }
+    public boolean isLockable(Material type) { return allLockableSet.contains(type); }
 
     public boolean isLockable(@NotNull Material type, @NotNull World world) {
         WorldsConfig wc = BlockProt.getWorldsConfig();
@@ -791,24 +718,26 @@ public final class DefaultConfig extends BlockProtConfig {
         return isLockableDoor(type);
     }
 
-    public boolean isLockableBlock(Material type)       { return lockableBlocks.contains(type); }
-    public boolean isLockableTileEntity(Material type)  { return lockableTileEntities.contains(type) || shulkerBoxes.contains(type); }
-    public boolean isLockableDoor(Material type)        { return lockableDoors.contains(type); }
-    public boolean isLockableShulkerBox(Material type)  { return shulkerBoxes.contains(type); }
+    public boolean isLockableBlock(Material type)       { return lockableBlocksSet.contains(type); }
+    public boolean isLockableTileEntity(Material type)  { return lockableTileEntitiesSet.contains(type) || shulkerBoxesSet.contains(type); }
+    public boolean isLockableDoor(Material type)        { return lockableDoorsSet.contains(type); }
+    public boolean isLockableShulkerBox(Material type)  { return shulkerBoxesSet.contains(type); }
     public boolean isLockableInventory(InventoryType t) { return lockableInventories.contains(t); }
 
     public void addTestLockable(@NotNull Material material) {
         if (!lockableTileEntities.contains(material)) {
             lockableTileEntities.add(material);
+            syncLockableSets();
         }
     }
 
     public void removeTestLockable(@NotNull Material material) {
         lockableTileEntities.remove(material);
+        syncLockableSets();
     }
 
     public boolean isLockableEntity(@NotNull Material type) {
-        return lockableEntities.contains(type);
+        return lockableEntitiesSet.contains(type);
     }
 
     public boolean isLockableEntity(@NotNull Material type, @NotNull World world) {
@@ -831,37 +760,8 @@ public final class DefaultConfig extends BlockProtConfig {
 
     public boolean isModernFamilyBlocks() { return config.getBoolean("modern_family_blocks", false); }
 
-    /**
-     * Determines the output format for a blocks.yml key.
-     *
-     * <p>Primarily checks the key's actual on-disk content: if it already contains a
-     * family expression (e.g. because {@code /bp recommended blocks} wrote one, or a previous
-     * "select all" toggle collapsed it to {@code [*-SIGN]}), individual toggles keep
-     * writing expressions for that key so a single click does not blow up an already
-     * compact list into hundreds of flat material names.
-     *
-     * <p>Only when the key has no existing content (first-ever toggle on an empty/placeholder
-     * key) does this fall back to the global {@code modern_family_blocks} flag to decide the
-     * starting format. This mirrors {@code BLOCK_FAMILY_SYNTAX.md}: the flag governs the
-     * startup/reload sweep and the format chosen for brand-new content, but it does not force
-     * every future single-block toggle back to flat once a key is already in expression form.
-     */
     private boolean isKeyInExpressionFormat(@NotNull String configKey) {
-        if (blocksConfig == null) return isModernFamilyBlocks();
-        Object raw = blocksConfig.get(configKey);
-        if (raw instanceof String s) {
-            String trimmed = s.trim();
-            if (!isPlaceholderEntry(trimmed)) return BlockFamilyParser.isFamilyExpression(trimmed);
-        }
-        if (raw instanceof List<?> list) {
-            for (Object o : list) {
-                if (!(o instanceof String s)) continue;
-                String trimmed = s.trim();
-                if (isPlaceholderEntry(trimmed)) continue;
-                return BlockFamilyParser.isFamilyExpression(trimmed);
-            }
-        }
-        return isModernFamilyBlocks();
+        return BlocksConfigModifier.isKeyInExpressionFormat(blocksConfig, isModernFamilyBlocks(), configKey);
     }
 
     @Nullable
@@ -871,322 +771,95 @@ public final class DefaultConfig extends BlockProtConfig {
         return new File(dataFolder, blocksFilePath);
     }
 
-    public static final List<String> BLOCKS_YML_KEY_ORDER = List.of(
-        "lockable_tile_entities", "lockable_shulker_boxes",
-        "lockable_blocks", "lockable_doors", "lockable_entities",
-        "protectable_entities",
-        "auto_drop_to_inventory"
-    );
-
-    private static final List<String> LOCKABLE_LIST_KEYS = List.of(
-        "lockable_tile_entities", "lockable_shulker_boxes",
-        "lockable_blocks", "lockable_doors", "lockable_entities"
-    );
-
-    private static final String AUTO_DROP_BLOCKS_KEY = "auto_drop_to_inventory.blocks";
-
-    /**
-     * True for a blocks.yml list entry that carries no material name: a YAML null
-     * (blank template line), a blank string, or the legacy "[]" / "[ ]" hint text.
-     * Canonical implementation; other classes delegate to this one.
-     */
     public static boolean isPlaceholderEntry(@Nullable Object o) {
-        if (o == null) return true;
-        if (o instanceof String s) {
-            String t = s.trim();
-            return t.isEmpty() || t.equals("[]") || t.equals("[ ]");
-        }
-        return false;
+        return BlocksConfigStorage.isPlaceholderEntry(o);
     }
 
     public static void sanitizeBlocksListsForSave(@NotNull YamlConfiguration cfg, boolean modernFormat) {
-        sanitizeListsForSave(cfg, "", modernFormat);
+        BlocksConfigStorage.sanitizeBlocksListsForSave(cfg, modernFormat);
     }
 
-    /**
-     * Sanitizes lists for saving to disk, supporting an optional key prefix (e.g. for worlds).
-     */
     public static void sanitizeListsForSave(@NotNull YamlConfiguration cfg, @NotNull String prefix, boolean modernFormat) {
-        List<String> keys = new ArrayList<>(LOCKABLE_LIST_KEYS);
-        if (prefix.isEmpty()) {
-            keys.add("protectable_entities");
-            keys.add(AUTO_DROP_BLOCKS_KEY);
-        }
-        for (String k : keys) {
-            String key = prefix + k;
-            if (!cfg.contains(key)) continue;
-            List<?> raw = cfg.getList(key);
-            if (raw == null) continue;
-
-            List<Object> real = new ArrayList<>();
-            for (Object o : raw) {
-                if (!isPlaceholderEntry(o)) real.add(o);
-            }
-
-            if (real.isEmpty()) {
-                cfg.set(key, modernFormat ? List.of("[]") : Arrays.asList(null, null));
-            } else if (real.size() != raw.size()) {
-                cfg.set(key, real);
-            }
-        }
+        BlocksConfigStorage.sanitizeListsForSave(cfg, prefix, modernFormat);
     }
 
-    /**
-     * Header shared by both blocks.yml generation paths, so the comment text and the
-     * referenced doc path never drift apart from each other or from the shipped resource.
-     */
-    private static final List<String> BLOCKS_HEADER = List.of(
-        "# BlockProt Reloaded - blocks.yml",
-        "# Add block or material names below each list, one per line, replacing the blank lines.",
-        "# Run /bp recommended blocks for a ready-made starting selection instead of editing by hand.",
-        "# Format: flat names (CHEST) or family expressions ([*-CHEST]).",
-        "# See docs/MODERN SYNTAX AND LEGACY/BLOCK_FAMILY_SYNTAX.md for full syntax.",
-        "# Your lockable lists are never rewritten on startup/reload; structural merges, format conversion, and repair may rewrite this file."
-    );
-
-    /**
-     * Returns a new YamlConfiguration with all keys from the source, but
-     * with top-level keys arranged in BLOCKS_YML_KEY_ORDER. Extra keys
-     * not in the order list are appended at the end.
-     */
     public static YamlConfiguration reorderBlocksKeys(@NotNull YamlConfiguration source) {
-        YamlConfiguration result = new YamlConfiguration();
-        for (String key : BLOCKS_YML_KEY_ORDER) {
-            if (!source.contains(key)) continue;
-            Object val = source.get(key);
-            if (val instanceof ConfigurationSection section) {
-                for (String sk : section.getKeys(false)) {
-                    result.set(key + "." + sk, section.get(sk));
-                }
-            } else {
-                result.set(key, val);
-            }
-        }
-        for (String key : source.getKeys(false)) {
-            if (BLOCKS_YML_KEY_ORDER.contains(key)) continue;
-            Object val = source.get(key);
-            if (val instanceof ConfigurationSection section) {
-                for (String sk : section.getKeys(false)) {
-                    result.set(key + "." + sk, section.get(sk));
-                }
-            } else {
-                result.set(key, val);
-            }
-        }
-        return result;
+        return BlocksConfigStorage.reorderBlocksKeys(source);
     }
 
     private void saveBlocksConfig() {
         File file = getBlocksFile();
         if (file == null || blocksConfig == null) return;
         try {
-            de.sean.blockprot.bukkit.BlockProt plugin = de.sean.blockprot.bukkit.BlockProt.getInstance();
+            BlockProt plugin = BlockProt.getInstance();
             if (plugin != null && plugin.getFileWatcher() != null) {
                 plugin.getFileWatcher().suppressNext();
             }
-            sanitizeBlocksListsForSave(blocksConfig, isModernFamilyBlocks());
-            blocksConfig = reorderBlocksKeys(blocksConfig);
+            BlocksConfigStorage.sanitizeBlocksListsForSave(blocksConfig, isModernFamilyBlocks());
+            blocksConfig = BlocksConfigStorage.reorderBlocksKeys(blocksConfig);
             blocksConfig.save(file);
-            prependBlocksHeader(file);
+            BlocksConfigStorage.prependBlocksHeader(file);
         } catch (IOException e) {
             BlockProtLogger.warn("Failed to save blocks.yml: " + e.getMessage());
         }
-        de.sean.blockprot.bukkit.BlockProt plugin = de.sean.blockprot.bukkit.BlockProt.getInstance();
+        BlockProt plugin = BlockProt.getInstance();
         if (plugin != null && plugin.getFileWatcher() != null) {
             plugin.getFileWatcher().requestProgrammaticReload();
         }
     }
 
     public static void prependBlocksHeader(@NotNull File file) throws IOException {
-        List<String> existingLines = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
-        if (!existingLines.isEmpty() && existingLines.get(0).equals(BLOCKS_HEADER.get(0))) {
-            cleanNullPlaceholderLines(file);
-            return;
-        }
-        List<String> newLines = new ArrayList<>(BLOCKS_HEADER);
-        newLines.add("");
-        int skipLimit = BLOCKS_HEADER.size() + 1;
-        int skipCount = 0;
-        for (String line : existingLines) {
-            if (line.startsWith("# BlockProt") || (line.isEmpty() && skipCount < skipLimit)) {
-                skipCount++;
-                continue;
-            }
-            newLines.add(line);
-        }
-        Files.write(file.toPath(), newLines, StandardCharsets.UTF_8);
-        cleanNullPlaceholderLines(file);
+        BlocksConfigStorage.prependBlocksHeader(file);
     }
 
-    /**
-     * Replaces any occurrence of "- null" or "- 'null'" in the file with "- " (a blank entry).
-     * This is needed because Bukkit YamlConfiguration writes null list elements as "null".
-     */
     public static void cleanNullPlaceholderLines(@NotNull File file) throws IOException {
-        List<String> lines = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
-        List<String> newLines = new ArrayList<>();
-        boolean modified = false;
-        for (String line : lines) {
-            String trimmed = line.trim();
-            if (trimmed.equals("- null") || trimmed.equals("- 'null'")) {
-                int idx = line.indexOf('-');
-                String newLine = line.substring(0, idx + 1);
-                newLines.add(newLine);
-                modified = true;
-            } else {
-                newLines.add(line);
-            }
-        }
-        if (modified) {
-            Files.write(file.toPath(), newLines, StandardCharsets.UTF_8);
-        }
+        BlocksConfigStorage.cleanNullPlaceholderLines(file);
     }
 
     private void reloadBlocksAfterToggle() {
         loadBlocksFromConfig();
-        checkAutoDisableModernFamilyBlocks();
+        BlocksConfigModifier.checkAutoDisableModernFamilyBlocks(blocksConfig, isModernFamilyBlocks(), dataFolder);
     }
 
-    private void checkAutoDisableModernFamilyBlocks() {
-        if (!isModernFamilyBlocks()) return;
-        if (blocksConfig == null) return;
-        boolean allEmpty = true;
-        outer:
-        for (String key : LOCKABLE_LIST_KEYS) {
-            List<?> list = blocksConfig.getList(key);
-            if (list == null) continue;
-            for (Object o : list) {
-                // Blank template placeholders (null or empty string) carry no material
-                // and do not count as configured content.
-                if (o instanceof String s && s.isBlank()) continue;
-                if (o == null) continue;
-                allEmpty = false;
-                break outer;
-            }
-        }
-        if (allEmpty) {
-            File configFile = de.sean.blockprot.bukkit.BlockProt.getInstance().getDataFolder().toPath()
-                .resolve("config.yml").toFile();
-            if (configFile.exists()) {
-                org.bukkit.configuration.file.YamlConfiguration cfg =
-                    org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(configFile);
-                cfg.set("modern_family_blocks", false);
-                try {
-                    cfg.save(configFile);
-                } catch (java.io.IOException e) {
-                    BlockProtLogger.warn("Failed to save config.yml: " + e.getMessage());
-                }
-                BlockProtLogger.log("blocks-auto",
-                    "All lockable lists empty, disabled modern_family_blocks.");
-            }
-        }
-    }
-
-    /**
-     * Returns true if there is at least one non-placeholder entry configured
-     * in the lockable block lists of blocks.yml.
-     */
     public boolean hasConfiguredBlocks() {
-        if (blocksConfig == null) return false;
-        for (String key : LOCKABLE_LIST_KEYS) {
-            List<?> list = blocksConfig.getList(key);
-            if (list == null) continue;
-            for (Object o : list) {
-                if (!isPlaceholderEntry(o)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return BlocksConfigModifier.hasConfiguredBlocks(blocksConfig);
     }
 
     @Nullable
-    private static String configKeyForMaterial(@NotNull Material material) {
-        for (BlockFamilyParser.Family family : BlockFamilyParser.Family.values()) {
-            if (BlockFamilyParser.getFamilyMembers(family).contains(material)) {
-                return switch (family) {
-                    case TILE_ENTITIES -> "lockable_tile_entities";
-                    case SHULKER_BOXES -> "lockable_shulker_boxes";
-                    case BLOCKS -> "lockable_blocks";
-                    case DOORS -> "lockable_doors";
-                    case ENTITIES -> "lockable_entities";
-                };
-            }
-        }
-        return null;
+    public static String configKeyForMaterial(@NotNull Material material) {
+        return BlocksConfigModifier.configKeyForMaterial(material);
     }
 
     @Nullable
     public static String configKeyForFamily(@NotNull BlockFamilyParser.Family family) {
-        return switch (family) {
-            case TILE_ENTITIES -> "lockable_tile_entities";
-            case SHULKER_BOXES -> "lockable_shulker_boxes";
-            case BLOCKS -> "lockable_blocks";
-            case DOORS -> "lockable_doors";
-            case ENTITIES -> "lockable_entities";
-        };
+        return BlocksConfigModifier.configKeyForFamily(family);
     }
 
-    /**
-     * Re-writes every lockable list key in blocks.yml to match {@code toModern}, based on
-     * the materials currently active for each key. This is the "forced sweep" documented in
-     * {@code BLOCK_FAMILY_SYNTAX.md} for flipping {@code modern_family_blocks} - without it,
-     * {@link #isKeyInExpressionFormat(String)} just keeps reading whatever format a key
-     * already has on disk, so a key that picked up flat entries before modern mode was ever
-     * enabled stays flat forever even after the flag is turned on, and every subsequent
-     * individual toggle on that key keeps writing flat too. Call this right after flipping
-     * {@code modern_family_blocks} so the on-disk format actually matches the flag immediately,
-     * not only for keys an individual toggle happens to touch afterwards.
-     */
     public synchronized void convertBlocksFileFormat(boolean toModern) {
         if (blocksConfig == null) return;
-        writeFamilyKeyFormat("lockable_tile_entities", BlockFamilyParser.Family.TILE_ENTITIES, lockableTileEntities, toModern);
-        writeFamilyKeyFormat("lockable_shulker_boxes", BlockFamilyParser.Family.SHULKER_BOXES, shulkerBoxes, toModern);
+        BlocksConfigModifier.writeFamilyKeyFormat(blocksConfig, "lockable_tile_entities", BlockFamilyParser.Family.TILE_ENTITIES, lockableTileEntities, toModern);
+        BlocksConfigModifier.writeFamilyKeyFormat(blocksConfig, "lockable_shulker_boxes", BlockFamilyParser.Family.SHULKER_BOXES, shulkerBoxes, toModern);
         List<Material> blocksOnly = lockableBlocks.stream().filter(m -> !lockableDoors.contains(m)).toList();
-        writeFamilyKeyFormat("lockable_blocks", BlockFamilyParser.Family.BLOCKS, blocksOnly, toModern);
-        writeFamilyKeyFormat("lockable_doors", BlockFamilyParser.Family.DOORS, lockableDoors, toModern);
-        writeFamilyKeyFormat("lockable_entities", BlockFamilyParser.Family.ENTITIES, lockableEntities, toModern);
+        BlocksConfigModifier.writeFamilyKeyFormat(blocksConfig, "lockable_blocks", BlockFamilyParser.Family.BLOCKS, blocksOnly, toModern);
+        BlocksConfigModifier.writeFamilyKeyFormat(blocksConfig, "lockable_doors", BlockFamilyParser.Family.DOORS, lockableDoors, toModern);
+        BlocksConfigModifier.writeFamilyKeyFormat(blocksConfig, "lockable_entities", BlockFamilyParser.Family.ENTITIES, lockableEntities, toModern);
         saveBlocksConfig();
         reloadBlocksAfterToggle();
     }
 
-    private void writeFamilyKeyFormat(
-            @NotNull String configKey, @NotNull BlockFamilyParser.Family family,
-            @NotNull List<Material> active, boolean toModern) {
-        if (!blocksConfig.contains(configKey) && active.isEmpty()) return;
-        if (toModern) {
-            String expr = BlockFamilyParser.toFamilyExpression(active, family);
-            blocksConfig.set(configKey, expr != null
-                ? List.of(expr)
-                : active.stream().map(Material::name).sorted().toList());
-        } else {
-            blocksConfig.set(configKey, active.stream().map(Material::name).sorted().toList());
-        }
-    }
-
-    /**
-     * Toggles a single material in blocks.yml. Adds it if currently inactive, removes it
-     * if currently active. Saves to disk and logs the change. Handles both flat and
-     * expression-based entries.
-     *
-     * @param material the material to toggle
-     * @param who      the player who initiated the toggle
-     * @return the new active state (true = now lockable, false = now not lockable)
-     */
     public synchronized boolean toggleLockable(@NotNull Material material, @NotNull Player who) {
         String configKey = configKeyForMaterial(material);
         if (configKey == null) {
             BlockProtLogger.warn("toggleLockable: " + material.name()
                 + " does not belong to any BlockFamilyParser family; ignoring click from "
-                + who.getName() + ". A menu/dialog listed a material that configKeyForMaterial() "
-                + "cannot resolve; report this as a bug.");
+                + who.getName() + ".");
             return isLockable(material);
         }
         if (blocksConfig == null) return isLockable(material);
 
         String name = material.name();
         boolean currentlyActive = isLockable(material) || isLockableEntity(material);
-        BlockFamilyParser.Family family = familyForMaterial(material);
+        BlockFamilyParser.Family family = BlocksConfigModifier.familyForMaterial(material);
 
         if (family != null) {
             Object raw = blocksConfig.get(configKey);
@@ -1226,24 +899,6 @@ public final class DefaultConfig extends BlockProtConfig {
         return !currentlyActive;
     }
 
-    @Nullable
-    private static BlockFamilyParser.Family familyForMaterial(@NotNull Material material) {
-        for (BlockFamilyParser.Family family : BlockFamilyParser.Family.values()) {
-            if (BlockFamilyParser.getFamilyMembers(family).contains(material)) {
-                return family;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Sets a single material to a specific lockable state in blocks.yml.
-     * Only saves if the state actually changes.
-     *
-     * @param material the material to set
-     * @param lockable true to enable, false to disable
-     * @param who      the player who initiated the change
-     */
     public synchronized void setLockable(@NotNull Material material, boolean lockable, @NotNull Player who) {
         boolean currentlyActive = isLockable(material) || isLockableEntity(material);
         if (currentlyActive == lockable) return;
@@ -1254,8 +909,8 @@ public final class DefaultConfig extends BlockProtConfig {
         if (blocksConfig == null) return;
         Map<String, Set<Material>> activeByKey = new LinkedHashMap<>();
 
-        for (String key : LOCKABLE_LIST_KEYS) {
-            BlockFamilyParser.Family family = familyForConfigKey(key);
+        for (String key : BlocksConfigStorage.LOCKABLE_LIST_KEYS) {
+            BlockFamilyParser.Family family = BlocksConfigModifier.familyForConfigKey(key);
             if (family == null) continue;
             Object raw = blocksConfig.get(key);
             if (raw == null) {
@@ -1269,7 +924,7 @@ public final class DefaultConfig extends BlockProtConfig {
         for (Material mat : materials) {
             String configKey = configKeyForMaterial(mat);
             if (configKey == null) continue;
-            BlockFamilyParser.Family family = familyForMaterial(mat);
+            BlockFamilyParser.Family family = BlocksConfigModifier.familyForMaterial(mat);
             if (family == null) continue;
             Set<Material> active = activeByKey.get(configKey);
             if (active == null) continue;
@@ -1289,7 +944,7 @@ public final class DefaultConfig extends BlockProtConfig {
             String configKey = entry.getKey();
             Set<Material> activeSet = entry.getValue();
             if (isKeyInExpressionFormat(configKey)) {
-                BlockFamilyParser.Family family = familyForConfigKey(configKey);
+                BlockFamilyParser.Family family = BlocksConfigModifier.familyForConfigKey(configKey);
                 String expr = family != null ? BlockFamilyParser.toFamilyExpression(activeSet, family) : null;
                 if (expr != null) {
                     blocksConfig.set(configKey, List.of(expr));
@@ -1316,28 +971,6 @@ public final class DefaultConfig extends BlockProtConfig {
         }
     }
 
-    @Nullable
-    private static BlockFamilyParser.Family familyForConfigKey(@NotNull String configKey) {
-        return switch (configKey) {
-            case "lockable_tile_entities" -> BlockFamilyParser.Family.TILE_ENTITIES;
-            case "lockable_shulker_boxes" -> BlockFamilyParser.Family.SHULKER_BOXES;
-            case "lockable_blocks" -> BlockFamilyParser.Family.BLOCKS;
-            case "lockable_doors" -> BlockFamilyParser.Family.DOORS;
-            case "lockable_entities" -> BlockFamilyParser.Family.ENTITIES;
-            default -> null;
-        };
-    }
-
-    /**
-     * Toggles an entire family (all its members) in blocks.yml.
-     * If all members matching the expression are already active, disables them.
-     * Otherwise enables all matching members.
-     *
-     * @param family     the family to toggle
-     * @param configKey  the config key to modify
-     * @param expression the family expression to toggle
-     * @param who        the player who initiated the action
-     */
     public synchronized void toggleFamily(
             @NotNull BlockFamilyParser.Family family,
             @NotNull String configKey,
@@ -1382,17 +1015,10 @@ public final class DefaultConfig extends BlockProtConfig {
         }
     }
 
-    /**
-     * Toggles a single material in the auto-drop block list.
-     *
-     * @param material the material to toggle
-     * @param who      the player who initiated the toggle
-     * @return the new auto-drop state for this material
-     */
     public synchronized boolean toggleAutoDropMaterial(@NotNull Material material, @NotNull Player who) {
         if (blocksConfig == null) return isAutoDropToInventory(material);
 
-        Set<Material> current = getAutoDropToInventoryBlocks();
+        Set<Material> current = new LinkedHashSet<>(getAutoDropToInventoryBlocks());
         boolean currentlyActive = current.contains(material);
         String name = material.name();
 
@@ -1419,19 +1045,10 @@ public final class DefaultConfig extends BlockProtConfig {
         return !currentlyActive;
     }
 
-    /**
-     * Toggles an entire family in the auto-drop block list.
-     * If all family members are already present, removes them all.
-     * Otherwise adds all family members.
-     *
-     * @param family the family to toggle
-     * @param who    the player who initiated the toggle
-     * @return true if the family is now enabled (all members active)
-     */
     public synchronized boolean toggleAutoDropFamily(@NotNull BlockFamilyParser.Family family, @NotNull Player who) {
         if (blocksConfig == null) return false;
 
-        Set<Material> current = getAutoDropToInventoryBlocks();
+        Set<Material> current = new LinkedHashSet<>(getAutoDropToInventoryBlocks());
         Set<Material> members = BlockFamilyParser.getFamilyMembers(family);
         boolean allActive = members.stream().allMatch(current::contains);
 
@@ -1458,10 +1075,6 @@ public final class DefaultConfig extends BlockProtConfig {
         return !allActive;
     }
 
-    /**
-     * Writes the active auto-drop material set back to {@code blocksConfig},
-     * using family expressions when {@code modern_family_blocks} is enabled.
-     */
     private synchronized void writeAutoDropBlocks(@NotNull Set<Material> active) {
         if (blocksConfig == null) return;
 
@@ -1501,90 +1114,8 @@ public final class DefaultConfig extends BlockProtConfig {
         reloadBlocksAfterToggle();
     }
 
-    /**
-     * Returns the representative Material for a family, used in GUI icons.
-     */
     @NotNull
     public static Material representativeMaterialForFamily(@NotNull BlockFamilyParser.Family family) {
-        return switch (family) {
-            case TILE_ENTITIES -> Material.CHEST;
-            case SHULKER_BOXES -> Material.SHULKER_BOX;
-            case BLOCKS -> Material.ANVIL;
-            case DOORS -> Material.OAK_DOOR;
-            case ENTITIES -> Material.ITEM_FRAME;
-        };
-    }
-
-    /**
-     * Patches an existing blocks.yml on disk by adding any keys that are present in the
-     * bundled JAR default but absent from the file. Existing keys are never touched.
-     *
-     * <p>This handles upgrades where a new config key (e.g. {@code lockable_entities}) is
-     * added in a newer plugin version. The user's file continues to work unchanged, and the
-     * new key appears at the bottom of the file with its JAR default value.
-     *
-     * <p>Keys patched: {@code lockable_entities}, {@code auto_drop_to_inventory}.
-     */
-    private void patchBlocksFileIfNeeded(@NotNull File blocksFile, @NotNull YamlConfiguration bc) {
-        boolean dirty = false;
-
-        if (!bc.contains("lockable_entities")) {
-            bc.set("lockable_entities", Collections.emptyList());
-            BlockProtLogger.log("blocks-patch", "blocks.yml: added missing key 'lockable_entities' (empty list).");
-            dirty = true;
-        }
-
-        if (!bc.contains("auto_drop_to_inventory")) {
-            bc.set("auto_drop_to_inventory.enabled", true);
-            bc.set("auto_drop_to_inventory.blocks", Arrays.asList(null, null));
-            BlockProtLogger.log("blocks-patch", "blocks.yml: added missing key 'auto_drop_to_inventory' (enabled by default).");
-            dirty = true;
-        }
-
-        if (!bc.contains("protectable_entities")) {
-            bc.set("protectable_entities", Arrays.asList(null, null));
-            BlockProtLogger.log("blocks-patch", "blocks.yml: added missing key 'protectable_entities' (empty list).");
-            dirty = true;
-        }
-
-        if (bc.contains("recommended_blocks_applied")) {
-            bc.set("recommended_blocks_applied", null);
-            dirty = true;
-        }
-
-        if (dirty) {
-            try {
-                bc.save(blocksFile);
-                prependBlocksHeader(blocksFile);
-            } catch (IOException e) {
-                BlockProtLogger.warn("blocks.yml patch save failed: " + e.getMessage());
-            }
-        }
-    }
-
-    /**
-     * Creates a fresh blocks.yml with the standard header comments.
-     * Used when the file does not exist yet.
-     */
-    private void createBlocksFileWithHeader(@NotNull File blocksFile) throws IOException {
-        List<String> lines = new ArrayList<>(BLOCKS_HEADER);
-        lines.add("");
-        for (String key : LOCKABLE_LIST_KEYS) {
-            lines.add(key + ":");
-            lines.add("-");
-            lines.add("-");
-        }
-        lines.add("");
-        lines.add("protectable_entities:");
-        lines.add("- VILLAGER");
-        lines.add("-");
-        lines.add("");
-        lines.add("auto_drop_to_inventory:");
-        lines.add("  enabled: true");
-        lines.add("  blocks:");
-        lines.add("  -");
-        lines.add("  -");
-        lines.add("");
-        Files.write(blocksFile.toPath(), lines, StandardCharsets.UTF_8);
+        return BlocksConfigModifier.representativeMaterialForFamily(family);
     }
 }
