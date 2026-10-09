@@ -58,6 +58,7 @@ public class InteractEventListener implements Listener {
             return;
 
         if (event.getClickedBlock() == null) return;
+        if (event.isCancelled() || event.useInteractedBlock() == org.bukkit.event.Event.Result.DENY) return;
         if (BlockProt.getDefaultConfig().isWorldExcluded(event.getClickedBlock().getWorld())) return;
         if (!BlockProt.getDefaultConfig().isLockable(event.getClickedBlock().getType(),
             event.getClickedBlock().getWorld())) return;
