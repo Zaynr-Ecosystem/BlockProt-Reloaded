@@ -139,7 +139,7 @@ public final class CommandsAndPermissionsDiagnostics {
             "HelpCommand", "SettingsCommand", "FriendsAddAllCommand", "StatisticsCommand",
             "TransferCommand", "AboutCommand", "HintsCommand", "InfoCommand",
             "ReloadCommand", "UpdateCommand", "IntegrationsCommand", "DebugCommand",
-            "AdminUnlockCommand", "WorldProtDeleteCommand", "LockablesCommand", "RecommendedCommand",
+            "AdminUnlockCommand", "WorldProtDeleteCommand", "LogsCommand", "LockablesCommand", "RecommendedCommand",
             "TiersCommand"
         };
         Set<String> wired = new HashSet<>();
