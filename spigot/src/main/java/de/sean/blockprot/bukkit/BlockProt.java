@@ -406,7 +406,7 @@ public final class BlockProt extends JavaPlugin {
             String guideStep2  = Translator.get(TranslationKey.CONSOLE__FIRST_START__STEP2)
                 .replace("{file}", "blocks.yml");
             String guideStep3  = Translator.get(TranslationKey.CONSOLE__FIRST_START__STEP3)
-                .replace("{url}", "https://github.com/VictorGugug/BlockProt-Reloaded");
+                .replace("{url}", "https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded");
             String guideStep4  = Translator.get(TranslationKey.CONSOLE__FIRST_START__STEP4)
                 .replace("{command}", "/bp recommended");
             String guideFooter = Translator.get(TranslationKey.CONSOLE__FIRST_START__FOOTER);
@@ -480,7 +480,7 @@ public final class BlockProt extends JavaPlugin {
                 && UpdateChecker.latestRelease.getHtmlUrl() != null
                 && !UpdateChecker.latestRelease.getHtmlUrl().isBlank()
                 ? UpdateChecker.latestRelease.getHtmlUrl()
-                : "https://github.com/VictorGugug/BlockProt-Reloaded/releases/latest";
+                : "https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/releases/latest";
             BlockProtConsole.bootColored(
                 label,
                 Translator.get(TranslationKey.CONSOLE__BOOT_UPDATE_OUTDATED)
