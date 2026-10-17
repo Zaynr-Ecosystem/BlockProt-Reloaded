@@ -216,7 +216,8 @@ async function main() {
       check('owner places an item frame', true);
       const intruderFrame = Object.values(intruder.entities).find((e) => e.id === frame.id);
       if (intruderFrame) {
-        await intruder.attack(intruderFrame).catch(() => {});
+        // mineflayer attack() is synchronous and returns undefined
+        intruder.attack(intruderFrame);
         await sleep(1500);
         const stillPresent = Object.values(owner.entities).find((e) => e.id === frame.id);
         check('intruder cannot break the protected item frame', Boolean(stillPresent));

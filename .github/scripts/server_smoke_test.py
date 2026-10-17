@@ -74,7 +74,7 @@ def prepare_server(workdir, jar, server_url, port):
     (workdir / "eula.txt").write_text("eula=true\n", encoding="utf-8")
     (workdir / "server.properties").write_text(
         f"server-port={port}\nonline-mode=false\nlevel-type=minecraft\\:flat\n"
-        "generate-structures=false\nspawn-protection=0\n", encoding="utf-8")
+        "generate-structures=false\nspawn-protection=0\ndifficulty=peaceful\n", encoding="utf-8")
     return server_jar
 
 
@@ -149,7 +149,7 @@ def run(args):
             process.stdin.flush()
             text = wait_for(log_path, lambda t: SUMMARY_RE.search(t) is not None, args.debug_timeout)
             if args.players:
-                for command in ("op BPOwner", "bp recommended blocks force", "bp reload"):
+                for command in ("difficulty peaceful", "op BPOwner", "bp recommended blocks force", "bp reload"):
                     process.stdin.write(command + "\n")
                     process.stdin.flush()
                     time.sleep(4)
