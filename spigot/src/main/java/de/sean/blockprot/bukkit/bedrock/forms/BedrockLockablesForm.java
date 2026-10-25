@@ -67,13 +67,16 @@ public final class BedrockLockablesForm {
             .button(back, FormImage.Type.PATH, "textures/ui/back_button_default")
             .validResultHandler(response -> {
                 int clicked = response.clickedButtonId();
-                switch (clicked) {
-                    case 0 -> showCategoryItems(player, BlockFamilyParser.Family.TILE_ENTITIES);
-                    case 1 -> showCategoryItems(player, BlockFamilyParser.Family.SHULKER_BOXES);
-                    case 2 -> showCategoryItems(player, BlockFamilyParser.Family.DOORS);
-                    case 3 -> showCategoryItems(player, BlockFamilyParser.Family.ENTITIES);
-                    default -> BedrockAdminMenuForm.show(player);
-                }
+                BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                    if (!player.isOnline()) return;
+                    switch (clicked) {
+                        case 0 -> showCategoryItems(player, BlockFamilyParser.Family.TILE_ENTITIES);
+                        case 1 -> showCategoryItems(player, BlockFamilyParser.Family.SHULKER_BOXES);
+                        case 2 -> showCategoryItems(player, BlockFamilyParser.Family.DOORS);
+                        case 3 -> showCategoryItems(player, BlockFamilyParser.Family.ENTITIES);
+                        default -> BedrockAdminMenuForm.show(player);
+                    }
+                });
             });
 
         BedrockBridge.sendForm(player, builder.build());
@@ -112,6 +115,7 @@ public final class BedrockLockablesForm {
         builder.validResultHandler(response -> {
             int clicked = response.clickedButtonId();
             BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                if (!player.isOnline()) return;
                 if (clicked == 0) {
                     boolean target = noneActive;
                     cfg.batchSetLockable(matList, target, player);

@@ -68,15 +68,18 @@ public final class BedrockAdminConfigForm {
             .button(back, FormImage.Type.PATH, "textures/ui/back_button_default")
             .validResultHandler(response -> {
                 int clicked = response.clickedButtonId();
-                switch (clicked) {
-                    case 0 -> showPlayersCategory(player);
-                    case 1 -> showBlocksCategory(player);
-                    case 2 -> showEntityCategory(player);
-                    case 3 -> showExpiryCategory(player);
-                    case 4 -> showNotificationsCategory(player);
-                    case 5 -> showMaintenanceCategory(player);
-                    default -> BedrockAdminMenuForm.show(player);
-                }
+                BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                    if (!player.isOnline()) return;
+                    switch (clicked) {
+                        case 0 -> showPlayersCategory(player);
+                        case 1 -> showBlocksCategory(player);
+                        case 2 -> showEntityCategory(player);
+                        case 3 -> showExpiryCategory(player);
+                        case 4 -> showNotificationsCategory(player);
+                        case 5 -> showMaintenanceCategory(player);
+                        default -> BedrockAdminMenuForm.show(player);
+                    }
+                });
             });
 
         BedrockBridge.sendForm(player, builder.build());
@@ -133,7 +136,10 @@ public final class BedrockAdminConfigForm {
         builder.validResultHandler(response -> {
             int clicked = response.clickedButtonId();
             if (clicked >= 0 && clicked < actions.size()) {
-                actions.get(clicked).run();
+                BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                    if (!player.isOnline()) return;
+                    actions.get(clicked).run();
+                });
             }
         });
 
@@ -199,7 +205,10 @@ public final class BedrockAdminConfigForm {
         builder.validResultHandler(response -> {
             int clicked = response.clickedButtonId();
             if (clicked >= 0 && clicked < actions.size()) {
-                actions.get(clicked).run();
+                BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                    if (!player.isOnline()) return;
+                    actions.get(clicked).run();
+                });
             }
         });
 
@@ -257,7 +266,10 @@ public final class BedrockAdminConfigForm {
         builder.validResultHandler(response -> {
             int clicked = response.clickedButtonId();
             if (clicked >= 0 && clicked < actions.size()) {
-                actions.get(clicked).run();
+                BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                    if (!player.isOnline()) return;
+                    actions.get(clicked).run();
+                });
             }
         });
 
@@ -299,7 +311,10 @@ public final class BedrockAdminConfigForm {
         builder.validResultHandler(response -> {
             int clicked = response.clickedButtonId();
             if (clicked >= 0 && clicked < actions.size()) {
-                actions.get(clicked).run();
+                BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                    if (!player.isOnline()) return;
+                    actions.get(clicked).run();
+                });
             }
         });
 
@@ -341,7 +356,10 @@ public final class BedrockAdminConfigForm {
         builder.validResultHandler(response -> {
             int clicked = response.clickedButtonId();
             if (clicked >= 0 && clicked < actions.size()) {
-                actions.get(clicked).run();
+                BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                    if (!player.isOnline()) return;
+                    actions.get(clicked).run();
+                });
             }
         });
 
@@ -391,7 +409,10 @@ public final class BedrockAdminConfigForm {
         builder.validResultHandler(response -> {
             int clicked = response.clickedButtonId();
             if (clicked >= 0 && clicked < actions.size()) {
-                actions.get(clicked).run();
+                BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                    if (!player.isOnline()) return;
+                    actions.get(clicked).run();
+                });
             }
         });
 
@@ -406,7 +427,9 @@ public final class BedrockAdminConfigForm {
                 CustomFormResponse res = response;
                 try {
                     int val = Integer.parseInt(res.asInput(0).trim());
-                    onSave.accept(val);
+                    BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                        if (player.isOnline()) onSave.accept(val);
+                    });
                 } catch (NumberFormatException ignored) {}
             });
 

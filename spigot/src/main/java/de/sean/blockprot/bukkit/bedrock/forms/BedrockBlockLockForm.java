@@ -53,6 +53,12 @@ public final class BedrockBlockLockForm {
     private BedrockBlockLockForm() {}
 
     public static void show(@NotNull Player player, @NotNull Block block, @NotNull BlockNBTHandler handler) {
+        if (!Bukkit.isPrimaryThread() && (!BlockProt.hasFoliaLib() || !BlockProt.getFoliaLib().getScheduler().isOwnedByCurrentRegion(block))) {
+            BlockProt.getFoliaLib().getScheduler().runAtLocation(block.getLocation(), task -> {
+                if (player.isOnline()) show(player, block, new BlockNBTHandler(block));
+            });
+            return;
+        }
         boolean isNotProtected = handler.isNotProtected();
         boolean isOwner = handler.isOwner(player.getUniqueId());
         String blockName = block.getType().name();
@@ -125,7 +131,10 @@ public final class BedrockBlockLockForm {
         builder.validResultHandler(response -> {
             int clicked = response.clickedButtonId();
             if (clicked >= 0 && clicked < actions.size()) {
-                actions.get(clicked).run();
+                BlockProt.getFoliaLib().getScheduler().runAtLocation(block.getLocation(), task -> {
+                    if (!player.isOnline()) return;
+                    actions.get(clicked).run();
+                });
             }
         });
 
@@ -142,8 +151,12 @@ public final class BedrockBlockLockForm {
             .validResultHandler(response -> {
                 CustomFormResponse res = response;
                 String newName = res.asInput(0);
-                handler.setName(newName != null ? newName.trim() : "");
-                show(player, block, handler);
+                BlockProt.getFoliaLib().getScheduler().runAtLocation(block.getLocation(), task -> {
+                    if (!player.isOnline()) return;
+                    BlockNBTHandler h = new BlockNBTHandler(block);
+                    h.setName(newName != null ? newName.trim() : "");
+                    show(player, block, h);
+                });
             });
 
         BedrockBridge.sendForm(player, builder.build());

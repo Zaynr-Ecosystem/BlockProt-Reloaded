@@ -56,7 +56,11 @@ public final class BedrockTransferForm {
                 CustomFormResponse res = response;
                 String targetName = res.asInput(0);
                 if (targetName != null && !targetName.isBlank()) {
-                    TransferCommand.transferAll(player, targetName.trim());
+                    BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                        if (player.isOnline()) {
+                            TransferCommand.transferAll(player, targetName.trim());
+                        }
+                    });
                 }
             });
 
@@ -102,6 +106,7 @@ public final class BedrockTransferForm {
 
             final OfflinePlayer finalTarget = target;
             BlockProt.getFoliaLib().getScheduler().runAtLocation(block.getLocation(), locTask -> {
+                if (!player.isOnline()) return;
                 try {
                     BlockNBTHandler handler = new BlockNBTHandler(block);
                     if (!handler.isOwner(player.getUniqueId())) {

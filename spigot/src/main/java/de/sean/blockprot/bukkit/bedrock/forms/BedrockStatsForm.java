@@ -20,6 +20,7 @@
 
 package de.sean.blockprot.bukkit.bedrock.forms;
 
+import de.sean.blockprot.bukkit.BlockProt;
 import de.sean.blockprot.bukkit.TranslationKey;
 import de.sean.blockprot.bukkit.Translator;
 import de.sean.blockprot.bukkit.bedrock.BedrockBridge;
@@ -44,6 +45,12 @@ public final class BedrockStatsForm {
     private BedrockStatsForm() {}
 
     public static void showUserStats(@NotNull Player player) {
+        if (!org.bukkit.Bukkit.isPrimaryThread() && (!BlockProt.hasFoliaLib() || !BlockProt.getFoliaLib().getScheduler().isOwnedByCurrentRegion(player))) {
+            BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                if (player.isOnline()) showUserStats(player);
+            });
+            return;
+        }
         String title = stripColor(Translator.get(TranslationKey.INVENTORIES__USER_MENU__PLACEMENTS));
 
         PlayerBlocksStatistic stat = new PlayerBlocksStatistic();
@@ -71,7 +78,9 @@ public final class BedrockStatsForm {
             .title(title)
             .content(content.toString())
             .button(back, FormImage.Type.PATH, "textures/ui/back_button_default")
-            .validResultHandler(response -> BedrockUserMenuForm.show(player));
+            .validResultHandler(response -> BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                if (player.isOnline()) BedrockUserMenuForm.show(player);
+            }));
 
         BedrockBridge.sendForm(player, builder.build());
     }

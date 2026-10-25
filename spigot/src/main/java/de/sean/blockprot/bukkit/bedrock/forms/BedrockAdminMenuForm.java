@@ -59,25 +59,28 @@ public final class BedrockAdminMenuForm {
             .button(close, FormImage.Type.PATH, "textures/ui/cancel")
             .validResultHandler(response -> {
                 int clicked = response.clickedButtonId();
-                AdminAction required = switch (clicked) {
-                    case 0 -> AdminAction.CONFIG;
-                    case 1, 2 -> AdminAction.LOCKABLES;
-                    case 3 -> AdminAction.RELOAD;
-                    default -> null;
-                };
-                if (required != null && AdminTierManager.deny(player, required)) return;
-                switch (clicked) {
-                    case 0 -> BedrockAdminConfigForm.showCategories(player);
-                    case 1 -> BedrockLockablesForm.show(player);
-                    case 2 -> BedrockAutoDropForm.show(player);
-                    case 3 -> {
-                        new de.sean.blockprot.bukkit.tasks.BackupTask(BlockProt.getInstance().getDataFolder(), true).run();
-                        de.sean.blockprot.bukkit.config.ReloadCoordinator.commitCommand();
-                        de.sean.blockprot.bukkit.listeners.BlockEventListener.invalidateAllSettings();
-                        ComponentMessages.sendLegacy(player, Translator.get(TranslationKey.MESSAGES__RELOAD_DONE));
-                        show(player);
+                BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                    if (!player.isOnline()) return;
+                    AdminAction required = switch (clicked) {
+                        case 0 -> AdminAction.CONFIG;
+                        case 1, 2 -> AdminAction.LOCKABLES;
+                        case 3 -> AdminAction.RELOAD;
+                        default -> null;
+                    };
+                    if (required != null && AdminTierManager.deny(player, required)) return;
+                    switch (clicked) {
+                        case 0 -> BedrockAdminConfigForm.showCategories(player);
+                        case 1 -> BedrockLockablesForm.show(player);
+                        case 2 -> BedrockAutoDropForm.show(player);
+                        case 3 -> {
+                            new de.sean.blockprot.bukkit.tasks.BackupTask(BlockProt.getInstance().getDataFolder(), true).run();
+                            de.sean.blockprot.bukkit.config.ReloadCoordinator.commitCommand();
+                            de.sean.blockprot.bukkit.listeners.BlockEventListener.invalidateAllSettings();
+                            ComponentMessages.sendLegacy(player, Translator.get(TranslationKey.MESSAGES__RELOAD_DONE));
+                            show(player);
+                        }
                     }
-                }
+                });
             });
 
         BedrockBridge.sendForm(player, builder.build());

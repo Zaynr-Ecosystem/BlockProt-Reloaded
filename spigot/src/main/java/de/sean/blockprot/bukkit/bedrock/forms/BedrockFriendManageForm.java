@@ -50,11 +50,40 @@ public final class BedrockFriendManageForm {
 
     private BedrockFriendManageForm() {}
 
+    private static void runForHandler(@NotNull Player player, @NotNull FriendSupportingHandler<?> handler, @NotNull Runnable action) {
+        if (handler instanceof BlockNBTHandler bnh) {
+            BlockProt.getFoliaLib().getScheduler().runAtLocation(bnh.block.getLocation(), task -> {
+                if (player.isOnline()) action.run();
+            });
+        } else {
+            BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                if (player.isOnline()) action.run();
+            });
+        }
+    }
+
     public static void show(@NotNull Player player) {
-        show(player, new PlayerSettingsHandler(player), null);
+        BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+            if (player.isOnline()) {
+                show(player, new PlayerSettingsHandler(player), null);
+            }
+        });
     }
 
     public static void show(@NotNull Player player, @NotNull FriendSupportingHandler<?> handler, @Nullable Runnable onBack) {
+        if (handler instanceof BlockNBTHandler bnh) {
+            if (!org.bukkit.Bukkit.isPrimaryThread() && (!BlockProt.hasFoliaLib() || !BlockProt.getFoliaLib().getScheduler().isOwnedByCurrentRegion(bnh.block))) {
+                BlockProt.getFoliaLib().getScheduler().runAtLocation(bnh.block.getLocation(), task -> {
+                    if (player.isOnline()) show(player, new BlockNBTHandler(bnh.block), onBack);
+                });
+                return;
+            }
+        } else if (!org.bukkit.Bukkit.isPrimaryThread() && (!BlockProt.hasFoliaLib() || !BlockProt.getFoliaLib().getScheduler().isOwnedByCurrentRegion(player))) {
+            BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                if (player.isOnline()) show(player, handler, onBack);
+            });
+            return;
+        }
         String title = stripColor(Translator.get(TranslationKey.INVENTORIES__FRIENDS__MANAGE));
         String addFriend = stripColor(Translator.get(TranslationKey.INVENTORIES__FRIENDS__SEARCH));
         String back = stripColor(Translator.get(TranslationKey.DIALOGS__BACK));
@@ -76,15 +105,17 @@ public final class BedrockFriendManageForm {
 
         builder.validResultHandler(response -> {
             int clicked = response.clickedButtonId();
-            if (clicked == 0) {
-                showAddFriendPrompt(player, handler, () -> show(player, handler, onBack));
-            } else if (clicked <= friends.size()) {
-                FriendHandler selected = friends.get(clicked - 1);
-                showFriendActionPrompt(player, handler, selected, () -> show(player, handler, onBack));
-            } else {
-                if (onBack != null) onBack.run();
-                else BedrockUserMenuForm.show(player);
-            }
+            runForHandler(player, handler, () -> {
+                if (clicked == 0) {
+                    showAddFriendPrompt(player, handler, () -> show(player, handler, onBack));
+                } else if (clicked <= friends.size()) {
+                    FriendHandler selected = friends.get(clicked - 1);
+                    showFriendActionPrompt(player, handler, selected, () -> show(player, handler, onBack));
+                } else {
+                    if (onBack != null) onBack.run();
+                    else BedrockUserMenuForm.show(player);
+                }
+            });
         });
 
         BedrockBridge.sendForm(player, builder.build());
@@ -101,7 +132,7 @@ public final class BedrockFriendManageForm {
                 CustomFormResponse res = response;
                 String input = res.asInput(0);
                 if (input == null || input.isBlank()) {
-                    returnBack.run();
+                    runForHandler(player, handler, returnBack);
                     return;
                 }
 
@@ -113,12 +144,14 @@ public final class BedrockFriendManageForm {
                         return;
                     }
 
-                    handler.addFriend(match.getKey().toString());
-                    if (handler instanceof BlockNBTHandler bnh) {
-                        bnh.applyToOtherContainer();
-                    }
-                    ComponentMessages.sendLegacy(player, Translator.get(TranslationKey.MESSAGES__FRIEND_ADDED).replace("{player}", match.getValue()));
-                    BlockProt.getFoliaLib().getScheduler().runAtEntity(player, tick -> returnBack.run());
+                    runForHandler(player, handler, () -> {
+                        handler.addFriend(match.getKey().toString());
+                        if (handler instanceof BlockNBTHandler bnh) {
+                            bnh.applyToOtherContainer();
+                        }
+                        ComponentMessages.sendLegacy(player, Translator.get(TranslationKey.MESSAGES__FRIEND_ADDED).replace("{player}", match.getValue()));
+                        returnBack.run();
+                    });
                 });
             });
 
@@ -146,24 +179,26 @@ public final class BedrockFriendManageForm {
             .button(back, FormImage.Type.PATH, "textures/ui/back_button_default")
             .validResultHandler(response -> {
                 int clicked = response.clickedButtonId();
-                if (clicked >= 0 && clicked <= 3) {
-                    int newLevel = clicked + 1;
-                    friendHandler.setLevel(newLevel);
-                    handler.notifyFriendsMutated();
-                    if (handler instanceof BlockNBTHandler bnh) {
-                        bnh.applyToOtherContainer();
+                runForHandler(player, handler, () -> {
+                    if (clicked >= 0 && clicked <= 3) {
+                        int newLevel = clicked + 1;
+                        friendHandler.setLevel(newLevel);
+                        handler.notifyFriendsMutated();
+                        if (handler instanceof BlockNBTHandler bnh) {
+                            bnh.applyToOtherContainer();
+                        }
+                        showFriendActionPrompt(player, handler, friendHandler, returnBack);
+                    } else if (clicked == 4) {
+                        handler.removeFriend(uuidStr);
+                        if (handler instanceof BlockNBTHandler bnh) {
+                            bnh.applyToOtherContainer();
+                        }
+                        ComponentMessages.sendLegacy(player, Translator.get(TranslationKey.MESSAGES__FRIEND_REMOVED).replace("{player}", name));
+                        returnBack.run();
+                    } else {
+                        returnBack.run();
                     }
-                    showFriendActionPrompt(player, handler, friendHandler, returnBack);
-                } else if (clicked == 4) {
-                    handler.removeFriend(uuidStr);
-                    if (handler instanceof BlockNBTHandler bnh) {
-                        bnh.applyToOtherContainer();
-                    }
-                    ComponentMessages.sendLegacy(player, Translator.get(TranslationKey.MESSAGES__FRIEND_REMOVED).replace("{player}", name));
-                    returnBack.run();
-                } else {
-                    returnBack.run();
-                }
+                });
             });
 
         BedrockBridge.sendForm(player, builder.build());

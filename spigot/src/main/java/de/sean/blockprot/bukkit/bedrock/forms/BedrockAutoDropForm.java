@@ -20,6 +20,7 @@
 
 package de.sean.blockprot.bukkit.bedrock.forms;
 
+import de.sean.blockprot.bukkit.BlockProt;
 import de.sean.blockprot.bukkit.TranslationKey;
 import de.sean.blockprot.bukkit.Translator;
 import de.sean.blockprot.bukkit.bedrock.BedrockBridge;
@@ -64,11 +65,14 @@ public final class BedrockAutoDropForm {
 
         builder.validResultHandler(response -> {
             int clicked = response.clickedButtonId();
-            if (clicked >= 0 && clicked < FAMILIES.size()) {
-                show(player);
-            } else {
-                BedrockAdminMenuForm.show(player);
-            }
+            BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                if (!player.isOnline()) return;
+                if (clicked >= 0 && clicked < FAMILIES.size()) {
+                    show(player);
+                } else {
+                    BedrockAdminMenuForm.show(player);
+                }
+            });
         });
 
         BedrockBridge.sendForm(player, builder.build());

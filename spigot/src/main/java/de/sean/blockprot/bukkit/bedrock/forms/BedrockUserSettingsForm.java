@@ -41,6 +41,12 @@ public final class BedrockUserSettingsForm {
     private BedrockUserSettingsForm() {}
 
     public static void show(@NotNull Player player) {
+        if (!org.bukkit.Bukkit.isPrimaryThread() && (!BlockProt.hasFoliaLib() || !BlockProt.getFoliaLib().getScheduler().isOwnedByCurrentRegion(player))) {
+            BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                if (player.isOnline()) show(player);
+            });
+            return;
+        }
         PlayerSettingsHandler handler = new PlayerSettingsHandler(player);
 
         String title = stripColor(Translator.get(TranslationKey.INVENTORIES__USER_SETTINGS));
@@ -70,6 +76,7 @@ public final class BedrockUserSettingsForm {
             .validResultHandler(response -> {
                 int clicked = response.clickedButtonId();
                 BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                    if (!player.isOnline()) return;
                     PlayerSettingsHandler h = new PlayerSettingsHandler(player);
                     switch (clicked) {
                         case 0 -> {

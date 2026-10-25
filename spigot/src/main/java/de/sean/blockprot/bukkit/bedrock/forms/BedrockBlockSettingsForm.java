@@ -44,6 +44,12 @@ public final class BedrockBlockSettingsForm {
     private BedrockBlockSettingsForm() {}
 
     public static void show(@NotNull Player player, @NotNull Block block, @NotNull BlockNBTHandler handler) {
+        if (!org.bukkit.Bukkit.isPrimaryThread() && (!BlockProt.hasFoliaLib() || !BlockProt.getFoliaLib().getScheduler().isOwnedByCurrentRegion(block))) {
+            BlockProt.getFoliaLib().getScheduler().runAtLocation(block.getLocation(), task -> {
+                if (player.isOnline()) show(player, block, new BlockNBTHandler(block));
+            });
+            return;
+        }
         String title = stripColor(Translator.get(TranslationKey.INVENTORIES__BLOCK_SETTINGS__TITLE));
         String rawRedstone = stripColor(Translator.get(TranslationKey.INVENTORIES__REDSTONE__REDSTONE_PROTECTION));
         String rawPiston = stripColor(Translator.get(TranslationKey.INVENTORIES__REDSTONE__PISTON_PROTECTION));
@@ -78,6 +84,7 @@ public final class BedrockBlockSettingsForm {
         builder.validResultHandler(response -> {
             int clicked = response.clickedButtonId();
             BlockProt.getFoliaLib().getScheduler().runAtLocation(block.getLocation(), task -> {
+                if (!player.isOnline()) return;
                 BlockNBTHandler h = new BlockNBTHandler(block);
                 RedstoneSettingsHandler r = h.getRedstoneHandler();
                 if (clicked == 0) {

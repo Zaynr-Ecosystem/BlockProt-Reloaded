@@ -20,6 +20,7 @@
 
 package de.sean.blockprot.bukkit.bedrock.forms;
 
+import de.sean.blockprot.bukkit.BlockProt;
 import de.sean.blockprot.bukkit.TranslationKey;
 import de.sean.blockprot.bukkit.Translator;
 import de.sean.blockprot.bukkit.bedrock.BedrockBridge;
@@ -57,13 +58,16 @@ public final class BedrockUserMenuForm {
             .button(close, FormImage.Type.PATH, "textures/ui/cancel")
             .validResultHandler(response -> {
                 int clicked = response.clickedButtonId();
-                switch (clicked) {
-                    case 0 -> BedrockFriendManageForm.show(player);
-                    case 1 -> BedrockUserSettingsForm.show(player);
-                    case 2 -> BedrockStatsForm.showUserStats(player);
-                    case 3 -> BedrockTransferForm.showTransferAllPrompt(player);
-                    case 4 -> showAbout(player);
-                }
+                BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                    if (!player.isOnline()) return;
+                    switch (clicked) {
+                        case 0 -> BedrockFriendManageForm.show(player);
+                        case 1 -> BedrockUserSettingsForm.show(player);
+                        case 2 -> BedrockStatsForm.showUserStats(player);
+                        case 3 -> BedrockTransferForm.showTransferAllPrompt(player);
+                        case 4 -> showAbout(player);
+                    }
+                });
             });
 
         BedrockBridge.sendForm(player, builder.build());
@@ -84,7 +88,9 @@ public final class BedrockUserMenuForm {
             .title(title)
             .content(content)
             .button(back, FormImage.Type.PATH, "textures/ui/back_button_default")
-            .validResultHandler(response -> show(player));
+            .validResultHandler(response -> BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                if (player.isOnline()) show(player);
+            }));
 
         BedrockBridge.sendForm(player, builder.build());
     }
