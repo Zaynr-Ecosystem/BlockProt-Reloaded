@@ -820,7 +820,7 @@ jobs:
       - name: Publish to Modrinth & CurseForge
         id: mc_publish
         if: needs.inspect-and-build.outputs.github_only != 'true' && ((env.MODRINTH_TOKEN != '' && steps.detect.outputs.modrinth_skip != 'true') || (env.CURSEFORGE_TOKEN != '' && steps.detect.outputs.curseforge_skip != 'true'))
-        uses: Kir-Antipov/mc-publish@v3.3.1
+        uses: Kir-Antipov/mc-publish@v3.3.2
         with:
           modrinth-id: ${{ needs.edition.outputs.modrinth_id }}
           modrinth-token: ${{ steps.detect.outputs.modrinth_skip != 'true' && secrets.MODRINTH_TOKEN || '' }}
