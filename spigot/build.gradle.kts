@@ -177,7 +177,7 @@ tasks.runServer {
         "-Dterminal.ansi=true"
     )
     downloadPlugins {
-        url("https://download.luckperms.net/1561/bukkit/loader/LuckPerms-Bukkit-5.5.71.jar")
+        modrinth("luckperms", "v5.5.71-bukkit")
     }
 }
 
