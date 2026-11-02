@@ -428,10 +428,18 @@ public class BlockEventListener implements Listener {
 
     @EventHandler
     public void onSignChanged(@NotNull final SignChangeEvent event) {
-        if (BlockProt.getDefaultConfig().isLockable(event.getBlock().getType(), event.getBlock().getWorld())) {
-            final var handler = new BlockNBTHandler(event.getBlock());
-            if (handler.isProtected() && !handler.isOwner(event.getPlayer().getUniqueId()))
-                event.setCancelled(true);
-        }
+        final Block block = event.getBlock();
+        if (!BlockProt.getDefaultConfig().isLockable(block.getType(), block.getWorld())) return;
+        final var handler = new BlockNBTHandler(block);
+        if (!handler.isProtected()) return;
+
+        final Player player = event.getPlayer();
+        final String playerUuid = player.getUniqueId().toString();
+        if (handler.isOwner(playerUuid) || player.hasPermission(Permissions.USER_ADMIN.key())) return;
+
+        final var friend = handler.getFriend(playerUuid);
+        if (friend.isPresent() && friend.get().canWrite()) return;
+
+        event.setCancelled(true);
     }
 }

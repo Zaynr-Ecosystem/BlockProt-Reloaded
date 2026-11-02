@@ -67,10 +67,10 @@ public final class UpdateChecker implements Runnable {
      * {@code /releases} (list) is used instead so pre-releases are also detected.
      */
     private static final String GITHUB_API_URL =
-        "https://api.github.com/repos/VictorGugug/BlockProt-Reloaded/releases";
+        "https://api.github.com/repos/Zaynr-Ecosystem/BlockProt-Reloaded/releases";
 
     private static final String RELEASES_URL =
-        "https://github.com/VictorGugug/BlockProt-Reloaded/releases";
+        "https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/releases";
 
     private static String releaseUrl() {
         return Edition.current().tagPrefix().isEmpty() ? RELEASES_URL + "/latest" : RELEASES_URL;
