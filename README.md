@@ -1,10 +1,10 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/VictorGugug/BlockProt-Reloaded/main/images/RELEASE%20TITLES/BlockProtReloaded.png" alt="BlockProt Reloaded" />
+<img src="https://raw.githubusercontent.com/Zaynr-Ecosystem/BlockProt-Reloaded/main/images/RELEASE%20TITLES/BlockProtReloaded.png" alt="BlockProt Reloaded" />
 
 ---
-[![CI](https://img.shields.io/github/actions/workflow/status/VictorGugug/BlockProt-Reloaded/blockprot.yml?branch=main&style=flat-square&label=CI)](https://github.com/VictorGugug/BlockProt-Reloaded/actions/workflows/blockprot.yml)
-[![Release](https://img.shields.io/github/v/release/VictorGugug/BlockProt-Reloaded?style=flat-square&color=brightgreen&label=Release)](https://github.com/VictorGugug/BlockProt-Reloaded/releases)
+[![CI](https://img.shields.io/github/actions/workflow/status/Zaynr-Ecosystem/BlockProt-Reloaded/blockprot.yml?branch=main&style=flat-square&label=CI)](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/actions/workflows/blockprot.yml)
+[![Release](https://img.shields.io/github/v/release/Zaynr-Ecosystem/BlockProt-Reloaded?style=flat-square&color=brightgreen&label=Release)](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/releases)
 [![Modrinth](https://img.shields.io/modrinth/dt/C2ZYTu62?style=flat-square&color=00AF5C&logo=modrinth&label=Modrinth)](https://modrinth.com/plugin/blockprot-reloaded)
 [![CurseForge](https://img.shields.io/curseforge/dt/1565977?style=flat-square&color=FF6E1A&logo=curseforge&label=CurseForge)](https://www.curseforge.com/minecraft/bukkit-plugins/blockprot-reloaded)
 [![Hangar](https://img.shields.io/hangar/dt/BlockProt-Reloaded?style=flat-square&color=00D4A2&logo=papermc&label=Hangar)](https://hangar.papermc.io/VictorGugug/BlockProt-Reloaded/versions?channel=Release&platform=PAPER)
@@ -50,53 +50,53 @@ Both legacy color codes (`&a`, `&6`) and Adventure MiniMessage format (`<gold>`,
 ## Screenshots
 
 ### Block Lock Menu
-![Block lock](https://raw.githubusercontent.com/VictorGugug/BlockProt-Reloaded/main/images/main_menu.png)
+![Block lock](https://raw.githubusercontent.com/Zaynr-Ecosystem/BlockProt-Reloaded/main/images/main_menu.png)
 
 The main interface for locking blocks. Sneak and right-click any lockable block to open it. The two-row inventory displays functional controls on the top row and utility options on the bottom row.
 
 ### Friend Settings
-![Friend settings](https://raw.githubusercontent.com/VictorGugug/BlockProt-Reloaded/main/images/friend_settings.png)
+![Friend settings](https://raw.githubusercontent.com/Zaynr-Ecosystem/BlockProt-Reloaded/main/images/friend_settings.png)
 
 Add or remove friends from your protected blocks. Every friend can open the block and move items in and out; the level (Basic, Operator, Full Manager, or Custom) decides who may also open its menu, change settings, or manage friends.
 
 ### Player Settings
-![Player settings](https://raw.githubusercontent.com/VictorGugug/BlockProt-Reloaded/main/images/user_settings.png)
+![Player settings](https://raw.githubusercontent.com/Zaynr-Ecosystem/BlockProt-Reloaded/main/images/user_settings.png)
 
 Configure personal preferences such as lock-on-place behavior, notification sounds, and action bar hint toggles.
 
 ### Redstone Settings
-![Redstone settings](https://raw.githubusercontent.com/VictorGugug/BlockProt-Reloaded/main/images/redstone_settings.png)
+![Redstone settings](https://raw.githubusercontent.com/Zaynr-Ecosystem/BlockProt-Reloaded/main/images/redstone_settings.png)
 
 Control redstone, piston, and hopper interaction for each of your protected blocks independently.
 
 ### Block Info
-![Block info](https://raw.githubusercontent.com/VictorGugug/BlockProt-Reloaded/main/images/block_info.png)
+![Block info](https://raw.githubusercontent.com/Zaynr-Ecosystem/BlockProt-Reloaded/main/images/block_info.png)
 
 View the owner, friend list, protection status, and metadata for any protected block.
 
 ### Access Log
-![Access log](https://raw.githubusercontent.com/VictorGugug/BlockProt-Reloaded/main/images/access_log.png)
+![Access log](https://raw.githubusercontent.com/Zaynr-Ecosystem/BlockProt-Reloaded/main/images/access_log.png)
 
 Summary of all access attempts to your protected blocks. The audit log records when friends opened or interacted with your blocks.
 
 ### Access Log Detail
-![Inside log](https://raw.githubusercontent.com/VictorGugug/BlockProt-Reloaded/main/images/inside_log.png)
+![Inside log](https://raw.githubusercontent.com/Zaynr-Ecosystem/BlockProt-Reloaded/main/images/inside_log.png)
 
 Each access record shows a timestamp, player name, and action type: opened, item taken, item placed, or access denied.
 
 ### Admin Player Block-List
-![Admin view](https://raw.githubusercontent.com/VictorGugug/BlockProt-Reloaded/main/images/admin_view.png)
+![Admin view](https://raw.githubusercontent.com/Zaynr-Ecosystem/BlockProt-Reloaded/main/images/admin_view.png)
 
 Admin inspection tool to view all blocks owned by any player, including offline players. Click any entry to teleport. Shows real block icons and lock timestamps.
 
 ## Installing
 
-Download the latest JAR from [Releases](https://github.com/VictorGugug/BlockProt-Reloaded/releases) or [Modrinth](https://modrinth.com/plugin/blockprot-reloaded) and place it in your `plugins/` directory. Requires **Java 21+** (Java 25 for Minecraft 26.x) and **Paper, Purpur, or Folia 1.21.7 - 26.3**.
+Download the latest JAR from [Releases](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/releases) or [Modrinth](https://modrinth.com/plugin/blockprot-reloaded) and place it in your `plugins/` directory. Requires **Java 21+** (Java 25 for Minecraft 26.x) and **Paper, Purpur, or Folia 1.21.7 - 26.3**.
 
 ### Build from Source
 
 ```bash
-git clone https://github.com/VictorGugug/BlockProt-Reloaded.git
+git clone https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded.git
 cd BlockProt-Reloaded
 ./gradlew :blockprot-spigot:shadowJar
 ```
@@ -454,7 +454,7 @@ admin_tiers:
 
 ## Contact and Support
 
-Maintained by **Zar**. [Open an issue](https://github.com/VictorGugug/BlockProt-Reloaded/issues) for bugs or feature suggestions.
+Maintained by **Zar**. [Open an issue](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/issues) for bugs or feature suggestions.
 
 If you would like to support the maintenance and development of BlockProt Reloaded, you can sponsor through [GitHub Sponsors](https://github.com/sponsors/VictorGugug) or via the Sponsor button above.
 

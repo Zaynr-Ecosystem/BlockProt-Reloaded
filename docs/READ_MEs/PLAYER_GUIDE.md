@@ -141,6 +141,7 @@ matching player names reliably regardless of keyboard accents.
 | `/bp friends` | Opens your default-friends menu. |
 | `/bp friends addall <player>` | Adds a friend to **all** your protected blocks. |
 | `/bp transferall <player>` | Transfers ownership of **all** your protected blocks to another player. |
+| `/bp logs [here|<page>]` | Opens the paginated access audit log for your protected blocks or the targeted block. |
 
 ### Friend permission levels
 
@@ -153,9 +154,7 @@ items; the level decides what else the friend may do:
   name, view the audit log, and inspect the contents.
 - **Full Manager:** Everything Operator can do, plus managing friends. They cannot
   transfer or delete the protection.
-- **Custom:** Pick the individual flags (open menu, edit settings, edit name,
-  view audit, inspect, manage friends) in dialogs, inventory menus, or Bedrock
-  forms.
+- **Custom:** Configure four independent permissions (Open Container, Deposit Items, Withdraw Items, and Redstone Access) via dialogs, chest inventory menus, or Bedrock forms.
 
 ### Public blocks
 

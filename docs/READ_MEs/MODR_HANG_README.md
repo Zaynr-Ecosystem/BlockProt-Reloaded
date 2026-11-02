@@ -1,7 +1,7 @@
-<img src="https://raw.githubusercontent.com/VictorGugug/BlockProt-Reloaded/main/images/RELEASE%20TITLES/BlockProtReloaded.png" alt="BlockProt Reloaded" />
+<img src="https://raw.githubusercontent.com/Zaynr-Ecosystem/BlockProt-Reloaded/main/images/RELEASE%20TITLES/BlockProtReloaded.png" alt="BlockProt Reloaded" />
 
 ---
-> **Looking for another Minecraft version?** See the [version guide](https://github.com/VictorGugug/BlockProt-Reloaded/blob/main/docs/READ_MEs/VERSION_GUIDE.md).
+> **Looking for another Minecraft version?** See the [version guide](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/blob/main/docs/READ_MEs/VERSION_GUIDE.md).
 
 BlockProt Reloaded is a maintained fork of [BlockProt](https://github.com/spnda/BlockProt) for Paper, Purpur, and Folia servers (Minecraft 1.21.7 through 26.3). It preserves the original NBT-based protection core while adding stability fixes, performance improvements, and new features not present upstream.
 
@@ -61,7 +61,7 @@ lockable_entities:
 
 Sub-families: `CHEST`, `FURNACE`, `SHELF`, `TRANSPORT`, `MISC`, `SIGN` (tile entities); `SHULKERS`; `ANVIL`, `CAULDRON`, `WORKSTATION`, `TRAPDOOR`, `FENCE_GATE` (blocks); `DOORS`; `CHEST_BOATS`, `CHEST_MINECARTS`, `HOPPER_MINECARTS`, `ITEM_FRAMES` (entities).
 
-Full syntax: [`docs/MODERN SYNTAX AND LEGACY/BLOCK_FAMILY_SYNTAX.md`](https://github.com/VictorGugug/BlockProt-Reloaded/blob/main/docs/MODERN%20SYNTAX%20AND%20LEGACY/BLOCK_FAMILY_SYNTAX.md). Full material list: [`docs/MODERN SYNTAX AND LEGACY/LOCKABLE_BLOCKS_REFERENCE.md`](https://github.com/VictorGugug/BlockProt-Reloaded/blob/main/docs/MODERN%20SYNTAX%20AND%20LEGACY/LOCKABLE_BLOCKS_REFERENCE.md).
+Full syntax: [`docs/MODERN SYNTAX AND LEGACY/BLOCK_FAMILY_SYNTAX.md`](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/blob/main/docs/MODERN%20SYNTAX%20AND%20LEGACY/BLOCK_FAMILY_SYNTAX.md). Full material list: [`docs/MODERN SYNTAX AND LEGACY/LOCKABLE_BLOCKS_REFERENCE.md`](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/blob/main/docs/MODERN%20SYNTAX%20AND%20LEGACY/LOCKABLE_BLOCKS_REFERENCE.md).
 
 ### Config and blocks auto-merge on every reload
 On every startup and `/bp reload`, missing keys are added from JAR defaults and renamed keys are migrated. Existing values: including every family expression already written in `blocks.yml`: are never overwritten or reordered. In legacy flat-list mode, new material entries from a newer JAR are appended automatically so new block types become lockable without manual edits.
@@ -148,12 +148,12 @@ Place the JAR in `plugins/` and restart. Requires Java 21+ and Paper, Purpur, or
 
 ## Documentation
 
-- Release history: [`docs/RELEASE_NOTES/`](https://github.com/VictorGugug/BlockProt-Reloaded/tree/main/docs/RELEASE_NOTES)
-- Block family syntax: [`docs/MODERN SYNTAX AND LEGACY/BLOCK_FAMILY_SYNTAX.md`](https://github.com/VictorGugug/BlockProt-Reloaded/blob/main/docs/MODERN%20SYNTAX%20AND%20LEGACY/BLOCK_FAMILY_SYNTAX.md)
-- Full lockable materials reference: [`docs/MODERN SYNTAX AND LEGACY/LOCKABLE_BLOCKS_REFERENCE.md`](https://github.com/VictorGugug/BlockProt-Reloaded/blob/main/docs/MODERN%20SYNTAX%20AND%20LEGACY/LOCKABLE_BLOCKS_REFERENCE.md)
-- Administrator guide: [`docs/READ_MEs/ADMIN_GUIDE.md`](https://github.com/VictorGugug/BlockProt-Reloaded/blob/main/docs/READ_MEs/ADMIN_GUIDE.md)
-- Player guide: [`docs/READ_MEs/PLAYER_GUIDE.md`](https://github.com/VictorGugug/BlockProt-Reloaded/blob/main/docs/READ_MEs/PLAYER_GUIDE.md)
+- Release history: [`docs/RELEASE_NOTES/`](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/tree/main/docs/RELEASE_NOTES)
+- Block family syntax: [`docs/MODERN SYNTAX AND LEGACY/BLOCK_FAMILY_SYNTAX.md`](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/blob/main/docs/MODERN%20SYNTAX%20AND%20LEGACY/BLOCK_FAMILY_SYNTAX.md)
+- Full lockable materials reference: [`docs/MODERN SYNTAX AND LEGACY/LOCKABLE_BLOCKS_REFERENCE.md`](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/blob/main/docs/MODERN%20SYNTAX%20AND%20LEGACY/LOCKABLE_BLOCKS_REFERENCE.md)
+- Administrator guide: [`docs/READ_MEs/ADMIN_GUIDE.md`](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/blob/main/docs/READ_MEs/ADMIN_GUIDE.md)
+- Player guide: [`docs/READ_MEs/PLAYER_GUIDE.md`](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/blob/main/docs/READ_MEs/PLAYER_GUIDE.md)
 
-Repository: https://github.com/VictorGugug/BlockProt-Reloaded
-Issues and contributions: https://github.com/VictorGugug/BlockProt-Reloaded/issues
+Repository: https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded
+Issues and contributions: https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/issues
 License: GNU General Public License v3 - based on [BlockProt](https://github.com/spnda/BlockProt) by spnda.

@@ -19,7 +19,7 @@ Each edition reports anonymous metrics to its own bStats plugin page:
 - **BlockProt Reloaded Legacy** (1.20.5 - 1.21.6): [bStats #34385](https://bstats.org/plugin/bukkit/BlockProt%20Reloaded%20Legacy/34385)
 - **BlockProt Legacy** (1.18.2 - 1.20.4): [bStats #34386](https://bstats.org/plugin/bukkit/BlockProt%20Legacy/34386)
 
-BlockProt Reloaded 1.3.8 (Minecraft 1.21.1 to 1.21.6) and 1.3.7 (Minecraft 1.20.5 to 1.21) stay available on [GitHub Releases](https://github.com/VictorGugug/BlockProt-Reloaded/releases). The legacy editions replace them.
+BlockProt Reloaded 1.3.8 (Minecraft 1.21.1 to 1.21.6) and 1.3.7 (Minecraft 1.20.5 to 1.21) stay available on [GitHub Releases](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/releases). The legacy editions replace them.
 
 Spigot and CraftBukkit are not supported by any edition. Use Paper, Purpur or Folia.
 
@@ -72,4 +72,4 @@ Fixes are applied to BlockProt Reloaded first and carried to the legacy editions
 
 ## Where to report issues
 
-Open an issue on [GitHub](https://github.com/VictorGugug/BlockProt-Reloaded/issues) and choose the edition in the form. Read [CONTRIBUTING.md](../../CONTRIBUTING.md) and [SCOPE.md](../../SCOPE.md) first.
+Open an issue on [GitHub](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/issues) and choose the edition in the form. Read [CONTRIBUTING.md](../../CONTRIBUTING.md) and [SCOPE.md](../../SCOPE.md) first.

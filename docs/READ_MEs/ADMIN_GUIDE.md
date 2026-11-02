@@ -579,7 +579,7 @@ Run `/bp integrations` to list which are active on your server.
 - **Logs:** `plugins/BlockProtReloaded/logs/blockprot-*.log` records commands,
   reloads, denials, and protection decisions, with colors stripped for easy reading.
 - **Audit log:** denials and block activity are recorded in
-  `plugins/BlockProtReloaded/mysql/blockprot_audit.sqlite` and work out of the box.
+  `plugins/BlockProtReloaded/mysql/blockprot_audit.sqlite` and can be inspected in-game with `/bp logs [here|player <name>|<page>]` or via Paper dialogs.
 
 ## 15. Command reference
 
@@ -596,6 +596,7 @@ Run `/bp integrations` to list which are active on your server.
 | `/bp transferall <player>` | `blockprot.user` | Transfer all your blocks to another player. |
 | `/bp about` | `blockprot.user` | Plugin and fork information. |
 | `/bp disablehints` | `blockprot.user` | Disable the lock hint messages. |
+| `/bp logs [here|player <name>|<page>]` | `blockprot.user` | Paginated access audit log for your blocks, the targeted block (`here`), or another player (admin). |
 
 ### Admin commands
 

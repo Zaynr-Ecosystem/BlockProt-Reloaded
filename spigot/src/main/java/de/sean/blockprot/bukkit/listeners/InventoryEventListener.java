@@ -33,6 +33,7 @@ import de.sean.blockprot.bukkit.nbt.EntityNBTHandler;
 import de.sean.blockprot.bukkit.nbt.FriendHandler;
 import de.sean.blockprot.bukkit.BlockProtLogger;
 import de.sean.blockprot.bukkit.util.ComponentMessages;
+import de.sean.blockprot.bukkit.util.RegionTasks;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
@@ -110,8 +111,14 @@ public class InventoryEventListener implements Listener {
                 handleEntityInventoryClick(event, player, entity);
                 return;
             }
-            if (!(rawHolder instanceof BlockInventoryHolder blockHolder)) return;
-            Block block = blockHolder.getBlock();
+            Block block;
+            if (rawHolder instanceof BlockInventoryHolder blockHolder) {
+                block = blockHolder.getBlock();
+            } else if (rawHolder instanceof DoubleChest doubleChest) {
+                block = doubleChest.getLocation().getBlock();
+            } else {
+                return;
+            }
             if (BlockProt.getDefaultConfig().isLockable(block.getType(), block.getWorld())) {
                 BlockNBTHandler handler = new BlockNBTHandler(block);
                 String playerUuid = player.getUniqueId().toString();
@@ -122,7 +129,7 @@ public class InventoryEventListener implements Listener {
                         FriendHandler friendHandler = friend.get();
                         if (!friendHandler.canOpenContainer()) {
                             event.setCancelled(true);
-                            player.closeInventory();
+                            RegionTasks.runFor(player, player::closeInventory);
                             return;
                         }
                         if (TAKE_ACTIONS.contains(event.getAction()) && !friendHandler.canWithdraw()) {
@@ -139,7 +146,7 @@ public class InventoryEventListener implements Listener {
                             event.setCancelled(true);
                         } else if (!friendHandler.canRead()) {
                             event.setCancelled(true);
-                            player.closeInventory();
+                            RegionTasks.runFor(player, player::closeInventory);
                         } else {
                             if (event.getClickedInventory() != null
                                     && event.getClickedInventory().equals(event.getInventory())) {
@@ -147,7 +154,7 @@ public class InventoryEventListener implements Listener {
                             }
                         }
                     } else {
-                        player.closeInventory();
+                        RegionTasks.runFor(player, player::closeInventory);
                         event.setCancelled(true);
                     }
                 } else if (handler.isProtected() && handler.isOwner(playerUuid)) {
@@ -382,7 +389,7 @@ public class InventoryEventListener implements Listener {
         }
 
         event.setCancelled(true);
-        player.closeInventory();
+        RegionTasks.runFor(player, player::closeInventory);
         AuditLogger audit = BlockProt.getAuditLogger();
         if (audit != null) {
             audit.log(player.getUniqueId(), player.getName(), entity.getLocation(), AuditLogger.Action.ACCESS_DENIED);
