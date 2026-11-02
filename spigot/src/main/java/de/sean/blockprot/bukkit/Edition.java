@@ -39,7 +39,7 @@ public enum Edition {
         "https://modrinth.com/plugin/blockprot-reloaded", 3);
 
     private static final String GUIDE_URL =
-        "https://github.com/VictorGugug/BlockProt-Reloaded/blob/main/docs/READ_MEs/VERSION_GUIDE.md";
+        "https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/blob/main/docs/READ_MEs/VERSION_GUIDE.md";
 
     private static Edition current;
 
