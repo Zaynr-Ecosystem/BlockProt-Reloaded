@@ -24,6 +24,8 @@ import de.sean.blockprot.bukkit.BlockProt;
 import de.sean.blockprot.bukkit.Permissions;
 import de.sean.blockprot.bukkit.TranslationKey;
 import de.sean.blockprot.bukkit.Translator;
+import de.sean.blockprot.bukkit.admin.AdminAction;
+import de.sean.blockprot.bukkit.admin.AdminTierManager;
 import de.sean.blockprot.bukkit.util.ComponentMessages;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -55,8 +57,14 @@ public final class HelpCommand implements CommandExecutor {
 
         final boolean useMenus = !BlockProt.getDefaultConfig().areExtraCommandsEnabled();
         final boolean isOp = sender.isOp();
-        final boolean isAdmin = sender.hasPermission(Permissions.USER_ADMIN.key());
-        final boolean hasDebug = sender.hasPermission(Permissions.DEBUG.key());
+        final boolean isAdmin = AdminTierManager.hasAnyAdminPermission(sender) || sender.hasPermission(Permissions.USER_ADMIN.key());
+        final boolean hasDebug = sender.hasPermission(Permissions.DEBUG.key()) || AdminTierManager.hasPermission(sender, AdminAction.DEBUG);
+        final boolean canUpdate = isOp || AdminTierManager.hasPermission(sender, AdminAction.UPDATE);
+        final boolean canReload = isOp || AdminTierManager.hasPermission(sender, AdminAction.RELOAD);
+        final boolean canLockables = isOp || AdminTierManager.hasPermission(sender, AdminAction.LOCKABLES);
+        final boolean canRecommended = isOp || AdminTierManager.hasPermission(sender, AdminAction.RECOMMENDED);
+        final boolean canProtDel = isOp || AdminTierManager.hasPermission(sender, AdminAction.PROTDEL);
+        final boolean canIntegrations = isOp || AdminTierManager.hasPermission(sender, AdminAction.INTEGRATIONS);
 
         if (useMenus) {
             send(sender, Translator.get(TranslationKey.HELP__GUI_MODE_TITLE));
@@ -64,14 +72,19 @@ public final class HelpCommand implements CommandExecutor {
             if (isAdmin) {
                 send(sender, Translator.get(TranslationKey.HELP__GUI_ADMIN));
             }
+            if (canUpdate) {
+                send(sender, Translator.get(TranslationKey.HELP__UPDATE));
+            }
         } else {
             send(sender, Translator.get(TranslationKey.HELP__BLOCK_PROTECTION_TITLE));
             send(sender, Translator.get(TranslationKey.HELP__BLOCK_PROTECTION_SETTINGS));
 
-            send(sender, Translator.get(TranslationKey.HELP__FRIENDS_TITLE));
-            send(sender, Translator.get(TranslationKey.HELP__FRIENDS_GUI));
-            send(sender, Translator.get(TranslationKey.HELP__FRIENDS_ADDALL));
-            send(sender, Translator.get(TranslationKey.HELP__TRANSFER));
+            if (!BlockProt.getDefaultConfig().isFriendFunctionalityDisabled()) {
+                send(sender, Translator.get(TranslationKey.HELP__FRIENDS_TITLE));
+                send(sender, Translator.get(TranslationKey.HELP__FRIENDS_GUI));
+                send(sender, Translator.get(TranslationKey.HELP__FRIENDS_ADDALL));
+                send(sender, Translator.get(TranslationKey.HELP__TRANSFER));
+            }
 
             send(sender, Translator.get(TranslationKey.HELP__OTHER_TITLE));
             send(sender, Translator.get(TranslationKey.HELP__SETTINGS));
@@ -82,14 +95,26 @@ public final class HelpCommand implements CommandExecutor {
             if (isAdmin) {
                 send(sender, Translator.get(TranslationKey.HELP__ADMIN_INFO));
                 send(sender, Translator.get(TranslationKey.HELP__UNLOCK));
-                send(sender, Translator.get(TranslationKey.HELP__LOGS));
+                if (BlockProt.getDefaultConfig().isSessionLogEnabled()) {
+                    send(sender, Translator.get(TranslationKey.HELP__LOGS));
+                }
             }
-            if (isOp) {
+            if (canIntegrations) {
                 send(sender, Translator.get(TranslationKey.HELP__INTEGRATIONS));
+            }
+            if (canUpdate) {
                 send(sender, Translator.get(TranslationKey.HELP__UPDATE));
+            }
+            if (canReload) {
                 send(sender, Translator.get(TranslationKey.HELP__RELOAD));
+            }
+            if (canLockables) {
                 send(sender, Translator.get(TranslationKey.HELP__LOCKABLES));
+            }
+            if (canRecommended) {
                 send(sender, Translator.get(TranslationKey.HELP__RECOMMENDED));
+            }
+            if (canProtDel) {
                 send(sender, Translator.get(TranslationKey.HELP__WORLD_PROT_DEL));
             }
             if (hasDebug) {

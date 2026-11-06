@@ -5,7 +5,7 @@ api-version: '1.13'
 authors: [ Zar ]
 description: Block protection plugin, BlockProt Reloaded
 prefix: BlockProt Reloaded
-website: https://github.com/VictorGugug/BlockProt-Reloaded
+website: https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded
 folia-supported: true
 permissions:
   blockprot.user:

@@ -295,13 +295,138 @@ jobs:
             build/smoke-server/plugins/BlockProtReloaded/logs/
           retention-days: 7
 
-  player-tests:
-    name: Player Tests on Every Supported Version
+  player-tests-plan:
+    name: Plan Player Tests (${{ needs.edition.outputs.branch }})
     needs: [edition]
-    if: ${{ (needs.edition.outputs.operation == 'preview' || needs.edition.outputs.operation == 'publish' || needs.edition.outputs.operation == 'maintenance') }}
-    uses: ./.github/workflows/player-tests.yml
-    with:
-      ref: ${{ needs.edition.outputs.branch }}
+    if: ${{ needs.edition.outputs.operation != 'sync' }}
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      jar_base: ${{ steps.matrix.outputs.jar_base }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule') && needs.edition.outputs.branch || '' }}
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Build the version matrix from gradle.properties
+        id: matrix
+        run: |
+          echo "matrix=$(python3 .github/scripts/e2e_matrix.py)" >> "$GITHUB_OUTPUT"
+          echo "jar_base=$(python3 -c "import json;print(json.load(open('.github/editions.json'))[open('.github/EDITION').read().strip()]['jarBase'])")" >> "$GITHUB_OUTPUT"
+
+  player-tests-build:
+    name: Build Player Tests JAR
+    needs: [edition, ci, player-tests-plan]
+    if: ${{ !cancelled() && (needs.ci.result == 'success' || needs.ci.result == 'skipped') && needs.player-tests-plan.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule') && needs.edition.outputs.branch || '' }}
+
+      - uses: actions/setup-java@v6
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+
+      - uses: gradle/actions/setup-gradle@v5
+
+      - run: chmod +x gradlew
+
+      - run: ./gradlew :blockprot-spigot:shadowJar --no-daemon
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: e2e-jar
+          path: spigot/build/libs/${{ needs.player-tests-plan.outputs.jar_base }}-*.jar
+          retention-days: 7
+
+  player-tests:
+    name: ${{ matrix.project }} ${{ matrix.version }} with two players
+    needs: [edition, player-tests-plan, player-tests-build]
+    if: ${{ !cancelled() && needs.player-tests-build.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.player-tests-plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule') && needs.edition.outputs.branch || '' }}
+
+      - uses: actions/setup-java@v6
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'temurin'
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: e2e-jar
+          path: build/e2e-jar
+
+      - name: Install the player bot
+        run: npm install --prefix build/e2e-deps mineflayer@4
+
+      - name: Boot the server, run diagnostics and play
+        env:
+          NODE_PATH: ${{ github.workspace }}/build/e2e-deps/node_modules
+        run: |
+          {
+            echo "## Server with two simulated players"
+            echo ""
+            echo "| Server | Result | Diagnostics |"
+            echo "| :--- | :---: | :--- |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          JAR=$(find build/e2e-jar -name "*.jar" ! -name "*-sources.jar" ! -name "*-javadoc.jar" | head -1)
+          for attempt in 1 2; do
+            if python3 .github/scripts/server_smoke_test.py --jar "$JAR" --project "${{ matrix.project }}" --version "${{ matrix.version }}" --java "$JAVA_HOME/bin/java" --workdir build/e2e-server --players .github/scripts/e2e_players.js --summary "$GITHUB_STEP_SUMMARY"; then
+              exit 0
+            fi
+            echo "Attempt $attempt failed"
+          done
+          exit 1
+
+      - name: Check the console names the edition
+        run: |
+          NAME=$(python3 -c "import json;print(json.load(open('.github/editions.json'))[open('.github/EDITION').read().strip()]['displayName'])")
+          sed 's/\x1b\[[0-9;]*m//g' build/e2e-server/console.log | grep -F "[$NAME]" > /dev/null
+
+      - name: Upload server log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-${{ matrix.project }}-${{ matrix.version }}
+          path: |
+            build/e2e-server/console.log
+            build/e2e-server/plugins/BlockProtReloaded/logs/
+          retention-days: 7
+
+  player-tests-verdict:
+    name: Every version passed
+    needs: [edition, player-tests-plan, player-tests-build, player-tests]
+    if: always() && needs.player-tests-plan.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail unless every server passed
+        run: |
+          if [ "${{ needs.player-tests-build.result }}" != "success" ] || [ "${{ needs.player-tests.result }}" != "success" ]; then
+            echo "Player tests build result: ${{ needs.player-tests-build.result }}"
+            echo "Player tests result: ${{ needs.player-tests.result }}"
+            exit 1
+          fi
 
   sync-check:
     name: Platform Publication Check
@@ -682,8 +807,8 @@ jobs:
 
   publish-platforms:
     name: Execute Multi-Platform Publication
-    needs: [edition, sync-check, inspect-and-build, player-tests]
-    if: ${{ !cancelled() && needs.inspect-and-build.result == 'success' && (needs.player-tests.result == 'success' || needs.player-tests.result == 'skipped') && (needs.edition.outputs.operation == 'publish' || needs.sync-check.outputs.needed == 'true') }}
+    needs: [edition, sync-check, inspect-and-build, player-tests-verdict]
+    if: ${{ !cancelled() && needs.inspect-and-build.result == 'success' && (needs.player-tests-verdict.result == 'success' || needs.player-tests-verdict.result == 'skipped') && (needs.edition.outputs.operation == 'publish' || needs.sync-check.outputs.needed == 'true') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write

@@ -127,7 +127,9 @@ public final class Translator {
             ? Locale.ROOT
             : Locale.forLanguageTag(localeStr.replace('_', '-'));
 
-        final String langFile = BlockProt.getDefaultConfig().getLanguageFile();
+        final String langFile = BlockProt.getDefaultConfigOrNull() != null
+            ? BlockProt.getDefaultConfigOrNull().getLanguageFile()
+            : "translations_en.yml";
         TranslationKey[] translations = TranslationKey.values();
 
         List<String> missingInBoth   = new ArrayList<>();
@@ -229,10 +231,26 @@ public final class Translator {
     }
 
     @NotNull
+    public static String getRaw(@NotNull final TranslationKey key) {
+        TranslationValue value = values.get(key);
+        if (value == null) {
+            String fallback = null;
+            if (BlockProt.getDefaultConfigOrNull() != null) {
+                fallback = BlockProt.getDefaultConfigOrNull().getTranslationFallbackString();
+            }
+            return (fallback == null || fallback.isBlank()) ? key.toString() : fallback;
+        }
+        return value.getValue();
+    }
+
+    @NotNull
     public static String get(@NotNull final TranslationKey key) {
         TranslationValue value = values.get(key);
         if (value == null) {
-            String fallback = BlockProt.getDefaultConfig().getTranslationFallbackString();
+            String fallback = null;
+            if (BlockProt.getDefaultConfigOrNull() != null) {
+                fallback = BlockProt.getDefaultConfigOrNull().getTranslationFallbackString();
+            }
             return process((fallback == null || fallback.isBlank()) ? key.toString() : fallback);
         }
         return process(value.getValue());

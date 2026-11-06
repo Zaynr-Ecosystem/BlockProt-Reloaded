@@ -30,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -43,12 +44,12 @@ public class CachedProfileService implements ProfileService, ProfileCache {
     private final ProfileCache cache;
 
     public CachedProfileService(ProfileCache cache) {
-        // We try to use our server's cache first for lookups, and only later fallback to the
-        // Mojang endpoint.
-        final var services = Lists.newArrayList(
-                BukkitPlayerService.getInstance(),
-                PaperPlayerService.getInstance(),
-                HttpRepositoryService.forMinecraft());
+        final List<ProfileService> services = new ArrayList<>();
+        services.add(BukkitPlayerService.getInstance());
+        services.add(PaperPlayerService.getInstance());
+        if (org.bukkit.Bukkit.getOnlineMode()) {
+            services.add(HttpRepositoryService.forMinecraft());
+        }
         services.removeIf(Objects::isNull);
         this.resolver = new CombinedProfileService(services);
         this.cache = cache;

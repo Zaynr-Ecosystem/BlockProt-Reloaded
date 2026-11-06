@@ -1,4 +1,4 @@
-![LEGACY BLOCKS SYNTAX](https://raw.githubusercontent.com/VictorGugug/BlockProt-Reloaded/main/images/RELEASE%20TITLES/docs/LEGACY%20BLOCKS%20SYNTAX.png)
+![LEGACY BLOCKS SYNTAX](https://raw.githubusercontent.com/Zaynr-Ecosystem/BlockProt-Reloaded/main/images/RELEASE%20TITLES/docs/LEGACY%20BLOCKS%20SYNTAX.png)
 
 # blocks.yml: Configuration Guide
 

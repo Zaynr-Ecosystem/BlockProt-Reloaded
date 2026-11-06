@@ -17,7 +17,7 @@ Admins get a separate toolset: a paged block browser (`/bp lockables`), per-play
 
 Only blocks and entities that exist on your Minecraft version can be locked; the lists below name the complete set across editions.
 
-**Tile entities (storage):** all chest variants, all 17 shulker box colors, all 12 shelf variants (1.21.9+), furnace, smoker, blast furnace, hopper, dispenser, dropper, barrel, brewing stand, decorated pot, chiseled bookshelf, crafter, jukebox, lectern, beehive, bee nest.
+**Tile entities (storage):** all chest variants, all 17 shulker box colors, furnace, smoker, blast furnace, hopper, dispenser, dropper, barrel, brewing stand, decorated pot, chiseled bookshelf, jukebox, lectern, beehive, bee nest.
 
 **Interactive blocks:** doors, trapdoors, and fence gates (all wood variants plus iron and all copper oxidation stages), anvils, cauldrons, enchanting table, grindstone, stonecutter, loom, cartography table, smithing table, composter, bell, note block, dragon egg.
 

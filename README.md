@@ -7,13 +7,13 @@
 [![Release](https://img.shields.io/github/v/release/Zaynr-Ecosystem/BlockProt-Reloaded?style=flat-square&color=brightgreen&label=Release)](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/releases)
 [![Modrinth](https://img.shields.io/modrinth/dt/C2ZYTu62?style=flat-square&color=00AF5C&logo=modrinth&label=Modrinth)](https://modrinth.com/plugin/blockprot-reloaded)
 [![CurseForge](https://img.shields.io/curseforge/dt/1565977?style=flat-square&color=FF6E1A&logo=curseforge&label=CurseForge)](https://www.curseforge.com/minecraft/bukkit-plugins/blockprot-reloaded)
-[![Hangar](https://img.shields.io/hangar/dt/BlockProt-Reloaded?style=flat-square&color=00D4A2&logo=papermc&label=Hangar)](https://hangar.papermc.io/VictorGugug/BlockProt-Reloaded/versions?channel=Release&platform=PAPER)
+[![Hangar](https://img.shields.io/hangar/dt/BlockProt-Reloaded?style=flat-square&color=00D4A2&logo=papermc&label=Hangar)](https://hangar.papermc.io/Zaynr-Ecosystem/BlockProt-Reloaded/versions?channel=Release&platform=PAPER)
 [![bStats](https://img.shields.io/bstats/servers/31548?style=flat-square&label=bStats)](https://bstats.org/plugin/bukkit/BlockProt%20Reloaded/31548)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg?style=flat-square)](LICENSE)
 [![GitLocalize](https://gitlocalize.com/repo/10833/whole_project/badge.svg)](https://gitlocalize.com/repo/10833)
 [![Java](https://img.shields.io/badge/Java-21+-orange?style=flat-square)](https://openjdk.org/projects/jdk/21/)
 [![Paper](https://img.shields.io/badge/Paper-1.21.7%20--%2026.3-white?style=flat-square)](https://papermc.io/)
-[![Sponsor](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa?style=flat-square&logo=githubsponsors)](https://github.com/sponsors/VictorGugug)
+[![Sponsor](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa?style=flat-square&logo=githubsponsors)](https://github.com/sponsors/Zaynr-Ecosystem)
 
 Java 21 bytecode (JDK 25 toolchain), Paper 1.21.7 through 26.3, Folia support, Native Paper Dialogs, Bedrock Forms, Admin Tiers, MySQL index, Access Audit, Entity Protection, Villager Workstation Protection, Auto-Backup, Ownership Transfer, Item Frame and Vehicle Protection.
 
@@ -57,7 +57,7 @@ The main interface for locking blocks. Sneak and right-click any lockable block 
 ### Friend Settings
 ![Friend settings](https://raw.githubusercontent.com/Zaynr-Ecosystem/BlockProt-Reloaded/main/images/friend_settings.png)
 
-Add or remove friends from your protected blocks. Every friend can open the block and move items in and out; the level (Basic, Operator, Full Manager, or Custom) decides who may also open its menu, change settings, or manage friends.
+Add or remove friends from your protected blocks. Built-in levels (Basic, Operator, Full Manager) grant preset roles, while the Custom level exposes 10 granular flags to selectively allow or revoke container opening, deposit, withdraw, and redstone access.
 
 ### Player Settings
 ![Player settings](https://raw.githubusercontent.com/Zaynr-Ecosystem/BlockProt-Reloaded/main/images/user_settings.png)
@@ -112,9 +112,9 @@ The version suffix is controlled by `versionSuffix` in `gradle.properties`:
 
 | Value | Output |
 |---|---|
-| *(blank)* | `BlockProtReloaded-1.4.1.jar` - stable release |
-| `BEDev` | `BlockProtReloaded-1.4.1-BEDev.jar` - experimental pre-release |
-| `hotfix.N` | `BlockProtReloaded-1.4.1-hotfix.2.jar` - targeted bugfix release, numbered when a version has several |
+| *(blank)* | `BlockProtReloaded-1.4.3.jar` - stable release |
+| `BEDev` | `BlockProtReloaded-1.4.3-BEDev.jar` - experimental pre-release |
+| `hotfix.N` | `BlockProtReloaded-1.4.3-hotfix.2.jar` - targeted bugfix release, numbered when a version has several |
 
 ## File Layout
 
@@ -180,7 +180,7 @@ Copying settings sends an action bar confirmation. Pasting replaces the friend l
 
 ## Commands
 
-Command visibility is controlled by `use_menus` in `config.yml`. When `use_menus: false`, all subcommands are available via chat. When `use_menus: true`, players only get `/bp user` and `/bp admin`; the console keeps every subcommand.
+Command visibility is controlled by `use_menus` in `config.yml`. When `use_menus: false`, all subcommands are available via chat. When `use_menus: true`, standard players only get `/bp user` and `/bp admin` (administrators with `UPDATE` permission or OP keep `/bp update` access via chat); the console keeps every subcommand.
 
 **Menu Commands:**
 
@@ -200,6 +200,7 @@ Command visibility is controlled by `use_menus` in `config.yml`. When `use_menus
 | `/bp friends addall <player>` | `blockprot.user` | Add a friend to every block you currently own |
 | `/bp stats` | `blockprot.user` | Open block statistics and location list |
 | `/bp transferall <player>` | `blockprot.user` | Transfer all owned blocks to another player (a single block is transferred from its lock menu) |
+| `/bp logs [here\|<page>]` | `blockprot.user` | View your own block access audit history or inspect the targeted block (`here`) |
 | `/bp disablehints` | `blockprot.user` | Toggle protection action bar hint messages |
 
 **Admin Commands:**
@@ -209,6 +210,7 @@ With `admin_tiers.enabled: false` (the default) the Permission column applies, w
 | Command | Permission | Tier | Description |
 |---|---|---|---|
 | `/bp info <player>` | Admin | T1 | Inspect all blocks owned by a player (online or offline); prints the list when run from the console |
+| `/bp logs [here\|player <name>\|<page>]` | Admin or `AdminAction.LOGS` | T1 | Inspect access audit history for targeted block or any specific player |
 | `/bp unlock <player>` | Admin | T2 | Inspect or unlock protections owned by a player; lists their locked blocks when run from the console |
 | `/bp lockables` | Admin | T2 | Interactive browser for all known materials with toggleable active status |
 | `/bp protdel` | Admin | T3 | Bulk delete protections in a world with undo support; from the console use `/bp protdel <world> confirm` and `/bp protdel undo` |
@@ -280,7 +282,7 @@ Item frames, glowing item frames, chest boats, storage minecarts, and hopper min
 Villagers whose job-site points to a protected workstation inherit its protection. Non-owners cannot trade with or damage the linked villager, and cannot break blocks in the configured radius around the workstation. An Emerald button in the workstation menu initiates a particle indicator pointing to the linked villager.
 
 ### High-Performance Hopper Protection
-Hoppers are checked using a thread-safe Caffeine cache and `ProtectedBlockCache`, resolving server tick lag without needing to completely disable hopper extraction.
+Hoppers are checked using a thread-safe Caffeine cache and `ProtectedBlockCache`, resolving server tick lag without needing to completely disable hopper extraction. Provides bidirectional protection by blocking both unauthorized extraction and illegal item insertion into locked containers and storage vehicles (chest minecarts, hopper minecarts).
 
 ### Hybrid MySQL / SQLite Access Audit
 Stores block protections in PersistentDataContainer / NBT on the block itself. An optional MySQL / MariaDB index mirrors block locations and trust lists so large servers can search them without scanning region files; NBT stays the source of truth. An asynchronous SQLite audit log (`blockprot_audit.sqlite`) records open, item take, item place, and access denied events.
@@ -297,6 +299,7 @@ Configurable automated cleanup (`inactivity_cleanup_days`) that unregisters prot
 |---|---|
 | Towny | Respects town, plot, and nation boundaries; cleans unclaims; ruined town bypass |
 | WorldGuard | Evaluates region flags and respects the `allow-blockprot` custom region flag |
+| Zelly's Guard | Honors claim boundaries via event synchronization; prevents locking or accessing containers inside unowned claims |
 | Lands | Honors claim permissions; wilderness protection restrictions |
 | ClaimChunk | Restricts locking and container access to chunk owners |
 | GriefPrevention | Honors claim ownership; prevents locking outside or inside foreign claims |
@@ -310,7 +313,7 @@ Configurable automated cleanup (`inactivity_cleanup_days`) that unregisters prot
 
 ## Developer API
 
-Other plugins can query and react to BlockProt protections. The API is published through [JitPack](https://jitpack.io/#VictorGugug/BlockProt-Reloaded); use a release tag (for example `1.4.0`) as the version.
+Other plugins can query and react to BlockProt protections. The API is published through [JitPack](https://jitpack.io/#Zaynr-Ecosystem/BlockProt-Reloaded); use a release tag (for example `1.4.3`) as the version.
 
 Gradle (Kotlin DSL):
 
@@ -320,8 +323,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.VictorGugug.BlockProt-Reloaded:blockprot-spigot:1.4.0") { isTransitive = false }
-    compileOnly("com.github.VictorGugug.BlockProt-Reloaded:common:1.4.0")
+    compileOnly("com.github.Zaynr-Ecosystem.BlockProt-Reloaded:blockprot-spigot:1.4.3") { isTransitive = false }
+    compileOnly("com.github.Zaynr-Ecosystem.BlockProt-Reloaded:common:1.4.3")
 }
 ```
 
@@ -334,9 +337,9 @@ Maven:
 </repository>
 
 <dependency>
-    <groupId>com.github.VictorGugug.BlockProt-Reloaded</groupId>
+    <groupId>com.github.Zaynr-Ecosystem.BlockProt-Reloaded</groupId>
     <artifactId>blockprot-spigot</artifactId>
-    <version>1.4.0</version>
+    <version>1.4.3</version>
     <scope>provided</scope>
 </dependency>
 ```
@@ -391,7 +394,7 @@ friend_search_similarity: 0.5
 disable_friend_functionality: false
 
 # [Blocks and locking behavior]
-modern_family_blocks: false        # auto-convert flat lists to compact family expressions
+modern_family_blocks: false        # format saved blocks with family syntax (does not auto-convert on startup)
 redstone_disallowed_by_default: false
 simplified_hopper_logic: false
 protect_locked_blocks_from_explosions: true
@@ -456,7 +459,7 @@ admin_tiers:
 
 Maintained by **Zar**. [Open an issue](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/issues) for bugs or feature suggestions.
 
-If you would like to support the maintenance and development of BlockProt Reloaded, you can sponsor through [GitHub Sponsors](https://github.com/sponsors/VictorGugug) or via the Sponsor button above.
+If you would like to support the maintenance and development of BlockProt Reloaded, you can sponsor through [GitHub Sponsors](https://github.com/sponsors/Zaynr-Ecosystem) or via the Sponsor button above.
 
 ## License
 

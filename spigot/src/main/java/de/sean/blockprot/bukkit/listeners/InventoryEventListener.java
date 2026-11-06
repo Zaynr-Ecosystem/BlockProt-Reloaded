@@ -24,6 +24,8 @@ import de.sean.blockprot.bukkit.BlockProt;
 import de.sean.blockprot.bukkit.Permissions;
 import de.sean.blockprot.bukkit.TranslationKey;
 import de.sean.blockprot.bukkit.Translator;
+import de.sean.blockprot.bukkit.admin.AdminAction;
+import de.sean.blockprot.bukkit.admin.AdminTierManager;
 import de.sean.blockprot.bukkit.audit.AuditLogger;
 import de.sean.blockprot.bukkit.events.BlockAccessEvent;
 import de.sean.blockprot.bukkit.inventories.BlockProtInventory;
@@ -285,7 +287,7 @@ public class InventoryEventListener implements Listener {
                 if (!(handler.isNotProtected()
                         || handler.isOwner(playerUuid)
                         || (friend.isPresent() && friend.get().isManager())
-                        || event.getPlayer().hasPermission(Permissions.USER_ADMIN.key()))) {
+                        || AdminTierManager.hasPermission(event.getPlayer(), AdminAction.CONTAINER_BYPASS))) {
                     event.setCancelled(true);
                     sendMessage(event.getPlayer(), Translator.get(TranslationKey.MESSAGES__NO_PERMISSION));
                 }
@@ -296,7 +298,7 @@ public class InventoryEventListener implements Listener {
             EntityNBTHandler handler = new EntityNBTHandler(entity);
             if (!handler.isProtected()) return;
 
-            if (!(handler.canAccess(playerUuid) || player.hasPermission(Permissions.USER_ADMIN.key()))) {
+            if (!(handler.canAccess(playerUuid) || AdminTierManager.hasPermission(player, AdminAction.CONTAINER_BYPASS))) {
                 event.setCancelled(true);
                 sendMessage(player, Translator.get(TranslationKey.MESSAGES__NO_PERMISSION));
                 AuditLogger audit = BlockProt.getAuditLogger();
@@ -342,7 +344,7 @@ public class InventoryEventListener implements Listener {
                 } else {
                     BlockNBTHandler handler = new BlockNBTHandler(block);
                     if (!accessEvent.shouldBypassProtections()
-                            && !(handler.canAccess(playerUuid) || player.hasPermission(Permissions.USER_ADMIN.key()))) {
+                            && !(handler.canAccess(playerUuid) || AdminTierManager.hasPermission(player, AdminAction.CONTAINER_BYPASS))) {
                         event.setCancelled(true);
                         sendMessage(player, Translator.get(TranslationKey.MESSAGES__NO_PERMISSION));
                         AuditLogger audit = BlockProt.getAuditLogger();

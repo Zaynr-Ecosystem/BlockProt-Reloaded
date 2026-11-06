@@ -1,18 +1,14 @@
-![BLOCK FAMILY SYNTAX](https://raw.githubusercontent.com/VictorGugug/BlockProt-Reloaded/main/images/RELEASE%20TITLES/docs/BLOCK%20FAMILY%20SYNTAX.png)
+![BLOCK FAMILY SYNTAX](https://raw.githubusercontent.com/Zaynr-Ecosystem/BlockProt-Reloaded/main/images/RELEASE%20TITLES/docs/BLOCK%20FAMILY%20SYNTAX.png)
 
 Family expressions are a compact syntax for `blocks.yml`, `worlds.yml`, and
 `auto_drop_to_inventory`. They are **always parsed** regardless of the `modern_family_blocks`
 flag in `config.yml`.
 
-`modern_family_blocks` controls startup auto-conversion in both directions:
-- `true`  -> flat material lists are automatically converted to compact family expressions.
-- `false` -> any existing family expressions in the file are automatically converted to flat lists.
-It does not gate expression parsing (expressions are always parsed regardless of this flag).
+`modern_family_blocks` controls formatting when saving files via in-game interfaces (such as `/bp lockables`):
+- `true`  -> saves and updates `blocks.yml` using compact family expressions.
+- `false` -> saves and updates `blocks.yml` using flat material names.
 
-Flipping this flag runs a synchronous, forced sweep across every list key in `blocks.yml`
-(all 5 lockable lists plus `auto_drop_to_inventory.blocks`), not just the keys a GUI toggle
-happens to touch. A key that is empty or placeholder-only is still normalized, so the whole
-file always matches the current mode immediately after startup.
+**IMPORTANT:** `modern_family_blocks` does **NOT** force auto-conversion of `blocks.yml` on server startup or reload. `blocks.yml` is always read as-is, and family expressions are parsed dynamically regardless of this flag. When all lockable lists are empty, this flag automatically disables to `false`.
 
 They replace flat material lists with token-based expressions that resolve dynamically
 against the full family registry at startup and on `/bp reload`.

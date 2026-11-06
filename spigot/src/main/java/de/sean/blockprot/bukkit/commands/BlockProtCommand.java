@@ -23,6 +23,7 @@ package de.sean.blockprot.bukkit.commands;
 import de.sean.blockprot.bukkit.BlockProt;
 import de.sean.blockprot.bukkit.BlockProtLogger;
 import de.sean.blockprot.bukkit.Permissions;
+import de.sean.blockprot.bukkit.admin.AdminAction;
 import de.sean.blockprot.bukkit.admin.AdminTierManager;
 import de.sean.blockprot.bukkit.TranslationKey;
 import de.sean.blockprot.bukkit.Translator;
@@ -103,6 +104,7 @@ public final class BlockProtCommand implements TabExecutor {
     public static Map<String, CommandExecutor> getActiveCommands(@NotNull CommandSender sender) {
         boolean menusEnabled = !BlockProt.getDefaultConfig().areExtraCommandsEnabled();
         boolean isAdmin = AdminTierManager.hasAnyAdminPermission(sender);
+        boolean canUpdate = sender.isOp() || AdminTierManager.hasPermission(sender, AdminAction.UPDATE);
 
         if (menusEnabled) {
             if (sender instanceof Player) {
@@ -111,11 +113,15 @@ public final class BlockProtCommand implements TabExecutor {
                 if (isAdmin) {
                     cmds.put("admin", GUI_COMMANDS.get("admin"));
                 }
+                if (canUpdate) {
+                    cmds.put("update", CLI_COMMANDS.get("update"));
+                }
                 return Collections.unmodifiableMap(cmds);
             }
             Map<String, CommandExecutor> consoleCmds = new LinkedHashMap<>();
             consoleCmds.putAll(CLI_COMMANDS);
             consoleCmds.putAll(ADMIN_COMMANDS);
+            filterGatedCommands(consoleCmds);
             return Collections.unmodifiableMap(consoleCmds);
         }
 
@@ -124,7 +130,20 @@ public final class BlockProtCommand implements TabExecutor {
         if (isAdmin || !(sender instanceof Player)) {
             cli.putAll(ADMIN_COMMANDS);
         }
+        filterGatedCommands(cli);
         return Collections.unmodifiableMap(cli);
+    }
+
+    private static void filterGatedCommands(@NotNull Map<String, CommandExecutor> map) {
+        if (!BlockProt.getDefaultConfig().isAdminTiersEnabled()) {
+            map.remove("tiers");
+        }
+        if (BlockProt.getDefaultConfig().isFriendFunctionalityDisabled()) {
+            map.remove("friends");
+        }
+        if (!BlockProt.getDefaultConfig().isSessionLogEnabled()) {
+            map.remove("logs");
+        }
     }
 
     @Override

@@ -122,7 +122,9 @@ public final class UserMenuDialog {
         );
 
         List<DialogButton> actions = new ArrayList<>();
-        actions.add(friendsBtn);
+        if (!BlockProt.getDefaultConfig().isFriendFunctionalityDisabled()) {
+            actions.add(friendsBtn);
+        }
         actions.add(settingsBtn);
         actions.add(statsBtn);
         actions.add(transferBtn);

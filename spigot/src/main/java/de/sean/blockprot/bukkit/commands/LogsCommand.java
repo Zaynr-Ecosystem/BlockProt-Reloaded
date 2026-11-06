@@ -61,7 +61,8 @@ public final class LogsCommand implements CommandExecutor {
 
     @Override
     public boolean canUseCommand(@NotNull CommandSender sender) {
-        return sender.hasPermission(Permissions.USER.key());
+        return BlockProt.getDefaultConfig().isSessionLogEnabled()
+            && sender.hasPermission(Permissions.USER.key());
     }
 
     @Override

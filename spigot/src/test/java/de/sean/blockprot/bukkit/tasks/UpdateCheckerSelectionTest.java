@@ -110,4 +110,18 @@ class UpdateCheckerSelectionTest {
         releases.add(draft);
         assertNull(UpdateChecker.selectBest(releases, new SemanticVersion("1.3.8"), Edition.BPR));
     }
+
+    @Test
+    void hotfixTaggedAsPrereleaseOnGitHubIsOfferedToStableServer() {
+        List<UpdateChecker.GitHubRelease> releases = new ArrayList<>();
+        releases.add(release("1.4.2-hotfix", true));
+        assertEquals("1.4.2-hotfix", UpdateChecker.selectBest(releases, new SemanticVersion("1.4.2"), Edition.BPR).tagName);
+    }
+
+    @Test
+    void hotfixRunningServerSeesNewerRelease() {
+        List<UpdateChecker.GitHubRelease> releases = new ArrayList<>();
+        releases.add(release("1.4.2", false));
+        assertEquals("1.4.2", UpdateChecker.selectBest(releases, new SemanticVersion("1.4.1-hotfix"), Edition.BPR).tagName);
+    }
 }

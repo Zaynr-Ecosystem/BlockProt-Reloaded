@@ -197,8 +197,12 @@ public final class AdminMenuDialog {
         List<DialogButton> actions = new ArrayList<>();
         actions.add(lockablesBtn);
         actions.add(configBtn);
-        actions.add(tiersBtn);
-        actions.add(worldExpiryBtn);
+        if (BlockProt.getDefaultConfig().isAdminTiersEnabled()) {
+            actions.add(tiersBtn);
+        }
+        if (BlockProt.getDefaultConfig().isWorldExpiryEnabled()) {
+            actions.add(worldExpiryBtn);
+        }
         actions.add(protdelBtn);
         actions.add(unlockBtn);
         actions.add(integrationsBtn);

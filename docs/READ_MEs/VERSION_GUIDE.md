@@ -6,7 +6,7 @@ BlockProt is published as three editions. Each edition covers a range of Minecra
 
 | Minecraft version | Edition | Java | Download |
 | --- | --- | --- | --- |
-| 1.21.7 and newer (including 26.x) | **BlockProt Reloaded** | 21 or newer (25 for Minecraft 26.x) | [Modrinth](https://modrinth.com/plugin/blockprot-reloaded), [CurseForge](https://www.curseforge.com/minecraft/bukkit-plugins/blockprot-reloaded), [Hangar](https://hangar.papermc.io/VictorGugug/BlockProt-Reloaded) |
+| 1.21.7 and newer (including 26.x) | **BlockProt Reloaded** | 21 or newer (25 for Minecraft 26.x) | [Modrinth](https://modrinth.com/plugin/blockprot-reloaded), [CurseForge](https://www.curseforge.com/minecraft/bukkit-plugins/blockprot-reloaded), [Hangar](https://hangar.papermc.io/Zaynr-Ecosystem/BlockProt-Reloaded) |
 | 1.20.5 to 1.21.6 | **BlockProt Reloaded Legacy** | 21 or newer | [Modrinth](https://modrinth.com/plugin/blockprot-reloaded-legacy) |
 | 1.18.2 to 1.20.4 | **BlockProt Legacy** | 17 or newer | [Modrinth](https://modrinth.com/plugin/blockprot-legacy) |
 | Older than 1.18.2 | No supported edition | | Older upstream BlockProt releases may run there; they are not maintained here |

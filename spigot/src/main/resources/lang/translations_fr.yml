@@ -2,17 +2,82 @@ locale: fr
 language_name: Français
 enabled: Activé
 disabled: Désactivé
+icon:
+  settings: "⚙ "
+  friends: "👤 "
+  stats: "📊 "
+  about: "ℹ "
+  lockables: "📦 "
+  reload: "🔄 "
+  search: "🔍 "
+  integrations: "🔗 "
+  config: "📝 "
+  debug: "🔧 "
+  info: "👤 "
+  world_expiry: "⏱ "
+  unlock: "🔓 "
+  history: "📖 "
+  enable_all: "✔ "
+  disable_all: "✖ "
+  undo: "↩ "
+  add: "➕ "
+  toggle_on: "● "
+  toggle_off: "○ "
+  'true': ● vrai
+  'false': ○ faux
+  toggle_on_active: "● "
+  toggle_off_inactive: "○ "
+  tiers: '🛡 '
+search_aliases:
+  chest: "coffre, coffres"
+  copper: cuivre
+  furnace: "four, fours"
+  door: "porte, portes"
+  trapdoor: "trappe, trappes"
+  fence: "barriere, barrieres"
+  bed: "lit, lits"
+  hopper: "entonnoir, entonnoirs"
+  barrel: "tonneau, tonneaux"
+  lectern: "pupitre, pupitres"
+  sign: "panneau, panneaux"
+  bell: "cloche, cloches"
+  cauldron: "chaudron, chaudrons"
+  smoker: "fumoir, fumoirs"
+  stonecutter: tailleur de pierre
+  anvil: "enclume, enclumes"
+  frame: "cadre, cadres"
+  boat: "bateau, bateaux, barque, barques"
+  minecart: "wagonnet, wagonnets"
+  stand: "porte-armure, porte-armures"
+  brewing: "alambic, alambics"
+  bookshelf: "bibliotheque, bibliotheques"
 about:
-  title: §x§a§3§c§6§e§bBlockProt {version} - Spigot Plugin
-  fork_maintainers: '§7Mainteneurs du fork: §fVickey & Reim §8(alias ZarZey)'
+  title: "§x§a§3§c§6§e§bBlockProt {version} - Spigot Plugin"
+  fork_maintainers: "§7Mainteneurs du fork: §fVickey & Reim §8(alias ZarZey)"
   report_fork: §x§6§6§c§6§6§6Signaler des problèmes (BlockProt Reloaded)
-  report_fork_hover:
+  report_fork_hover: Cliquez pour ouvrir le suivi des problèmes sur GitHub
+commands:
+  description: Accéder aux commandes de BlockProt.
 inventories:
   back: Retour
   last_page: Dernière page
   next_page: Page suivante
+  loading: Chargement...
+  searching: Recherche...
   block_lock: Verrou du bloc
   user_settings: Paramètres utilisateur
+  user_settings_notifications: "Notifications d'accès"
+  user_settings_colorblind: Mode daltonien
+  block_info:
+    title: Infos du bloc
+    owner_label: "<gold>Propriétaire"
+    name_label: "<gold>Nom"
+    owner_lore: "<gray>Ce bloc appartient à </gray><white>{player}</white><gray>."
+    friend_count: "<gray>Amis : </gray><white>{count}"
+    linked_frame: "<gray>Cadre d'objet lié : {item}"
+    empty_frame: "<gray>(vide)"
+    location_format: "{type} \"<white>{nbtName}</white><gray>\" {coords}"
+    lore_prefix: "<gray>"
   lock: Verrouiller
   unlock: Déverrouiller
   lock_on_place: Verrouiller automatiquement
@@ -20,6 +85,7 @@ inventories:
   paste_configuration: Coller la configuration
   set_block_name: Mettre un nom de bloc
   inspect_contents: Inspecter le contenu
+  inspect_contents_empty: "<dark_gray>Vide"
   redstone:
     settings: Paramètres Redstone
     redstone_protection: Protection de redstone
@@ -27,6 +93,9 @@ inventories:
     hopper_protection: Protection des entonnoirs
     enable_all: Tout activer
     disable_all: Tout désactiver
+  block_settings:
+    title: Paramètres du bloc
+    owner_only_movement: Déplacement réservé au propriétaire
   friends:
     manage: Gérer les amis
     edit: Editer un ami
@@ -37,864 +106,1012 @@ inventories:
     the_public: Le publique
     the_public_desc: Représente chaque joueur sur ce serveur.
     make_public: Mettre en publique
+    select_candidate: Sélectionner un candidat
     permissions: Permissions
     permission:
       read: Lire
       write: Écrire
       manager: Gérer
-      none:
+      none: Aucun accès
   statistics:
     statistics: Statistiques
     player_statistics: Statistiques des joueurs
     global_statistics: Statistiques du serveur
     container_count: Nombre de blocs
     your_blocks: Vos blocs
+  stats:
+    lore_tp: "<gray>[✓] Clic : Téléportation au bloc"
+    lore_no_tp: "<red>[✗] Permission refusée (blockprot.blocks.tp)"
+    click_to_open: "<gray>Cliquer pour ouvrir"
+    contents_item_format: "<dark_gray>- {count}x {item}"
+    contents_more_format: "<dark_gray>+ {count} de plus..."
+    breakdown_entry: "<gray>{name}</gray><dark_gray> : </dark_gray><white>{count}"
+    breakdown_more: "<dark_gray>+ {count} de plus..."
+    item_frame_entry: "<dark_gray>{count}x {item}"
   audit:
     title: Journal d'accès
     no_entries: Aucune entrée trouvée.
     teleport: Téléporter au bloc
     open: Journal d'accès
-    action_count:
-    click_hint:
-    player_history:
-    action_access_denied:
-    action_opened:
-    action_item_taken:
-    action_item_placed:
-    action_raid_explosion:
-    action_unknown:
-  loading:
-  searching:
-  user_settings_notifications:
-  block_info:
-    title:
-    owner_label:
-    owner_lore:
-    friend_count:
-    linked_frame:
-    empty_frame:
-    location_format:
-    lore_prefix:
-  inspect_contents_empty:
-  block_settings:
-    title:
-    owner_only_movement:
-  groups:
-    title:
-    button:
-    button_lore:
-    create:
-    create_lore:
-    dissolve:
-    dissolve_lore:
-    leave:
-    leave_lore:
-    member_count:
-    no_group:
-    join:
-    join_lore:
-  stats:
-    lore_tp:
-    lore_no_tp:
-    click_to_open:
-    contents_item_format:
-    contents_more_format:
-    breakdown_entry:
-    breakdown_more:
-    item_frame_entry:
+    action_count: "<gray>{count} action(s)"
+    click_hint: "<gray>Cliquez pour voir tout l'historique."
+    player_history: "<green>Historique du joueur"
+    action_access_denied: "<red>Accès refusé"
+    action_opened: "<green>Ouvert"
+    action_item_taken: "<yellow>Objet(s) retiré(s)"
+    action_item_placed: "<dark_green>Objet(s) placé(s)"
+    action_raid_explosion: "<red>Explosion de raid"
+    action_unknown: "<gray>Accès"
   entity_settings:
-    settings:
-    protect:
-    no_damage:
-    no_interact:
-    no_leash:
-    no_pickup:
-  locate_villager:
+    settings: "<light_purple>Paramètres de l'entité"
+    protect: "<light_purple>Protection d'entité"
+    no_damage: "<red>Bloquer les dégâts"
+    no_interact: "<yellow>Bloquer l'interaction"
+    no_leash: "<gold>Bloquer la laisse"
+    no_pickup: "<aqua>Bloquer la montée (perroquet)"
+  locate_villager: "<green>Localiser le villageois lié"
   lockable_selection:
-    blocks_suffix:
+    blocks_suffix: " blocs"
   entity:
-    inspect_entity:
-    transfer_not_available:
-    manager_suffix:
+    inspect_entity: Inspecter le contenu
+    transfer_not_available: "<gray>Le transfert n'est pas disponible pour ce type d'entité."
+    manager_suffix: " [Gestionnaire]"
   transfer:
-    title:
-    search_prompt:
-    button:
-    button_lore:
+    title: "Transférer : {player}"
+    search_prompt: Nom du joueur
+    button: Transférer le bloc
+    button_lore: Transférer la propriété à un autre joueur.
   timed:
-    title:
-    button:
-    button_lore:
-    info:
-    over_max:
-    max_label:
-    no_limit:
-    player_label:
+    title: Accès temporisé
+    button: "<yellow>Accès temporisé"
+    button_lore: "Accorder l'accès pour une durée limitée. Cliquez pour choisir la durée."
+    info: "<yellow>Info"
+    over_max: "<red>Dépasse le maximum configuré"
+    max_label: "<gray>Maximum : </gray><white>{duration}"
+    no_limit: "<gray>Maximum : </gray><white>Aucune limite"
+    player_label: "<gray>Joueur : </gray><white>{player}"
   user_menu:
-    title:
-    settings:
-    settings_lore:
-    friends:
-    friends_lore:
-    stats:
-    stats_lore:
-    transfer:
-    transfer_lore:
-    timed:
-    timed_lore:
-    hints:
-    hints_lore:
-    hints_already:
-    about:
-    about_lore:
-    close:
-    close_lore:
-    placements:
-    placements_lore:
+    title: "<dark_gray>[</dark_gray><aqua>Utilisateur</aqua><dark_gray>] </dark_gray><white>BlockProt"
+    settings: "<white>Mes paramètres"
+    settings_lore: Configurer vos préférences personnelles.
+    friends: "<green>Amis"
+    friends_lore: "Gérer votre liste d'amis globale."
+    stats: "<aqua>Statistiques"
+    stats_lore: Voir combien de blocs vous avez protégés.
+    placements: "<aqua>Emplacements"
+    placements_lore: Afficher vos blocs protégés et leurs positions.
+    transfer: "<light_purple>Transférer tous les blocs"
+    transfer_lore: Transférer tous vos blocs protégés à un autre joueur.
+    timed: "<yellow>Accès temporisé"
+    timed_lore: Accorder un accès temporaire à un bloc.
+    hints: "<gray>Conseils de protection"
+    hints_lore: Basculer les conseils de protection lors de la pose de blocs.
+    hints_already: "<gray>Conseils déjà gérés."
+    about: "<white>À propos de BlockProt"
+    about_lore: Informations sur le plugin.
+    close: "<red>Fermer"
+    close_lore: Fermer ce menu.
   admin_menu:
-    title:
-    reload:
-    reload_lore:
-    update:
-    update_lore:
-    integrations:
-    integrations_lore:
-    stats:
-    stats_lore:
-    debug:
-    debug_lore:
-    info:
-    info_lore:
-    close:
-    close_lore:
-    world_expiry:
-    world_expiry_lore:
-    lockables:
-    lockables_lore:
-    config:
-    config_lore:
-    about:
-    about_lore:
-    auto_drop:
-    auto_drop_lore:
+    title: "BlockProt - Admin"
+    reload: "<green>Recharger la configuration"
+    reload_lore: Recharge config.yml et les traductions.
+    update: "<aqua>Rechercher des mises à jour"
+    update_lore: Vérifier si une nouvelle version est disponible.
+    integrations: "<light_purple>Intégrations actives"
+    integrations_lore: Liste les intégrations activées dans le tchat.
+    stats: "<white>Statistiques"
+    stats_lore: Ouvre le menu des statistiques globales.
+    debug: "<red>Diagnostics (débogage)"
+    debug_lore: Exécute des tests internes du plugin et écrit dans le journal.
+    info: "<yellow>Liste des blocs du joueur"
+    info_lore: "Rechercher les blocs protégés d'un joueur (ouvre l'interface)."
+    unlock: "<red>Déverrouiller blocs"
+    unlock_lore: Supprimer les protections d'un joueur spécifique.
+    close: "<red>Fermer"
+    close_lore: Fermer ce menu.
+    world_expiry: "<dark_purple>Expiration par monde"
+    world_expiry_lore: "Configurer l'expiration planifiée de la protection par monde."
+    lockables: "<white>Blocs verrouillables"
+    lockables_lore: Afficher et basculer tous les types de blocs verrouillables sur ce serveur.
+    config: "<yellow>Configuration"
+    config_lore: Ouvrir le dialogue de configuration admin.
+    about: "<white>À propos de BlockProt"
+    about_lore: Informations sur le plugin et version.
+    tiers: "<gold>Tiers d'Admin"
+    tiers_lore: Gérer les tiers et rôles administratifs des joueurs.
+    auto_drop: "<aqua>Dépôt automatique"
+    auto_drop_lore: "Configurer les blocs dont le contenu tombe directement dans l'inventaire du joueur."
+  admin_tiers:
+    title: "Tiers & Rôles d'Admin"
+    set_offline: "<yellow>Définir par nom"
+    set_offline_lore: Attribuer un rôle à un joueur hors ligne ou UUID.
+    current_role: "<gray>Rôle: </gray><white>{role}"
+    click_to_assign: "<yellow>Cliquer pour changer de rôle"
+    select_role_title: "Rôle: {player}"
+    role_owner: "<red>Propriétaire"
+    role_owner_lore: Accès administratif complet et attribution de rôles.
+    role_t3: "<gold>T3 Administrateur"
+    role_t3_lore: "Actions destructives, configurations et diagnostics de débogage."
+    role_t2: "<green>T2 Assistant"
+    role_t2_lore: "Déverrouillages, verrouillables et contournement de conteneurs."
+    role_t1: "<aqua>T1 Modérateur"
+    role_t1_lore: "Actions de lecture seule, infos de blocs, journaux et téléportation."
+    role_none: "<gray>Utilisateur (Normal)"
+    role_none_lore: Permissions de joueur standard sans tier administratif.
+    role_custom: "<light_purple>Personnalisé"
+    role_custom_lore: Actions administratives précises configurées par joueur.
+    status_op: "<red>● Opérateur Serveur (OP)"
+    status_not_op: "<gray>○ Joueur Standard"
+    select_role_below: "<yellow>Cliquez ci-dessous pour choisir un rôle"
+    custom_left_click: "<gray>[✓] Clic gauche: attribuer rôle"
+    custom_right_click: "<light_purple>[*] Clic droit: configurer actions"
+  admin_custom_flags:
+    title: "Actions Personnalisées: {player}"
+    enabled: "<green>● Activé"
+    disabled: "<red>○ Désactivé"
+    active_count: "<light_purple>Personnalisé: </light_purple><white>{active}/{total}\
+      \ actives"
+    min_tier: "<dark_gray>Tier minimum: </dark_gray><gray>{tier}"
+    click_to_toggle: "<yellow>Cliquer pour basculer"
   admin_block_list:
-    title:
+    title: "Blocs de {player}"
   player_list:
-    title:
-    empty:
-    block_count:
-    online:
-    offline:
-    sort_name_asc:
-    sort_name_desc:
-    sort_blocks_desc:
-    sort_blocks_asc:
+    title: Tous les joueurs
+    empty: "<gray>Aucun joueur trouvé."
+    block_count: "<gray>Blocs protégés : </gray><white>{count}"
+    online: "<green>En ligne"
+    offline: "<gray>Hors ligne"
+    sort_name_asc: "<white>Tri : Nom A-Z"
+    sort_name_desc: "<white>Tri : Nom Z-A"
+    sort_blocks_desc: "<white>Tri : Plus de blocs"
+    sort_blocks_asc: "<white>Tri : Moins de blocs"
   bp_unlock:
-    title:
-    left_click_hint:
-    right_click_hint:
+    title: "Déverrouiller : {player}"
+    left_click_hint: "<gray>[✓] Clic gauche : voir le contenu (lecture seule)"
+    right_click_hint: "<red>[!] Clic droit : retirer la protection"
   world_prot_del:
-    title:
-    search_prompt:
-    select_hint:
-    confirm_title:
-    confirm_button:
-    confirm_lore:
-    cancel_button:
-    undo_button:
-    undo_lore:
-    environment:
-    no_undo_available:
+    title: Supprimer les protections du monde
+    search_prompt: "<gray>Tapez un nom de monde pour filtrer..."
+    select_hint: "<yellow>Cliquez pour sélectionner ce monde"
+    confirm_title: "Supprimer les protections : {world}"
+    confirm_button: "<red>Confirmer la suppression : {world}"
+    confirm_lore: "<gray>Supprime TOUTES les protections dans </gray><yellow>{world}</yellow><gray>."
+    cancel_button: "<white>Annuler"
+    undo_button: "<green>Annuler la dernière suppression"
+    undo_lore: "<gray>Restaure les protections retirées lors de la dernière opération."
+    environment: "<gray>Environnement : "
+    no_undo_available: "<gray>Aucune annulation disponible"
   world_expiry:
-    title:
-    world_lore:
-    disabled:
-    duration_label:
-    environment_label:
+    title: "Paramètres d'expiration du monde"
+    world_lore: "<gray>Cliquez pour définir la durée d'expiration"
+    disabled: "<gray>Désactivé"
+    duration_label: "Durée : "
+    environment_label: "Environnement : "
   lockables:
-    title:
-    info_title:
-    left_click_hint:
-    right_click_hint:
-    toggle_family:
-    toggle_family_hint:
-    status_active:
-    status_inactive:
-    off_suffix:
-    copy_message:
-    copy_hover:
-    info_server:
-    info_client:
-    info_active:
-    info_inactive:
-    info_page:
+    title: Blocs verrouillables
+    info_title: Infos des blocs verrouillables
+    left_click_hint: "Clic gauche : activer / désactiver"
+    right_click_hint: "Clic droit : copier le nom"
+    toggle_family: "Basculer la famille : "
+    toggle_family_hint: "Clic gauche : basculer tous les éléments de la catégorie"
+    status_active: "Statut : ACTIF"
+    status_inactive: "Statut : INACTIF"
+    off_suffix: " [DÉSACTIVÉ]"
+    copy_message: "[Copier] "
+    copy_hover: "Cliquez pour copier dans le presse-papiers"
+    info_server: "Serveur : "
+    info_client: "Client : "
+    info_active: "Actif : "
+    info_inactive: "Inactif : "
+    info_page: "Page : "
     category:
-      chests:
-      shulkers:
-      furnaces:
-      storage:
-      signs:
-      doors:
-      trapdoors:
-      beds:
-      gates:
-      workstations:
-      interactive:
-      entities:
-      misc:
+      chests: Coffres
+      shulkers: Boîtes de Shulker
+      furnaces: Fours
+      storage: Stockage
+      signs: Pancartes
+      doors: Portes
+      trapdoors: Trappes
+      beds: Lits
+      gates: Portillons
+      workstations: Établis et postes de travail
+      interactive: Interactif
+      entities: Entités
+      misc: Divers
   auto_drop:
-    title:
-    family_title:
-    left_click_hint:
-    right_click_hint:
-    status_active:
-    status_inactive:
-  integrations:
-    separator:
-    none:
+    title: "Dépôt automatique dans l'inventaire"
+    family_title: "Dépôt automatique : {family}"
+    search: Chercher Blocs
+    search_lore: Chercher un bloc par son nom.
+    search_title: "Recherche: {query}"
+    left_click_hint: "Clic gauche : sélectionner des blocs individuels"
+    right_click_hint: "Clic droit : basculer toute la famille"
+    status_active: "Statut : ACTIF"
+    status_inactive: "Statut : INACTIF"
 messages:
   permission_granted: Permission accordée.
   unlocked: Déverrouillé.
   no_permission: Aucune autorisation.
+  error_prefix: "<red>[BlockProt] : "
+  entity_death_notification: "<bold><red>[BlockProt] </red></bold><red>Votre familier </red><yellow>{pet_name}</yellow><red> est mort."
   friend_added: Ami ajouté.
   friend_removed: Ami supprimé.
   friend_already_added: Ami déjà ajouté.
   friend_cant_be_removed: L'ami ne peut pas être supprimé.
+  friend_player_not_found: "<red>Joueur introuvable."
+  friend_search_failed: "<red>La recherche de joueur a échoué. Réessayez dans un moment."
   redstone_added: Protection Redstone ajoutée.
   redstone_removed: Protection Redstone supprimée.
   exceeded_max_block_count: Vous avez dépassé le nombre maximal de blocs verrouillables.
-  lock_hint: §6Vous pouvez protéger vos blocs en vous accroupissant et en faisant
-    un clic droit sur vos coffres, vos fourneaux et bien plus encore ! Consultez également
-    les paramètres de /blockprot pour le configurer à votre convenance. (Cliquez ici
-    pour désactiver ces conseils).
+  lock_hint: "§6Vous pouvez protéger vos blocs en vous accroupissant et en faisant\
+    \ un clic droit sur vos coffres, vos fourneaux et bien plus encore ! Consultez\
+    \ également les paramètres de /blockprot pour le configurer à votre convenance.\
+    \ (Cliquez ici pour désactiver ces conseils)."
   hint_hover_text: Ouvrez un menu à partir de BlockProt ou cliquez ici pour désactiver
     les conseils.
-  disabled_hints: §6Indices désactivées !
-  chat_input_prompt: '§eTapez le nom du joueur §7(§bTab§7 suggestions, §aEntrée§7
-    confirmer, §c{cancel}§7 annuler):'
+  disabled_hints: "§6Indices désactivées !"
+  chat_input_prompt: "§eTapez le nom du joueur §7(§bTab§7 suggestions, §aEntrée§7\
+    \ confirmer, §c{cancel}§7 annuler):"
+  chat_input_suffix: "<gray>(</gray><green>Entrée</green><gray> confirmer, </gray><red>{cancel}</red><gray>\
+    \ annuler):"
   chat_input_cancel_word: annuler
   chat_input_cancelled: §cRecherche annulée.
-  lock_on_place_success: §aBloc verrouillé !
-  friends_searching: §eRecherche de §f{player}§e...
-  friends_addall_success: §a§f{player}§a ajouté comme ami dans §f{count}§a bloc(s).
-  friends_addall_usage: '§cUsage: /blockprot friends addall <joueur>'
-  inactivity_cleanup_done: '§e[BlockProt] Nettoyage d''inactivité: §f{count}§e bloc(s)
-    libéré(s).'
+  item_count_suffix: " x{amount}"
+  entity_denied: "<red>[BlockProt] </red>Vous n'avez pas la permission d'interagir avec ce familier."
+  lock_on_place_success: "§aBloc verrouillé !"
+  friends_searching: "§eRecherche de §f{player}§e..."
+  friends_addall_success: "§a§f{player}§a ajouté comme ami dans §f{count}§a bloc(s)."
+  friends_addall_usage: "§cUsage: /blockprot friends addall <joueur>"
+  inactivity_cleanup_done: "§e[BlockProt] Nettoyage d'inactivité: §f{count}§e bloc(s)\
+    \ libéré(s)."
   friends_list_title: §6Vos amis
   only_players: Seuls les joueurs peuvent utiliser cette commande.
   reload_done: §aBlockProt a été rechargé avec succès.
-  integrations_enabled: '§7Intégrations actives ({count}): {integrations}'
-  error_prefix:
-  entity_death_notification:
-  friend_player_not_found:
-  entity_denied:
-  transfer_success:
-  transfer_usage:
-  transfer_not_owner:
-  transfer_player_not_found:
-  transfer_self:
-  transfer_self_gui:
-  transfer_not_owner_gui:
-  transfer_failed:
-  transfer_all_success:
-  transfer_all_no_blocks:
-  timed_access_success:
-  timed_access_granted:
-  timed_access_usage:
-  timed_access_revoked:
-  timed_access_not_owner:
-  timed_access_over_max:
-  timed_access_invalid_state:
-  admin_info_header:
-  admin_info_entry:
-  admin_info_usage:
-  admin_info_player_not_found:
-  admin_info_no_blocks:
-  user_transfer_hint:
-  user_timed_hint:
-  hints_disabled:
-  hints_already:
-  copy_done:
-  paste_done:
-  notify_opened:
-  notify_item_taken:
-  notify_item_placed:
-  raid_alert:
-  raid_coords:
-  raid_tp_label:
-  raid_pending:
-  no_permission_tp:
-  remote_unlock_warning:
-  admin_reload_done:
-  admin_integrations:
-  admin_info_hint:
-  admin_debug_hint:
-  admin_unlock_success:
-  admin_unlock_failed:
-  admin_unlock_usage:
-  bp_unlock_removed:
-  bp_unlock_usage:
-  bp_unlock_player_not_found:
-  bp_unlock_no_blocks:
+  integrations_enabled: "§7Intégrations actives ({count}): {integrations}"
+  transfer_success: "<green>Propriété transférée à </green><white>{player}</white><green>. Vous avez été ajouté comme ami."
+  transfer_usage: "<red>Utilisation : /bp transferall \\<joueur>"
+  transfer_not_owner: "<red>Vous n'êtes pas le propriétaire de ce bloc."
+  transfer_player_not_found: "<red>Joueur introuvable : {player}"
+  transfer_self: "<red>Vous ne pouvez pas vous transférer un bloc à vous-même."
+  transfer_self_gui: "<red>Vous ne pouvez pas vous transférer un bloc à vous-même."
+  transfer_not_owner_gui: "<red>Vous n'êtes pas le propriétaire de ce bloc."
+  transfer_failed: "<red>Impossible de transférer le bloc."
+  transfer_all_success: "<green>Transfert de </green><white>{count}</white><green> bloc(s) à </green><white>{player}</white><green> réussi."
+  transfer_all_no_blocks: "<red>Vous n'avez aucun bloc protégé à transférer."
+  timed_access_success: "<green>Accès temporaire accordé à </green><white>{player}</white><green> pour </green><white>{seconds}</white><green> seconde(s)."
+  timed_access_granted: "<green>Accès temporaire accordé pour </green><white>{duration}</white><green>."
+  timed_access_usage: "<red>Utilisation : /bp timed \\<joueur> \\<secondes>  (regardez un bloc dont vous êtes propriétaire)"
+  timed_access_revoked: "<gold>L'accès temporaire pour </gold><white>{player}</white><gold> a été révoqué."
+  timed_access_not_owner: "<red>Vous n'êtes pas le propriétaire de ce bloc ou il n'est pas verrouillable."
+  timed_access_over_max: "<red>La durée dépasse le maximum configuré ({duration})."
+  timed_access_invalid_state: "<red>L'accès temporaire n'est disponible que pour les amis sur un bloc spécifique."
+  admin_info_header: "<gold>=== Blocs possédés par {player} ==="
+  admin_info_entry: "<gray>  {world} </gray><white>{x}, {y}, {z}"
+  admin_info_usage: "<red>Utilisation : /bp info \\<joueur>"
+  admin_info_player_not_found: "<red>Joueur introuvable : {player}"
+  admin_info_no_blocks: "<gray>{player} ne possède aucun bloc verrouillé."
+  admin_setrole_usage: "<red>Utilisation: /bp tiers setrole <joueur> <t1|t2|t3|owner|none>"
+  admin_setrole_success: "<green>Rôle d'administrateur pour </green><white>{player}</white><green>\
+    \ défini sur </green><white>{role}</white><green>."
+  admin_tiers_disabled: "<red>Les tiers d'administrateur sont désactivés dans config.yml."
+  custom_perm_no_withdraw: "<red>Vous n'avez pas la permission de retirer des objets\
+    \ de ce bloc.</red>"
+  custom_perm_no_deposit: "<red>Vous n'avez pas la permission de déposer des objets\
+    \ dans ce bloc.</red>"
+  logs_usage: "<gold>Utilisation: <yellow>/bp logs [here|player <nom>|<page>]</yellow>"
+  logs_header: "<gold>=== <yellow>Journaux BlockProt (Page {page}/{total})</yellow>\
+    \ <gold>==="
+  logs_no_entries: "<gray>Aucune entrée de journal trouvée.</gray>"
+  logs_no_target: "<red>Vous devez regarder un bloc valide ou fournir des arguments.</red>"
+  logs_target_not_protected: "<red>Le bloc ciblé n'est pas protégé.</red>"
+  logs_page_info: "<gray>Page {page} sur {total} ({count} entrées)</gray>"
+  logs_prev: "<yellow>[« Précédent]</yellow>"
+  logs_next: "<yellow>[Suivant »]</yellow>"
+  hints_disabled: "<green>Conseils de protection désactivés."
+  hints_already: "<gray>Conseils déjà gérés. Modifiez-les dans Paramètres."
+  copy_done: "<green>Configuration copiée."
+  paste_done: "<green>Configuration collée."
+  notify_opened: "<gray>{player} </gray><white>a ouvert votre </white><yellow>{block}</yellow><white>."
+  notify_item_taken: "<gray>{player} </gray><white>a pris </white><yellow>{amount}x {item}</yellow><white> dans votre </white><yellow>{block}</yellow><white>."
+  notify_item_placed: "<gray>{player} </gray><white>a placé </white><yellow>{amount}x {item}</yellow><white> dans votre </white><yellow>{block}</yellow><white>."
+  raid_alert: "<red>! Raid possible ! </red><yellow>{block} </yellow><red>à </red><yellow>{world} [{x}, {y}, {z}]</yellow><red> - Auteur : </red><yellow>{actor}"
+  raid_coords: "<bold><red>[BlockProt] </red></bold><red>Raid possible sur votre </red><yellow>{block}</yellow><red> à </red><white>{world} [{x}, {y}, {z}]</white><red>. Auteur : </red><yellow>{actor}"
+  raid_tp_label: "<green>[Téléportation]"
+  raid_pending: "<bold><red>[BlockProt] </red></bold><red>Pendant que vous étiez hors ligne, un raid possible a été détecté sur votre bloc </red><yellow>{block}</yellow><red> à </red><white>{world} [{x}, {y}, {z}]</white><red>. Auteur : </red><yellow>{actor}"
+  raid_actor_environment: environnement
+  no_permission_tp: "<red>[✗] Permission refusée : blockprot.blocks.tp"
+  remote_unlock_warning: "<yellow>! Cela déverrouillera le bloc à distance. Cliquez à nouveau pour confirmer. Pour reverrouiller, visitez directement le bloc."
+  admin_reload_done: "<green>Configuration et traductions rechargées."
+  admin_reload_failed: "<red>Échec du rechargement: {error}"
+  admin_tiers_info: "<gray>[BlockProt] </gray><yellow>{player} </yellow><gray>- {role}\
+    \ </gray><gray>| </gray><red>OP: {op}"
+  admin_tiers_op_yes: "<red>Oui"
+  admin_tiers_op_no: "<gray>Non"
+  menu_internal_error: "<red>Une erreur interne est survenue lors du traitement du\
+    \ menu. Vérifiez la console."
+  admin_integrations: "<gray>Intégrations ({count}) : {integrations}"
+  admin_info_hint: "<gray>Utilisez </gray><white>/bp info \\<joueur></white><gray> pour lister ses blocs protégés."
+  admin_debug_hint: "<gray>Exécution des diagnostics..."
+  admin_unlock_success: "<green>Le bloc en {x} {y} {z} ({world}) a été déverrouillé."
+  admin_unlock_failed: "<red>Échec du déverrouillage du bloc. Il n'est peut-être ni protégé ni verrouillable."
+  admin_unlock_usage: "<red>Utilisation : /bp unlock \\<joueur>  (nécessite blockprot.admin)"
+  bp_unlock_removed: "<green>Protection retirée de </green><white>{block}</white><green> (propriétaire : {player}) en {x} {y} {z}."
+  bp_unlock_usage: "<red>Utilisation : /bp unlock \\<joueur>"
+  bp_unlock_player_not_found: "<red>Joueur introuvable : {player}"
+  bp_unlock_no_blocks: "<gray>{player} ne possède aucun bloc verrouillé."
+  bp_unlock_console_header: "<yellow>{player} possède </yellow><white>{count}</white><yellow>\
+    \ bloc(s) verrouillé(s):"
+  bp_unlock_console_entry: "<gray>- </gray><white>{world} {x} {y} {z}"
   world_expiry:
-    set:
-    cleared:
-    error:
-    usage:
+    set: "<green>Expiration pour </green><white>{world} </white><green>définie à </green><white>{duration}</white><green>."
+    cleared: "<red>Expiration effacée pour </red><white>{world}</white><red>."
+    error: "<red>Durée invalide : {input}. Utilisez un format comme 30d, 12h, 45m."
+    usage: "<yellow>Entrez une durée (ex. 30d, 12h, 45m) ou 0 pour désactiver."
   lockables:
-    family_unknown:
-    toggle_feedback:
-    toggle_family_feedback:
+    family_unknown: "Impossible de déterminer la famille pour {expression}"
+    toggle_feedback: "{action} {name} dans blocks.yml"
+    toggle_family_feedback: "{action} {family} dans blocks.yml"
   auto_drop:
-    toggle_feedback:
-    toggle_family_feedback:
-  groups:
-    created:
-    dissolved:
-    joined:
-    left:
-    not_owner:
-    already_in_group:
-    disabled:
-  debug_usage:
-  console_warn_prefix:
-  cmd_usage_menus:
-  cmd_usage_cli:
-  cmd_usage_cli_gui_only:
-  world_prot_del_done:
-  world_prot_del_none:
-  world_prot_del_world_not_found:
-  world_prot_del_usage:
-  world_prot_del_undo_done:
-  world_prot_del_undo_nothing:
+    toggle_feedback: "{action} {name} dans auto_drop_to_inventory"
+    toggle_family_feedback: "{action} {family} dans auto_drop_to_inventory"
+    search_no_results: "Aucun bloc trouvé pour '{query}'."
+  debug_usage: "<red>Utilisation : /bp debug \\<run|...>"
+  console_warn_prefix: "<red>[BlockProt WARN] "
+  cmd_usage_menus: "<red>Utilisation : /bp \\<user|admin>"
+  cmd_usage_cli: "<red>Utilisation : /bp help pour les commandes disponibles"
+  cmd_usage_cli_gui_only: "<red>Utilisez /bp user ou /bp admin en mode menu (activez use_menus dans config)"
+  world_prot_del_done: "<green>Suppression de </green><white>{count}</white><green> protection(s) dans le monde </green><yellow>{world}</yellow><green>."
+  world_prot_del_none: "<yellow>Aucun bloc protégé trouvé dans le monde </yellow><white>{world}</white><yellow>."
+  world_prot_del_world_not_found: "<red>Monde introuvable : {world}"
+  world_prot_del_usage: "<red>Utilisation : /bp protdel [monde]"
+  world_prot_del_console_usage: "<red>Utilisation depuis la console: /bp protdel <monde>\
+    \ confirm | /bp protdel undo"
+  world_prot_del_undo_done: "<green>Annulation terminée : </green><white>{count}</white><green> protection(s) restaurée(s)."
+  world_prot_del_undo_nothing: "<yellow>Aucune suppression à annuler."
   debug:
-    chest_placed:
-    shulker_placed:
-    history_cleared:
-    running_diagnostics:
-    results_go_to_log:
-    checks_passed_actionbar:
-    checks_failed_actionbar:
-    checks_passed_chat:
-    checks_failed_chat:
-    log_path:
-    inventory_title:
+    chest_placed: "<green>Coffre placé"
+    shulker_placed: "<green>Boîte de Shulker placée"
+    history_cleared: "<green>Historique effacé"
+    running_diagnostics: "<yellow>Exécution des diagnostics..."
+    results_go_to_log: "<gray>Les résultats vont dans le journal de session. Résumé à la fin."
+    checks_passed_actionbar: "<green>✔ Toutes les {passed} vérifications ont réussi"
+    checks_failed_actionbar: "<red>✗ {failed} échouée(s) / {total}"
+    checks_passed_chat: "<bold><green>[BlockProt] </green></bold><green>Toutes les <bold>{passed}</bold></green><green> vérifications ont réussi."
+    checks_failed_chat: "<bold><red>[BlockProt] </red></bold><red>{failed} vérification(s) ONT ÉCHOUÉ - voir journal."
+    log_path: "<gray>Journal : </gray><white>{path}"
+    headless_start: "<yellow>[BlockProt] Exécution des diagnostics console au spawn\
+      \ (aucun joueur connecté)..."
+    headless_player_context: "<yellow>[BlockProt] Exécution des diagnostics avec le\
+      \ contexte du joueur: </yellow><white>{player}"
+    headless_finished: "<green>[BlockProt] Diagnostics console terminés: </green><white>{passed}\
+      \ réussis, {failed} échoués ({total} au total)."
+    inventory_title: "<red>BlockProt Débogage"
   time:
-    days:
-    day:
-    hours:
-    hour:
-    minutes:
-    minute:
+    days: jours
+    day: jour
+    hours: heures
+    hour: heure
+    minutes: minutes
+    minute: minute
   first_run:
-    header:
-    title:
-    step1:
-    step1_click:
-    step2:
-    step3:
-    step4:
-    footer:
+    header: "<strikethrough><#d2b48c>{line}"
+    title: "<#d2b48c>   BlockProt Reloaded - Guide de premier démarrage"
+    step1: "<gray>   1. Utilisez </gray><#8fe3b0>{command} </#8fe3b0><gray>pour configurer les blocs verrouillables."
+    step1_click: "<gray>      Cliquez ici pour ouvrir l'interface </gray><gray>[</gray><#8fe3b0>{command}</#8fe3b0><gray>]"
+    step2: "<gray>   2. Ou modifiez </gray><#8fe3b0>{file} </#8fe3b0><gray>manuellement dans le dossier du plugin."
+    step3: "<gray>   3. Voir la documentation : </gray><#8fe3b0>{url}"
+    step4: "<gray>   4. Exécutez </gray><#8fe3b0>{command} </#8fe3b0><gray>dans la console pour une configuration recommandée."
+    footer: "<strikethrough><#d2b48c>{line}"
   integrations:
-    name_colored:
-    name:
-    separator:
-    none:
+    name_colored: "<gold>{name}"
+    name: Intégrations
+    separator: "<gray>, "
+    none: "<gray>Aucune"
   location:
-    locked_ago:
-    just_now:
-    empty_contents:
+    locked_ago: "<dark_gray>Verrouillé il y a {time}"
+    just_now: "à l'instant"
+    empty_contents: "<dark_gray>Vide"
   update:
-    outdated:
-    ahead:
-    up_to_date:
-    click_hint:
+    outdated: "<red>BlockProt est obsolète ! Nouvelle version stable : {version}"
+    outdated_hotfix: "<red>IMPORTANT: BlockProt a un correctif important (hotfix)\
+      \ disponible: {version}! Il corrige des bugs de la version actuelle ({base_version}).\
+      \ Cliquez pour le télécharger."
+    outdated_dev: "<yellow>BlockProt a une nouvelle version de développement expérimentale\
+      \ (BEDev) disponible: {version}. Ce n'est PAS une version stable et elle est\
+      \ publiée uniquement sur GitHub."
+    ahead: "<yellow>BlockProt Reloaded est en avance sur la version publiée ({version})"
+    ahead_hotfix: "<yellow>BlockProt Reloaded exécute le correctif {version}, en avance\
+      \ sur la version publiée ({base_version})"
+    up_to_date: "<#98FF98>BlockProt Reloaded est à jour."
+    click_hint: Cliquez pour visiter la page des versions GitHub
 console:
   config_change_detected: Changement de configuration détecté ; rechargement...
   config_reloaded: Configuration rechargée automatiquement.
-  filewatcher_error: 'Erreur du surveillant de fichiers: {error}'
+  filewatcher_error: "Erreur du surveillant de fichiers: {error}"
   audit_logger_started: Journal d'audit démarré.
-  audit_logger_failed: 'Impossible de démarrer le journal d''audit: {error}'
+  audit_logger_failed: "Impossible de démarrer le journal d'audit: {error}"
   worldedit_listener_enabled: Écouteur de collage automatique WorldEdit activé.
-  claims_system_enabled: Système de parcelles activé.
-  claims_system_disabled: Système de parcelles désactivé (claims_enabled=false).
-  worlds_yml_syntax_error: 'worlds.yml contient une erreur de syntaxe YAML ; restauration
-    des valeurs par défaut: {error}'
+  worlds_yml_syntax_error: "worlds.yml contient une erreur de syntaxe YAML ; restauration\
+    \ des valeurs par défaut: {error}"
   worlds_yml_restored: worlds.yml restauré depuis les valeurs internes par défaut.
-  worlds_yml_restore_failed: 'Impossible de restaurer worlds.yml: {error}'
-  worlds_yml_save_failed: 'Impossible de sauvegarder worlds.yml: {error}'
+  worlds_yml_restore_failed: "Impossible de restaurer worlds.yml: {error}"
+  worlds_yml_save_failed: "Impossible de sauvegarder worlds.yml: {error}"
   backup_dir_failed: Impossible de créer le dossier de sauvegarde. Sauvegarde ignorée.
-  backup_created: 'Données BlockProt existantes détectées ; sauvegarde de sécurité
-    créée: backups/{file}'
+  backup_created: "Données BlockProt existantes détectées ; sauvegarde de sécurité\
+    \ créée: backups/{file}"
   backup_review_config: Vérifiez config.yml avant d'activer les nouvelles fonctions
     BPR. Détails dans le journal de session.
-  backup_failed: 'Échec de la sauvegarde: {error}'
-  config_language_missing: 'Le fichier de langue configuré n''existe pas: {file}'
-  lang_keys_updated: '{file} mis à jour avec {count} clé(s) de traduction manquante(s).'
-  lang_keys_save_failed: 'Impossible de sauvegarder le fichier de langue fusionné
-    {file}: {error}'
-  config_keys_updated: config.yml mis à jour avec {count} option(s) manquante(s).
-    Vérifiez-le avant d'activer les nouvelles fonctions BPR.
-  config_keys_save_failed: 'Impossible de sauvegarder config.yml fusionné: {error}'
+  backup_failed: "Échec de la sauvegarde: {error}"
+  config_language_missing: "Le fichier de langue configuré n'existe pas: {file}"
+  lang_keys_updated: "{file} mis à jour avec {count} clé(s) de traduction manquante(s)."
+  lang_keys_save_failed: "Impossible de sauvegarder le fichier de langue fusionné\
+    \ {file}: {error}"
+  config_keys_updated: "config.yml mis à jour avec {count} option(s) manquante(s).\
+    \ Vérifiez-le avant d'activer les nouvelles fonctions BPR."
+  config_keys_save_failed: "Impossible de sauvegarder config.yml fusionné: {error}"
   mysql_enabled: Index hybride MySQL activé.
-  mysql_disabled: 'Index hybride MySQL désactivé: {error}'
-  mysql_lookup_failed: 'Échec de la requête de confiance MySQL: {error}'
-  mysql_schema_failed: 'Échec de l''initialisation du schéma MySQL: {error}'
-  mysql_cache_load_failed: 'Échec du chargement du cache de confiance MySQL: {error}'
-  mysql_operation_failed: 'Échec d''une opération MySQL: {error}'
-  translations_incomplete: 'Traductions: {total} clé(s) incomplète(s) dans {file}
-    ; {fallback} utilisent l''anglais de secours, {missing} absente(s) des deux fichiers.
-    Détails dans le journal de session.'
-  java_too_old: 'Version Java trop ancienne: {version} (BlockProt Reloaded nécessite
-    Java 25+)'
+  mysql_disabled: "Index hybride MySQL désactivé: {error}"
+  mysql_lookup_failed: "Échec de la requête de confiance MySQL: {error}"
+  mysql_schema_failed: "Échec de l'initialisation du schéma MySQL: {error}"
+  mysql_cache_load_failed: "Échec du chargement du cache de confiance MySQL: {error}"
+  mysql_operation_failed: "Échec d'une opération MySQL: {error}"
+  translations_incomplete: "Traductions: {total} clé(s) incomplète(s) dans {file}\
+    \ ; {fallback} utilisent l'anglais de secours, {missing} absente(s) des deux fichiers.\
+    \ Détails dans le journal de session."
+  java_too_old: "Version Java trop ancienne: {version} (BlockProt Reloaded nécessite\
+    \ Java 25+)"
+  minecraft_unsupported: "{edition} {version} ne supporte pas Minecraft {mc}. Consultez\
+    \ le guide des versions: {guide} . Téléchargez {recommended} ({range}): {url}"
+  minecraft_unsupported_none: "Aucune édition de BlockProt ne supporte Minecraft {mc}.\
+    \ Consultez le guide des versions: {guide}"
+  minecraft_newer_available: "Minecraft {mc} est plus récent que la plage de {edition}\
+    \ ({edition_range}). Consultez le guide: {guide} . L'édition recommandée est {recommended}:\
+    \ {url}"
+  edition_migration: "Migration détectée: {from} vers {to}. Sauvegarde: {path}"
+  edition_downgrade: "{to} est plus ancien que {from}. Les données écrites par la\
+    \ version plus récente peuvent contenir des paramètres ignorés. Rétrogradation\
+    \ non prise en charge ; sauvegarde créée: {path}"
+  about_edition: "{edition} {version} (Minecraft {range})"
   not_paper: Serveur non Paper détecté. La recherche de joueurs par chat est désactivée
     et utilisera l'interface enclume. Paper est recommandé.
-  typed_views_fallback: Paper/Spigot 1.21.0-1.21.3 sans vues d'inventaire typées.
-    Des alternatives AnvilInput seront utilisées.
-  dialogs_unavailable:
-  stats_save_failed:
-  migration_start:
-  migration_done:
-  migration_failed:
-  saving_statistics:
+  software_unsupported: "Logiciel de serveur non pris en charge détecté: {software}.\
+    \ BlockProt Reloaded supporte Paper et ses forks (Paper, Purpur, Folia, ...).\
+    \ Spigot, CraftBukkit et autres ne sont pas supportés."
+  dialogs_unavailable: "use_dialogs est activé mais ce serveur n'expose pas l'API de dialogue Paper (nécessite Paper 1.21.7+). Repli sur les menus d'inventaire/tchat."
+  stats_save_failed: "Impossible d'enregistrer le fichier de statistiques : {error}"
+  migration_start: "Migration des données de {source} vers {target}..."
+  migration_done: "Migration depuis {source} terminée. La configuration et les listes de blocs précédentes ont été conservées. Ancien dossier conservé."
+  migration_failed: "Échec de la migration depuis {source} : {error}"
+  saving_statistics: Enregistrement des statistiques sur le disque...
   update:
-    available:
-    up_to_date:
-  viaversion_detected:
-  viaversion_api_missing:
-  craftbukkit_unsupported:
-  integration_enabled:
-  startup_complete:
-  auto_reload_disabled:
-  boot_configuration:
-  boot_listeners:
-  boot_commands:
-  boot_startup_time:
-  boot_loaded:
-  boot_registered:
-  boot_hooked:
-  boot_not_installed:
-  boot_dialog_api:
-  boot_available:
-  boot_not_available:
-  recommended_console_only:
-  recommended_blocks_missing:
-  recommended_reload:
-  recommended_failed:
+    available: "Une version STABLE plus récente de BlockProt Reloaded est disponible : {version}"
+    available_hotfix: "IMPORTANT: un correctif important (hotfix) de BlockProt Reloaded\
+      \ est disponible: {version}! Il corrige des bugs de la version actuelle ({base_version})."
+    available_dev: "Une nouvelle version de développement expérimentale (BEDev) de\
+      \ BlockProt Reloaded est disponible: {version}. Ce n'est PAS une version stable\
+      \ et elle est publiée uniquement sur GitHub."
+    up_to_date: BlockProt Reloaded est à jour
+  viaversion_detected: "ViaVersion {version} détecté. Prise en charge des clients multi-versions active."
+  viaversion_api_missing: "Plugin ViaVersion présent mais classe API introuvable - ignoré."
+  craftbukkit_unsupported: "Ce plugin ne prend pas en charge CraftBukkit. Veuillez utiliser Paper ou un fork de Paper (Purpur, Folia, Pufferfish, Leaf)."
+  integration_enabled: "Intégration activée : {name}"
+  floodgate_prefix_detected: "Préfixe d'utilisateur Floodgate détecté: '{prefix}'"
+  floodgate_prefix_failed: "Échec de la détection automatique du préfixe Floodgate:\
+    \ {error}"
+  brigadier_register_failed: "Impossible d'enregistrer les commandes Brigadier: {error}"
+  bedrock_form_send_failed: "Échec de l'envoi du formulaire Bedrock ({platform}):\
+    \ {error}"
+  raid_log: "Raid potentiel: {block} à {world} [{x},{y},{z}] acteur={actor}"
+  startup_complete: "BlockProt v{version} activé."
+  auto_reload_disabled: "Le rechargement automatique est désactivé (auto_reload_configs: false). La configuration ne se rechargera PAS d'elle-même - utilisez /bp reload après chaque modification."
+  boot_configuration: Configuration
+  boot_listeners: Écouteurs
+  boot_commands: Commandes
+  boot_startup_time: Temps de démarrage
+  boot_loaded: Chargé
+  boot_registered: Enregistré
+  boot_hooked: Connecté
+  boot_not_installed: Non installé
+  boot_dialog_api: API de dialogue
+  boot_available: Disponible
+  boot_not_available: Indisponible
+  boot_build_stable: "Exécution de la version stable {version}."
+  boot_build_hotfix: "Exécution du correctif {version} de la version actuelle ({base})."
+  boot_build_experimental: "Exécution de la version de développement expérimentale\
+    \ (BEDev) {version}. Ce n'est PAS une version stable ; une sauvegarde a été créée."
+  boot_update: Vérification des mises à jour
+  boot_update_up_to_date: "À jour ({version})"
+  boot_update_outdated: "Nouvelle version disponible: {version}"
+  boot_update_ahead: "Plus récent que la dernière version ({version})"
+  boot_update_not_checked: Non vérifié
+  boot_update_download: "Télécharger: {url}"
+  recommended_console_only: "<#f0a0a0>✖ </#f0a0a0><gray>Cette commande nécessite des permissions administratives."
+  recommended_blocks_missing: "  <#f0a0a0>✖ </#f0a0a0><gray>Fichier </gray><white>blocks.yml </white><gray>introuvable. Démarrez le serveur une fois pour le générer."
+  recommended_header: "<#d2b48c>[BlockProt] </#d2b48c><white>Configuration Recommandée:"
+  recommended_usage_header: "<#d2b48c>[BlockProt] </#d2b48c><white>Utilisation de\
+    \ la Configuration Recommandée:"
+  recommended_usage_apply: "  <#8fe3b0>● </#8fe3b0><white>/bp recommended <blocks|config|all>\
+    \ [force] </white><dark_gray>- </dark_gray><gray>Appliquer les préréglages recommandés."
+  recommended_usage_undo: "  <#a0c4e8>● </#a0c4e8><white>/bp recommended undo <blocks|config|all>\
+    \ </white><dark_gray>- </dark_gray><gray>Rétablir les préréglages à l'état initial."
+  recommended_usage: "<gray>Utilisation : </gray><yellow>/bp recommended \\<blocks|config|all> [force]</yellow><gray> ou </gray><yellow>/bp recommended undo \\<blocks|config|all></yellow><gray>."
+  recommended_blocks_done: "  <#8fe3b0>● </#8fe3b0><gray>Listes de blocs : </gray><#8fe3b0>Écrites dans </#8fe3b0><white>blocks.yml</white><gray>."
+  recommended_config_done: "  <#8fe3b0>● </#8fe3b0><gray>Paramètres : </gray><#8fe3b0>Activés dans </#8fe3b0><white>config.yml </white><dark_gray>(modern_family_blocks, use_menus, use_dialogs)</dark_gray><gray>."
+  recommended_reload: "  <#a0c4e8>⏱ </#a0c4e8><gray>Rechargez avec </gray><white>/bp reload </white><gray>ou attendez le rechargement automatique."
+  recommended_failed: "  <#f0a0a0>✖ </#f0a0a0><gray>Échec de l'écriture de </gray><white>{file}</white><gray> : </gray><red>{error}"
+  recommended_already_applied: "  <#f3c27c>● </#f3c27c><gray>Les éléments recommandés </gray><white>{target} </white><gray>ont déjà été appliqués. Réexécutez avec </gray><white>/bp recommended {target} force</white><gray>."
+  recommended_undo_header: "<#d2b48c>[BlockProt] </#d2b48c><white>Annulation de la\
+    \ Configuration Recommandée:"
+  recommended_undo_done: "  <#8fe3b0>● </#8fe3b0><gray>Configuration recommandée </gray><white>{target}\
+    \ </white><gray>rétablir à l'état par défaut."
+  recommended_undo_nothing: "  <#f3c27c>● </#f3c27c><gray>La configuration </gray><white>{target}\
+    \ </white><gray>n'a pas été appliquée ; rien à annuler."
   first_start:
-    header:
-    title:
-    step1:
-    step2:
-    step3:
-    step4:
-    footer:
-  boot:
-    configuration:
-    listeners:
-    commands:
-    startup_time:
-    loaded:
-    registered:
-    hooked:
-    not_installed:
-  recommended_usage:
-  recommended_blocks_done:
-  recommended_config_done:
-  recommended_already_applied:
+    header: "<#d2b48c>  ------------------------------------------"
+    title: "<#d2b48c>   BlockProt Reloaded - Guide de premier démarrage"
+    step1: "<gray>   1. Utilisez </gray><#8fe3b0>{command} </#8fe3b0><gray>pour configurer les blocs verrouillables."
+    step2: "<gray>   2. Ou modifiez </gray><#8fe3b0>{file} </#8fe3b0><gray>manuellement dans le dossier du plugin."
+    step3: "<gray>   3. Voir la documentation : </gray><#8fe3b0>{url}"
+    step4: "<gray>   4. Exécutez </gray><#8fe3b0>{command} </#8fe3b0><gray>dans la console pour une configuration recommandée."
+    footer: "<#d2b48c>  ------------------------------------------"
+dialogs:
+  about:
+    title: À propos de BlockProt Reloaded
+    description: "BlockProt Reloaded - un fork de BlockProt par spnda."
+    maintainer: Maintenu par Zaynr (Zar).
+    report_issues: "Signaler des problèmes :"
+    version_label: "Version : "
+    server_label: "Serveur : "
+    api_label: "API : "
+    java_label: "Java : "
+    issues_url: "github.com/Zaynr-Ecosystem/BlockProt-Reloaded/issues"
+    author_label: "Auteur: spnda"
+    maintainer_label: "Mainteneur: Zaynr (Zar)"
+    db_engine_label: "Moteur de base de données : "
+    db_mysql: MySQL
+    db_sqlite: SQLite
+    cache_label: "Cache : "
+    cache_suffix: " blocs protégés"
+    integrations_label: "Intégrations : "
+    integrations_disabled: "Désactivé ({count} au total)"
+    integrations_active: "Actif ({enabled}/{total} : {names})"
+  user_menu:
+    header: Menu Utilisateur
+  admin_menu:
+    header: Menu Admin
+    config_tooltip: Modifier les paramètres de config.yml
+  admin_tiers:
+    title: "Tiers & Rôles d'Admin"
+    header: "Tiers & Rôles d'Admin"
+    subtitle: Sélectionnez un joueur en ligne ou entrez un nom pour attribuer un tier
+    set_offline_btn: Définir joueur par nom
+    set_offline_tooltip: Entrez le nom du joueur ou son UUID
+    assign_title: "Attribuer le rôle: {player}"
+    assign_prompt: "Choisissez le tier administratif pour {player}:"
+    current_tier: "Tier actuel: {tier}"
+    status_op: Opérateur Serveur (OP)
+    status_not_op: Joueur Standard
+    custom_config_btn: Configurer Custom
+    custom_config_tooltip: "Configurer des permissions précises pour {player}"
+    custom_flags_title: "Actions Personnalisées: {player}"
+    custom_flags_header: Permissions Détaillées
+    custom_flags_subtitle: "Activer/désactiver les actions administratives pour {player}:"
+  settings:
+    header: Paramètres
+    auto_lock_desc: Verrouiller automatiquement les blocs lors de la pose.
+    hints_desc: "Afficher les conseils dans la barre d'action pour les blocs verrouillés."
+    notifications_desc: "Recevoir les messages de notification d'accès."
+    prefer_dialogs: Utiliser les dialogues Paper
+    prefer_dialogs_desc: "Préférer les fenêtres de dialogue natives Paper aux interfaces d'inventaire."
+    prefer_bedrock_forms: Préférer les formulaires Bedrock
+    prefer_bedrock_forms_desc: Choisir les formulaires natifs Bedrock plutôt que les
+      interfaces d'inventaire.
+    colorblind_desc: Utiliser des symboles à fort contraste pour des indicateurs d'état
+      accessibles.
+  friends:
+    header: Amis
+    manage_hint: "Gérer votre liste d'amis par défaut :"
+    select_candidate_hint: "Qui vouliez-vous dire ? Sélectionnez un candidat:"
+    select_candidate_score: "Similarité: {score}%"
+    public_make: Rendre public
+    public_current: "Actuellement : Public"
+    private_current: "Actuellement : Privé"
+    public_click: "Cliquez pour accorder à tous les joueurs l'accès à vos blocs."
+    private_click: Cliquez pour rendre vos blocs privés.
+    no_history: Aucun historique de recherche.
+    recent_searches: "Recherches récentes :"
+    level_label: "Niveau de permission: {level}"
+    level_basic: "Niveau 1: De base (Déposer & Retirer)"
+    level_basic_desc: "Peut déposer et retirer des objets, mais ne peut pas ouvrir\
+      \ les paramètres du bloc."
+    level_operator: "Niveau 2: Opérateur"
+    level_operator_desc: "Peut gérer les objets et ouvrir les paramètres (redstone,\
+      \ entonnoirs, nom, audit, inspecter, info)."
+    level_manager: "Niveau 3: Gestionnaire Complet"
+    level_manager_desc: Accès complet aux paramètres du bloc et gestion des amis.
+      Ne peut pas déverrouiller ni transférer.
+    level_custom: "Niveau 4: Personnalisé"
+    level_custom_desc: Configurer des permissions d'accès précises pour ce joueur.
+    flag_open_menu: Ouvrir le Menu des Paramètres
+    flag_edit_settings: Configurer les Paramètres du Bloc
+    flag_edit_name: Changer le Nom du Bloc
+    flag_view_audit: Voir le Journal d'Audit
+    flag_inspect: Inspecter le Contenu
+    flag_manage_friends: Gérer les Amis
+    flag_open_container: Ouvrir le Conteneur
+    flag_deposit: Déposer des Objets
+    flag_withdraw: Retirer des Objets
+    flag_redstone: Accès Redstone
+  stats:
+    header: Statistiques
+    your_blocks: "Vos blocs protégés : "
+    no_blocks: "  (aucun)"
+    breakdown: "Répartition :"
+    server_total: "Total du serveur : "
+    placements_title: Emplacements
+  integrations:
+    count: "{enabled}/{total} activé(s)"
+    enabled: "<green>Activé"
+    disabled: "<gray>Désactivé"
+    plugin: "Plugin : {name}"
+    dependent: "Dépendant : {name}"
+  lockables:
+    header: Blocs verrouillables
+    cat_prefix: "Catégorie : "
+    categories:
+      chests: Coffres
+      shulkers: Boîtes de Shulker
+      furnaces: Fours
+      storage: Stockage
+      signs: Pancartes
+      doors: Portes
+      trapdoors: Trappes
+      beds: Lits
+      gates: Portillons
+      workstations: Établis et postes de travail
+      interactive: Interactif
+      entities: Entités
+  auto_drop:
+    search_prompt: Tapez le nom du bloc
+  info:
+    header: Joueurs avec des blocs
+    protected_blocks: Blocs protégés par
+    block_list_title: "Liste des Blocs: {player}"
+  unlock:
+    header: Déverrouiller les blocs
+    click_hint: Cliquez pour déverrouiller ce bloc.
+    location: "Emplacement : "
+    material_label: "Matériau : "
+    owner_label: "Propriétaire : "
+    friends_label: "Amis : "
+    player_not_found: "Joueur introuvable : {player}"
+    no_blocks: "{player} n'a aucun bloc protégé."
+    unlocked: "Bloc déverrouillé en {location}"
+    not_owned: "Le bloc n'appartient pas à {player}"
+    failed: Échec du déverrouillage du bloc.
+  protdel:
+    header: Supprimer les protections
+    world_hint: "Supprimer toutes les protections dans {world}."
+    confirm: "Confirmer - Tout supprimer"
+    cancel: Annuler
+    blocks_suffix: " blocs"
+    undo_label: "Annuler ({count} disponibles)"
+    undo_title: Annuler les suppressions
+    no_history: "Aucun historique d'annulation."
+    restore_hint: "Cliquez pour restaurer ces {count} protections."
+    cant_undo: "Cette action ne peut pas être annulée !"
+    deleting: "Suppression des protections dans {world}..."
+  world_expiry:
+    header: Expiration par Monde
+    active_label: "Actif: {duration}"
+    disabled_label: Désactivé
+    click_hint: Cliquez pour configurer la durée d'expiration.
+  update:
+    title: Vérificateur de mise à jour
+    current: "Actuelle :"
+    latest: "Dernière :"
+    outdated: Obsolète
+    ahead: En avance sur la version
+    up_to_date: À jour
+    kind_hotfix: "<red>IMPORTANT: correctif (hotfix) de la version {base_version}:\
+      \ {version}"
+    kind_dev: "<yellow>Version de développement expérimentale (BEDev) - NON stable"
+    kind_stable: "<green>Version stable {version}"
+    check_hint: "Exécutez 'Vérifier maintenant' pour chercher des mises à jour."
+    check_now: Vérifier maintenant
+    checking: Recherche de mises à jour...
+    download: "Téléchargement :"
+    version_prefix: " v"
+  debug:
+    title: Infos de débogage
+    label_plugin: "BlockProt "
+    label_server: "Serveur : "
+    label_api: "API : "
+    label_java: "Java : "
+    run_separator: "=== /bp debug run ==="
+  choose_option: "Choisissez une option :"
+  admin_choose: "Sélectionnez une action administrative :"
+  click_to_open: Cliquez pour ouvrir.
+  back: ← Retour
+  close: ← Fermer
+  page: "Page {current}/{total}"
+  prev: ◀ Précédent
+  next: Suivant ▶
+  prev_hint: Page précédente.
+  next_hint: Page suivante.
+  status_label: "Statut : "
+  status_public: Public
+  status_private: Privé
+  status_enabled: Activé
+  status_disabled: Désactivé
+  switch_view: Changer de vue.
+  click_disable: Cliquez pour tout désactiver.
+  click_enable: Cliquez pour tout activer.
+  click_disable_single: Cliquez pour désactiver.
+  click_enable_single: Cliquez pour activer.
+  click_chat: Cliquez pour afficher les détails dans le tchat.
+  return_user_menu: Retourner au Menu Utilisateur.
+  return_admin_menu: Retourner au Menu Admin.
+  return_previous: Retourner au menu précédent.
+  category_label: "Catégorie : "
+  admin_config:
+    title: Configuration Admin
+    hint: "Sélectionnez une section de config.yml à modifier :"
+    cat_notifications: Notifications
+    cat_language: Langue
+    cat_worlds: Mondes
+    cat_players: Joueurs et amis
+    cat_blocks: Blocs et comportement de verrouillage
+    cat_entity: Protection des entités
+    cat_expiry: Expiration
+    cat_raid: Détection de raid
+    cat_maintenance: Maintenance
+    cat_deprecated: Obsolète
+    value_bool: Cliquer pour basculer.
+    value_cycle: "Cliquer pour faire défiler :"
+    value_click_edit: Cliquer pour modifier la valeur.
+    dialog_marker: "[ Réglage exclusif au dialogue ]"
+    return_categories: Retour aux catégories de configuration.
+    config_yml_prefix: "config.yml : "
+    value_current: "Actuel : "
+    enter_new_value: "<gray>Actuel {key} : </gray><white>{value} </white><gray>- Entrez la nouvelle valeur :"
+    new_value_prompt: "nouveau {key}"
+    invalid_number: "<red>Nombre invalide : {input}"
+    confirm_value: Confirmer
+    language:
+      language_file: Le fichier de langue pour les traductions.
+      toggle_category: Activer ou désactiver des langues
+      toggle_hint: Basculer les langues chargées au démarrage.
+      selector_category: Sélectionner la langue active
+      selector_hint: Choisir quel fichier de langue utiliser.
+      replace_translations: Mettre à jour automatiquement les traductions avec les clés manquantes.
+      replace_translations_title: Mettre à jour les traductions
+      fallback_string: Texte affiché pour une clé de traduction manquante.
+      fallback_string_title: Texte de secours
+      fallback_string_hint: Texte de secours
+      status_header: "activé  désactivé  [ACTIF] dans config.yml"
+      toggle_all_enable: Activer toutes les langues dans lang.yml
+      toggle_all_disable: Désactiver toutes les langues dans lang.yml
+      toggle_all_hint: Cliquer pour basculer toutes les langues
+      lang_status: "lang.yml : {status}"
+      config_status_active: actif
+      config_status_inactive: inactif
+      click_disable: Cliquer pour désactiver
+      click_enable: Cliquer pour activer
+      active_marker: "[ACTIF]"
+    worlds:
+      per_worlds_config: Configuration distincte par monde.
+      per_worlds_config_title: Configuration par monde
+      excluded_worlds: Mondes où le plugin est totalement désactivé.
+      excluded_worlds_title: Mondes exclus
+      excluded_worlds_hint: Noms de mondes séparés par des virgules ou vide
+      excluded_worlds_empty: (aucun)
+    players:
+      lock_on_place: Verrouiller automatiquement les blocs posés.
+      lock_on_place_title: Verrouillage auto à la pose
+      public_is_friend: Les blocs publics comptent comme des amis.
+      public_is_friend_title: Public compte comme ami
+      max_blocks: "Nombre max de blocs verrouillés par joueur (-1 = illimité)."
+      max_blocks_title: Max de blocs verrouillés
+      max_blocks_hint: "Max de blocs (-1 = illimité)"
+      hint_cooldown: Délai entre les conseils de verrouillage (secondes).
+      hint_cooldown_title: Délai des conseils de verrouillage
+      hint_cooldown_hint: Délai en secondes
+      friend_search: "Seuil de similarité de recherche d'amis (0.0-1.0)."
+      friend_search_title: "Similarité de recherche d'amis"
+      friend_search_hint: "Similarité (0.0 - 1.0)"
+      disable_friends: "Désactiver globalement le système d'amis."
+      disable_friends_title: "Désactiver le système d'amis"
+      bedrock_prefixes: Préfixes traités comme des joueurs Bedrock (Geyser/Floodgate).
+      bedrock_prefixes_title: Préfixes Bedrock
+      bedrock_prefixes_hint: "Préfixes séparés par des virgules (ex: ., *, _)"
+    blocks:
+      modern_family: Utiliser la syntaxe compacte de famille dans blocks.yml.
+      modern_family_title: Syntaxe de famille moderne
+      redstone_disallowed: Interdire les interactions Redstone par défaut.
+      redstone_disallowed_title: Interdire la Redstone
+      simplified_hopper: Logique simplifiée des entonnoirs pour les performances.
+      simplified_hopper_title: "Logique d'entonnoir simplifiée"
+      protect_explosions: Protéger les blocs verrouillés des explosions.
+      protect_explosions_title: Protection contre les explosions
+      piston_movement: Empêcher les pistons de déplacer les blocs verrouillés.
+      piston_movement_title: Protection des pistons
+      shulker_break: "Supprimer la protection lorsqu'une boîte de Shulker est cassée."
+      shulker_break_title: Supprimer la protection à la destruction du Shulker
+      allow_break: Autoriser la destruction de blocs protégés (données conservées).
+      allow_break_title: Autoriser la destruction des blocs protégés
+      spawn_protection: Respecter la protection de spawn vanilla.
+      spawn_protection_title: Respecter la protection du spawn
+      lock_effects: Afficher des particules sur les blocs verrouillés.
+      lock_effects_title: Particules de verrouillage
+      lock_sounds: Jouer des sons sur les blocs verrouillés.
+      lock_sounds_title: Sons de verrouillage
+      use_menus_de: Regrouper les menus dans /bp user et /bp admin.
+      use_menus_title: Utiliser le système de menus
+      use_dialogs_de: Utiliser les dialogues Paper (nécessite Paper 1.21.7+).
+      use_dialogs_title: Utiliser les dialogues Paper
+      timed_access: "Durée maximale d'accès temporisé (jours)."
+      timed_access_title: "Durée max d'accès temporisé"
+      timed_access_hint: Max de jours
+      action_bar_duration: Durée en secondes d'affichage des messages dans la barre
+        d'action.
+      action_bar_duration_title: Durée de la barre d'action
+      action_bar_duration_hint: Secondes (minimum 1)
+      locking_title: Verrouillage
+      behavior_title: Comportement
+      effects_title: Effets
+    entity:
+      protection_enabled: Activer la protection des entités.
+      protection_enabled_title: Protection des entités
+      auto_protect_tame: Protéger automatiquement les entités apprivoisées.
+      auto_protect_tame_title: "Protection auto à l'apprivoisement"
+      workstation_enabled: Protéger automatiquement les postes de travail de villageois.
+      workstation_enabled_title: Protection des postes de travail
+      workstation_radius: Rayon de protection du poste de travail.
+      workstation_radius_title: Rayon du poste de travail
+      workstation_radius_hint: Rayon horizontal (blocs)
+      workstation_vertical_radius: Rayon vertical du poste de travail.
+      workstation_vertical_radius_title: Rayon vertical du poste de travail
+      workstation_vertical_radius_hint: Rayon vertical (blocs)
+      villager_locate_seconds: Secondes pour localiser un villageois.
+      villager_locate_seconds_title: Délai de localisation du villageois
+      villager_locate_seconds_hint: Délai de localisation (secondes)
+      menu_item: "Objet utilisé pour ouvrir le menu de protection d'entités."
+      menu_item_title: "Outil de menu d'entité"
+      menu_item_hint: "Nom du matériau, ex. STICK"
+      menu_item_invalid: "<red>Matériau inconnu : {input}"
+    expiry:
+      enabled: "Activer l'expiration globale des protections inactives."
+      enabled_title: Expiration du monde
+      check_interval: Intervalle de vérification (minutes).
+      check_interval_title: "Intervalle de vérification d'expiration"
+      check_interval_hint: Minutes entre les vérifications
+      per_world: Configurer la durée d'expiration par monde.
+      per_world_title: Expiration par Monde
+    raid:
+      enabled: Protéger les blocs contre les raids.
+      enabled_title: Protection contre les raids
+    notifications:
+      notify_ops: Notifier les opérateurs des mises à jour disponibles.
+      notify_ops_title: Notifier les opérateurs
+      owner_enabled: Autoriser les notifications au propriétaire.
+      owner_enabled_title: "Notifications d'accès au propriétaire"
+      owner_open: "Notifier lorsque quelqu'un ouvre votre bloc."
+      owner_open_title: Notifier à l'ouverture
+      owner_take: "Notifier lorsque quelqu'un prend des objets."
+      owner_take_title: Notifier au retrait
+      owner_place: "Notifier lorsque quelqu'un dépose des objets."
+      owner_place_title: Notifier au placement
+    maintenance:
+      inactivity_cleanup: "Jours avant suppression des protections inactives (-1 = désactivé)."
+      inactivity_cleanup_title: "Nettoyage d'inactivité"
+      inactivity_cleanup_hint: "Jours (-1 = désactivé)"
+      auto_reload: Recharger automatiquement les configurations lors de modifications de fichiers.
+      auto_reload_title: Rechargement auto des configurations
+      auto_reload_delay: "Délai d'attente avant rechargement automatique (0-5 secondes)."
+      auto_reload_delay_title: Délai de rechargement automatique
+      auto_reload_delay_hint: "Délai en secondes (0 à 5, 0 = prochain tick)"
+      session_log: Activer la journalisation de session.
+      session_log_title: Journalisation de session
+      backups: Créer des sauvegardes automatiques.
+      backups_title: Sauvegardes automatiques
+      admin_tiers: Activer la configuration des limites par paliers (tiers) d'admin.
+      admin_tiers_title: Tiers d'Admin
+    deprecated:
+      we_paste_enabled: Verrouillage automatique lors du collage WorldEdit.
 worlds:
-  scan_start: Analyse des mondes... ({count} chargés)
-  scan_world_added: Monde '{world}' ajouté à worlds.yml avec protection activée.
-  scan_complete: 'Analyse terminée: {count} monde(s) détecté(s), {added} ajouté(s)
-    à worlds.yml.'
-  status:
-  protected_count:
-  no_worlds:
-  world_config_hint:
-  per_world_config:
-  worlds:
-  configured:
+  scan_start: "Analyse des mondes... ({count} chargés)"
+  scan_complete: "Analyse terminée: {count} monde(s) détecté(s), {added} ajouté(s)\
+    \ à worlds.yml."
+  status: Statut
+  protected_count: Blocs protégés
+  no_worlds: Aucun monde trouvé.
+  world_config_hint: Possède une configuration par monde
+  per_world_config: Configurer par monde
+  worlds: mondes
+  configured: Configuré
 integrations:
   lands:
     protect_containers_flag_name: Protéger les conteneurs (BlockProt)
-    protect_containers_desc: Autorise un joueur de protéger des coffres, des fours...
+    protect_containers_desc: "Autorise un joueur de protéger des coffres, des fours..."
     require_protect_for_friends_flag_name: Exige "Protéger les conteneurs" pour les
       amis (BlockProt)
     require_protect_for_friends_desc: Seuls les joueurs qui ont l'autorisation "Protéger
       les conteneurs" peuvent être ajoutés en tant qu'amis.
 help:
-  header: §6=== Aide BlockProt ===
-  footer: §6==================
+  header: "§6=== Aide BlockProt ==="
+  footer: "§6=================="
   block_protection_title: §6Protection de blocs
-  block_protection_settings: §7  /bp §f- Ouvre tes paramètres personnels de protection.
+  block_protection_settings: "§7  /bp §f- Ouvre tes paramètres personnels de protection."
   friends_title: §6Amis
-  friends_gui: §7  /bp friends §f- Ouvre le menu des amis par défaut.
-  friends_addall: §7  /bp friends addall <joueur> §f- Ajoute un ami à tous tes blocs.
+  friends_gui: "§7  /bp friends §f- Ouvre le menu des amis par défaut."
+  friends_addall: "§7  /bp friends addall <joueur> §f- Ajoute un ami à tous tes blocs."
+  transfer: "<gray>  /bp transferall \\<joueur> </gray><white>- Transfère tous vos blocs protégés à un autre joueur."
+  timed_access: "<gray>  /bp timed \\<joueur> \\<secondes> </gray><white>- Accorde un accès temporaire à un bloc verrouillé."
+  admin_info: "<gray>  /bp info \\<joueur> </gray><white>- Ouvre l'interface de la liste des blocs du joueur."
   other_title: §6Autres
-  settings: §7  /bp settings §f- Paramètres personnels.
-  stats: §7  /bp stats §f- Voir les statistiques de blocs.
-  about: §7  /bp about §f- Infos sur le plugin et le fork.
-  integrations: §7  /bp integrations §f- Lister les intégrations actives. (admin)
-  update: §7  /bp update §f- Vérifier les mises à jour. (admin)
-  reload: §7  /bp reload §f- Recharger la configuration. (admin)
-  disable_hints: §7  /bp disablehints §f- Désactiver les messages d'aide.
-  debug: §7  /bp debug <run|placeDebugChest|placeDebugShulker|clearSearchHistory>
-    §f- Diagnostic développeur.
-  transfer:
-  timed_access:
-  admin_info:
-  unlock:
-  lockables:
-  recommended:
-  world_prot_del:
-  gui_mode_title:
-  gui_user:
-  gui_admin:
-icon:
-  settings:
-  friends:
-  stats:
-  about:
-  lockables:
-  reload:
-  search:
-  integrations:
-  config:
-  debug:
+  settings: "§7  /bp settings §f- Paramètres personnels."
+  stats: "§7  /bp stats §f- Voir les statistiques de blocs."
+  about: "§7  /bp about §f- Infos sur le plugin et le fork."
+  integrations: "§7  /bp integrations §f- Lister les intégrations actives. (admin)"
+  update: "§7  /bp update §f- Vérifier les mises à jour. (admin)"
+  reload: "§7  /bp reload §f- Recharger la configuration. (admin)"
+  disable_hints: "§7  /bp disablehints §f- Désactiver les messages d'aide."
+  debug: "§7  /bp debug <run|placeDebugChest|placeDebugShulker|clearSearchHistory>\
+    \ §f- Diagnostic développeur."
+  unlock: "<gray>  /bp unlock \\<joueur> </gray><white>- Ouvre l'interface de déverrouillage de blocs d'un joueur."
+  lockables: "<gray>  /bp lockables </gray><white>- Parcourir et basculer les blocs verrouillables."
+  recommended: "<gray>  /bp recommended \\<blocks|config|all> [force] </gray><white>- Applique les listes de blocks.yml recommandées, les réglages config.yml ou les deux."
+  logs: "<gray>  /bp logs [here|player <nom>|<page>] </gray><white>- Inspecter les\
+    \ journaux d'accès."
+  logs_desc: Inspecter les journaux d'accès avec filtres et pagination.
+  world_prot_del: "<gray>  /bp protdel [monde] </gray><white>- Supprime toutes les protections dans un monde."
+  gui_mode_title: "<gold>► Mode GUI"
+  gui_user: "<gray>  /bp user  </gray><white>- Ouvrir le menu utilisateur (paramètres, amis, stats, à propos)"
+  gui_admin: "<gray>  /bp admin </gray><white>- Ouvrir le menu admin (recharger, mise à jour, intégrations, stats, débogage, info, blocs verrouillables)"
+admin_action:
   info:
-  world_expiry:
+    name: "Infos & Inspection"
+    desc: Voir les infos de protection des blocs et des joueurs.
+  teleport:
+    name: Téléportation
+    desc: Se téléporter aux blocs protégés et emplacements.
+  logs:
+    name: Journaux de Protection
+    desc: Inspecter les journaux d'accès aux protections.
+  break:
+    name: Contournement de Casse
+    desc: Casser les blocs protégés appartenant à d'autres.
   unlock:
-  history:
-  enable_all:
-  disable_all:
-  undo:
-  add:
-  toggle_on:
-  toggle_off:
-  toggle_on_active:
-  toggle_off_inactive:
-  true:
-  false:
-dialogs:
-  about:
-    title:
-    description:
-    maintainer:
-    report_issues:
-    version_label:
-    server_label:
-    api_label:
-    java_label:
-    issues_url:
-    credit_line:
-    db_engine_label:
-    db_mysql:
-    db_sqlite:
-    cache_label:
-    cache_suffix:
-    integrations_label:
-    integrations_disabled:
-    integrations_active:
-  user_menu:
-    header:
-  admin_menu:
-    header:
-    config_tooltip:
-  settings:
-    header:
-    auto_lock_desc:
-    hints_desc:
-    notifications_desc:
-    prefer_dialogs:
-    prefer_dialogs_desc:
-  friends:
-    header:
-    manage_hint:
-    public_make:
-    public_current:
-    private_current:
-    public_click:
-    private_click:
-    no_history:
-    recent_searches:
-  stats:
-    header:
-    your_blocks:
-    no_blocks:
-    breakdown:
-    server_total:
-    placements_title:
-  integrations:
-    count:
-    enabled:
-    disabled:
-    plugin:
-    dependent:
+    name: Déverrouillage Forcé
+    desc: Déverrouiller et retirer les protections d'autres joueurs.
   lockables:
-    header:
-    cat_prefix:
-    categories:
-      chests:
-      shulkers:
-      furnaces:
-      storage:
-      signs:
-      doors:
-      trapdoors:
-      beds:
-      gates:
-      workstations:
-      interactive:
-      entities:
-  info:
-    header:
-    protected_blocks:
-  unlock:
-    header:
-    click_hint:
-    location:
-    material_label:
-    owner_label:
-    friends_label:
-    player_not_found:
-    no_blocks:
-    unlocked:
-    not_owned:
-    failed:
+    name: Menu des Verrouillables
+    desc: Configurer les types de blocs verrouillables sur le serveur.
+  container_bypass:
+    name: Contournement de Conteneurs
+    desc: Ouvrir et interagir avec les conteneurs verrouillés.
   protdel:
-    header:
-    world_hint:
-    confirm:
-    cancel:
-    blocks_suffix:
-    undo_label:
-    undo_title:
-    no_history:
-    restore_hint:
-    cant_undo:
-    deleting:
-  update:
-    title:
-    current:
-    latest:
-    outdated:
-    ahead:
-    up_to_date:
-    check_hint:
-    check_now:
-    checking:
-    download:
-    version_prefix:
-    latest_link_label:
+    name: Suppression de Protections de Monde
+    desc: Purger les blocs protégés par monde.
+  config:
+    name: Modifier la Configuration
+    desc: Modifier la configuration et les paramètres du plugin.
   debug:
-    title:
-    label_plugin:
-    label_server:
-    label_api:
-    label_java:
-    run_separator:
-  choose_option:
-  admin_choose:
-  click_to_open:
-  back:
-  close:
-  page:
-  prev:
-  next:
-  prev_hint:
-  next_hint:
-  status_label:
-  status_public:
-  status_private:
-  status_enabled:
-  status_disabled:
-  switch_view:
-  click_disable:
-  click_enable:
-  click_chat:
-  return_user_menu:
-  return_admin_menu:
-  return_previous:
-  category_label:
-  admin_config:
-    title:
-    header:
-    hint:
-    cat_general:
-    cat_general_desc:
-    cat_protection:
-    cat_protection_desc:
-    cat_mechanics:
-    cat_mechanics_desc:
-    cat_limits:
-    cat_limits_desc:
-    cat_notifications:
-    cat_notifications_desc:
-    cat_language:
-    cat_worlds:
-    cat_players:
-    cat_blocks:
-    cat_entity:
-    cat_expiry:
-    cat_raid:
-    cat_maintenance:
-    cat_deprecated:
-    value_bool:
-    value_cycle:
-    value_click_edit:
-    dialog_marker:
-    return_categories:
-    config_yml_prefix:
-    value_current:
-    enter_new_value:
-    new_value_prompt:
-    invalid_number:
-    confirm_value:
-    lock_on_place:
-    public_is_friend:
-    redstone_disallowed:
-    auto_reload:
-    toggle_lang:
-    protect_explosions:
-    piston_movement:
-    shulker_break:
-    allow_break:
-    spawn_protection:
-    simplified_hopper:
-    lock_effects:
-    lock_sounds:
-    world_expiry:
-    entity_protection:
-    backups:
-    session_log:
-    max_blocks:
-    hint_cooldown:
-    friend_search:
-    notify_updates:
-    owner_notifications:
-    language:
-      language_file:
-      toggle_category:
-      toggle_hint:
-      selector_category:
-      selector_hint:
-      replace_translations:
-      fallback_string:
-      fallback_string_hint:
-      status_header:
-      toggle_all_enable:
-      toggle_all_disable:
-      toggle_all_hint:
-      lang_status:
-      config_status_active:
-      config_status_inactive:
-      click_disable:
-      click_enable:
-      active_marker:
-      replace_translations_title:
-      fallback_string_title:
-    worlds:
-      per_worlds_config:
-      excluded_worlds:
-      excluded_worlds_hint:
-      excluded_worlds_empty:
-      per_worlds_config_title:
-      excluded_worlds_title:
-    players:
-      lock_on_place:
-      public_is_friend:
-      max_blocks:
-      max_blocks_hint:
-      hint_cooldown:
-      hint_cooldown_hint:
-      friend_search:
-      friend_search_hint:
-      disable_friends:
-      lock_on_place_title:
-      public_is_friend_title:
-      max_blocks_title:
-      hint_cooldown_title:
-      friend_search_title:
-      disable_friends_title:
-    blocks:
-      modern_family:
-      redstone_disallowed:
-      simplified_hopper:
-      protect_explosions:
-      piston_movement:
-      shulker_break:
-      allow_break:
-      spawn_protection:
-      lock_effects:
-      lock_sounds:
-      use_menus_de:
-      use_dialogs_de:
-      timed_access:
-      timed_access_hint:
-      modern_family_title:
-      redstone_disallowed_title:
-      simplified_hopper_title:
-      protect_explosions_title:
-      piston_movement_title:
-      shulker_break_title:
-      allow_break_title:
-      spawn_protection_title:
-      lock_effects_title:
-      lock_sounds_title:
-      use_menus_title:
-      use_dialogs_title:
-      timed_access_title:
-    entity:
-      protection_enabled:
-      auto_protect_tame:
-      workstation_enabled:
-      workstation_radius:
-      workstation_radius_hint:
-      workstation_vertical_radius:
-      workstation_vertical_radius_hint:
-      villager_locate_seconds:
-      villager_locate_seconds_hint:
-      menu_item:
-      menu_item_hint:
-      menu_item_invalid:
-      protection_enabled_title:
-      auto_protect_tame_title:
-      workstation_enabled_title:
-      workstation_radius_title:
-      workstation_vertical_radius_title:
-      villager_locate_seconds_title:
-      menu_item_title:
-    expiry:
-      enabled:
-      check_interval:
-      check_interval_hint:
-      enabled_title:
-      check_interval_title:
-    raid:
-      enabled:
-      enabled_title:
-    notifications:
-      notify_ops:
-      owner_enabled:
-      owner_open:
-      owner_take:
-      owner_place:
-      notify_ops_title:
-      owner_enabled_title:
-    maintenance:
-      inactivity_cleanup:
-      inactivity_cleanup_hint:
-      auto_reload:
-      session_log:
-      backups:
-      inactivity_cleanup_title:
-      auto_reload_title:
-      auto_reload_delay:
-      auto_reload_delay_title:
-      auto_reload_delay_hint:
-      session_log_title:
-      backups_title:
-    deprecated:
-      we_paste_enabled:
-  click_disable_single:
-  click_enable_single:
+    name: Diagnostics de Débogage
+    desc: Exécuter des diagnostics et des tests système.
+  reload:
+    name: Recharger le Plugin
+    desc: Recharger les fichiers de configuration du plugin.
+  update:
+    name: Mises à Jour du Plugin
+    desc: Vérifier et gérer les mises à jour du plugin.
+  integrations:
+    name: Intégrations
+    desc: Inspecter les intégrations de plugins tiers.
+  recommended:
+    name: Paramètres Recommandés
+    desc: Appliquer la configuration recommandée du serveur.
+  setrole:
+    name: Attribuer des Rôles
+    desc: Attribuer des rôles et tiers administratifs aux joueurs.

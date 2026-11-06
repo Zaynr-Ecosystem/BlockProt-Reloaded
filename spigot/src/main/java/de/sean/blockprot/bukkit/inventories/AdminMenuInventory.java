@@ -109,9 +109,11 @@ public class AdminMenuInventory extends BlockProtInventory {
         inventory.setItem(SLOT_LOCKABLES, item(Material.CHEST,
             Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__LOCKABLES),
             Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__LOCKABLES_LORE)));
-        inventory.setItem(SLOT_WORLD_EXPIRY, item(Material.CLOCK,
-            Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__WORLD_EXPIRY),
-            Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__WORLD_EXPIRY_LORE)));
+        if (BlockProt.getDefaultConfig().isWorldExpiryEnabled()) {
+            inventory.setItem(SLOT_WORLD_EXPIRY, item(Material.CLOCK,
+                Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__WORLD_EXPIRY),
+                Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__WORLD_EXPIRY_LORE)));
+        }
         inventory.setItem(SLOT_PROT_DEL, item(Material.BARRIER,
             Translator.get(TranslationKey.INVENTORIES__WORLD_PROT_DEL__TITLE),
             ""));
@@ -125,9 +127,11 @@ public class AdminMenuInventory extends BlockProtInventory {
             Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__STATS),
             Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__STATS_LORE)));
 
-        inventory.setItem(SLOT_TIERS, item(Material.NETHERITE_CHESTPLATE,
-            Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__TIERS),
-            Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__TIERS_LORE)));
+        if (BlockProt.getDefaultConfig().isAdminTiersEnabled()) {
+            inventory.setItem(SLOT_TIERS, item(Material.NETHERITE_CHESTPLATE,
+                Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__TIERS),
+                Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__TIERS_LORE)));
+        }
 
         setPlayerSkullAsync(SLOT_INFO, player, player.getUniqueId(), player.getName(),
             Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__INFO),
@@ -199,7 +203,7 @@ public class AdminMenuInventory extends BlockProtInventory {
                 player.openInventory(new AdminConfigInventory().fill(player));
             }
 
-        } else if (slot == SLOT_TIERS) {
+        } else if (slot == SLOT_TIERS && BlockProt.getDefaultConfig().isAdminTiersEnabled()) {
             if (BlockProt.getDefaultConfig().shouldUseDialogs(player)) {
                 player.closeInventory();
                 de.sean.blockprot.bukkit.dialogs.AdminTiersDialog.show(player, DialogOrigin.ADMIN_MENU);
@@ -227,7 +231,12 @@ public class AdminMenuInventory extends BlockProtInventory {
             ComponentMessages.sendLegacyActionBar(player, Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__UPDATE_LORE));
             List<Player> opRecipients = new ArrayList<>();
             for (Player online : Bukkit.getOnlinePlayers()) {
-                if (online.isOp()) opRecipients.add(online);
+                if (online.isOp() || AdminTierManager.hasPermission(online, AdminAction.UPDATE)) {
+                    opRecipients.add(online);
+                }
+            }
+            if (!opRecipients.contains(player)) {
+                opRecipients.add(player);
             }
             UpdateChecker checker = new UpdateChecker(BlockProt.getPluginVersion(), opRecipients);
             BlockProt.getFoliaLib().getScheduler().runAsync(asyncTask -> checker.run());
@@ -255,7 +264,7 @@ public class AdminMenuInventory extends BlockProtInventory {
             player.closeInventory();
             DebugCommand.run(player);
 
-        } else if (slot == SLOT_WORLD_EXPIRY) {
+        } else if (slot == SLOT_WORLD_EXPIRY && BlockProt.getDefaultConfig().isWorldExpiryEnabled()) {
             InventoryState newState = InventoryState.builder()
                 .origin(InventoryState.MenuOrigin.ADMIN_MENU)
                 .build();

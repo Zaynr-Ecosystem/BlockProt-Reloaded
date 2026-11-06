@@ -14,7 +14,7 @@
 # When enabled: false, no blocks can be locked in that world.
 # Worlds auto-populate on first scan with empty lists.
 #
-# Docs: https://github.com/VictorGugug/BlockProt-Reloaded/tree/main/docs
+# Docs: https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/tree/main/docs
 # Syntax: docs/MODERN SYNTAX AND LEGACY/BLOCK_FAMILY_SYNTAX.md
 
 worlds:

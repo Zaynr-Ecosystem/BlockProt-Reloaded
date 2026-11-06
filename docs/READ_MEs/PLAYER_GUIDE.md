@@ -138,23 +138,22 @@ matching player names reliably regardless of keyboard accents.
 
 | Command | What it does |
 |---|---|
-| `/bp friends` | Opens your default-friends menu. |
+| `/bp friends` | Opens your default-friends menu (unavailable if friends functionality is disabled by the administrator). |
 | `/bp friends addall <player>` | Adds a friend to **all** your protected blocks. |
 | `/bp transferall <player>` | Transfers ownership of **all** your protected blocks to another player. |
-| `/bp logs [here|<page>]` | Opens the paginated access audit log for your protected blocks or the targeted block. |
+| `/bp logs [here\|<page>]` | Opens the paginated access audit log for your protected blocks or the targeted block. |
 
 ### Friend permission levels
 
 Starting in 1.3.6, you can grant four different permission levels when adding or
-editing a friend on a block. Every level can open the block and take or deposit
-items; the level decides what else the friend may do:
+editing a friend on a block. Preset levels grant standard container access, while the **Custom** level allows full control over 10 individual permissions:
 
-- **Basic:** Use the block only. The lock menu does not open for them.
+- **Basic:** Use the block only (open container, deposit, withdraw). The lock menu does not open for them.
 - **Operator:** Also open the lock menu, change block settings and the block
   name, view the audit log, and inspect the contents.
 - **Full Manager:** Everything Operator can do, plus managing friends. They cannot
   transfer or delete the protection.
-- **Custom:** Configure four independent permissions (Open Container, Deposit Items, Withdraw Items, and Redstone Access) via dialogs, chest inventory menus, or Bedrock forms.
+- **Custom:** Configure 10 granular permissions independently (Open Menu, Edit Settings, Edit Name, Inspect, View Audit, Manage Friends, Open Container, Deposit Items, Withdraw Items, and Redstone Access) via dialogs, chest inventory menus, or Bedrock forms. Unlike preset levels, Custom allows selectively revoking container opening, deposit, or withdraw access.
 
 ### Public blocks
 

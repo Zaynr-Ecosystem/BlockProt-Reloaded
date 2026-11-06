@@ -20,22 +20,42 @@
 
 package de.sean.blockprot.bukkit;
 
+import de.sean.blockprot.bukkit.config.DefaultConfig;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.mockbukkit.mockbukkit.MockBukkit;
 import org.mockbukkit.mockbukkit.ServerMock;
-import org.mockbukkit.mockbukkit.entity.PlayerMock;
 import org.junit.jupiter.api.*;
 
-import java.util.UUID;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class TranslatorTest {
 
     private static ServerMock server;
+    private static File tempFolder;
 
     @BeforeAll
-    static void setup() {
+    static void setup() throws Exception {
         server = MockBukkit.mock();
+        tempFolder = File.createTempFile("bp_translator_test", "");
+        tempFolder.delete();
+        tempFolder.mkdirs();
+        tempFolder.deleteOnExit();
+
+        var field = BlockProt.class.getDeclaredField("defaultConfig");
+        field.setAccessible(true);
+        field.set(null, new DefaultConfig(new YamlConfiguration(), tempFolder));
+
+        var stream = TranslatorTest.class.getResourceAsStream("/lang/translations_en.yml");
+        if (stream != null) {
+            try (var reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+                YamlConfiguration lang = YamlConfiguration.loadConfiguration(reader);
+                Translator.loadFromConfigs(lang, lang);
+            }
+        }
     }
 
     @AfterAll

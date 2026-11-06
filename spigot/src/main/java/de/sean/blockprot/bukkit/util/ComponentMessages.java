@@ -63,7 +63,8 @@ public final class ComponentMessages {
         return COMPONENT_ACTION_BAR_SUPPORTED;
     }
 
-    private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacySection();
+    private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.builder()
+        .character('§').hexColors().useUnusualXRepeatedCharacterHexFormat().build();
 
     private ComponentMessages() {}
 

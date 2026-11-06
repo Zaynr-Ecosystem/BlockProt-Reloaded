@@ -122,6 +122,11 @@ public final class BlockProt extends JavaPlugin {
     }
 
     @Nullable
+    public static DefaultConfig getDefaultConfigOrNull() {
+        return defaultConfig;
+    }
+
+    @Nullable
     public ConfigFileWatcher getFileWatcher() {
         return fileWatcher;
     }

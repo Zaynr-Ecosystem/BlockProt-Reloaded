@@ -48,7 +48,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:${project.findProperty("paperApiVersion") ?: "1.21.7-R0.1-SNAPSHOT"}")
     testImplementation("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("org.apache.commons:commons-lang3:3.21.0")
-    implementation("com.github.ben-manes.caffeine:caffeine:3.3.0")
+    implementation("com.github.ben-manes.caffeine:caffeine:3.3.1")
 
     testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -68,7 +68,7 @@ dependencies {
 
     implementation("org.enginehub:squirrelid:0.3.2")
     implementation("com.zaxxer:HikariCP:7.1.0")
-    implementation("com.mysql:mysql-connector-j:26.7.0")
+    implementation("com.mysql:mysql-connector-j:26.10.0")
 
     // Adventure: bundled for servers that do not expose Adventure to the plugin
     // classpath (vanilla Spigot/Bukkit). Paper-based servers resolve net.kyori.*

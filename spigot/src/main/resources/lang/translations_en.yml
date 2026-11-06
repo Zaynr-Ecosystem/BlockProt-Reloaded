@@ -511,7 +511,7 @@ messages:
     outdated_dev: "<yellow>BlockProt has a new experimental development build (BEDev) available: {version}. It is NOT a stable version and is only published on GitHub."
     ahead: "<yellow>BlockProt Reloaded is ahead of the published release ({version})"
     ahead_hotfix: "<yellow>BlockProt Reloaded is running hotfix {version}, ahead of the published release ({base_version})"
-    up_to_date: "<green>BlockProt is up-to-date"
+    up_to_date: "<#98FF98>BlockProt Reloaded is up to date."
     click_hint: "Click to visit the GitHub Releases page"
 
 console:
@@ -628,7 +628,7 @@ dialogs:
     server_label: "Server: "
     api_label: "API: "
     java_label: "Java: "
-    issues_url: "github.com/VictorGugug/BlockProt-Reloaded/issues"
+    issues_url: "github.com/Zaynr-Ecosystem/BlockProt-Reloaded/issues"
     author_label: "Author: spnda"
     maintainer_label: "Maintainer: Zaynr (Zar)"
     db_engine_label: "Database Engine: "

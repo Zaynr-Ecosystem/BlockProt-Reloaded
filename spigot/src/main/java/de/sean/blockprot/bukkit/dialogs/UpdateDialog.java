@@ -79,7 +79,7 @@ public final class UpdateDialog {
                     && cachedRelease.getHtmlUrl() != null
                     && !cachedRelease.getHtmlUrl().isBlank()
                 ? cachedRelease.getHtmlUrl()
-                : "https://github.com/VictorGugug/BlockProt-Reloaded/releases/latest";
+                : "https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/releases/latest";
 
             body.add(DialogBodyEntry.text(Component.empty()));
             body.add(DialogBodyEntry.text(

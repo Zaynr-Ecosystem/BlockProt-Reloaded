@@ -70,9 +70,11 @@ public class UserMenuInventory extends BlockProtInventory {
         inventory = createInventory();
         fillSeparators();
 
-        setPlayerSkullAsync(SLOT_FRIENDS, player, player.getUniqueId(), player.getName(),
-            Translator.get(TranslationKey.INVENTORIES__USER_MENU__FRIENDS),
-            Translator.get(TranslationKey.INVENTORIES__USER_MENU__FRIENDS_LORE));
+        if (!BlockProt.getDefaultConfig().isFriendFunctionalityDisabled()) {
+            setPlayerSkullAsync(SLOT_FRIENDS, player, player.getUniqueId(), player.getName(),
+                Translator.get(TranslationKey.INVENTORIES__USER_MENU__FRIENDS),
+                Translator.get(TranslationKey.INVENTORIES__USER_MENU__FRIENDS_LORE));
+        }
         inventory.setItem(SLOT_SETTINGS, item(Material.WRITABLE_BOOK,
             Translator.get(TranslationKey.INVENTORIES__USER_MENU__SETTINGS),
             Translator.get(TranslationKey.INVENTORIES__USER_MENU__SETTINGS_LORE)));
@@ -113,7 +115,7 @@ public class UserMenuInventory extends BlockProtInventory {
             InventoryState.set(player.getUniqueId(), newState);
             player.openInventory(new UserSettingsInventory().fill(player));
             new PlayerSettingsHandler(player).setHasPlayerInteractedWithMenu(true);
-        } else if (slot == SLOT_FRIENDS) {
+        } else if (slot == SLOT_FRIENDS && !BlockProt.getDefaultConfig().isFriendFunctionalityDisabled()) {
             InventoryState newState = new InventoryState(null);
             newState.friendSearchState = InventoryState.FriendSearchState.DEFAULT_FRIEND_SEARCH;
             newState.origin = InventoryState.MenuOrigin.USER_MENU;

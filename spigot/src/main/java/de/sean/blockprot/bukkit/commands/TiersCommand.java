@@ -51,8 +51,9 @@ public final class TiersCommand implements CommandExecutor {
 
     @Override
     public boolean canUseCommand(@NotNull CommandSender sender) {
-        return sender.isOp() || AdminTierManager.hasPermission(sender, AdminAction.SETROLE)
-            || sender.hasPermission(Permissions.ADMIN_OWNER.key());
+        return BlockProt.getDefaultConfig().isAdminTiersEnabled()
+            && (sender.isOp() || AdminTierManager.hasPermission(sender, AdminAction.SETROLE)
+                || sender.hasPermission(Permissions.ADMIN_OWNER.key()));
     }
 
     @Override

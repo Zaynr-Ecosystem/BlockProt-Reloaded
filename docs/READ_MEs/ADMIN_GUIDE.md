@@ -532,6 +532,10 @@ Starting in 1.3.6, player preferences, friend definitions, search history, and a
 
 Legacy flat root tags are migrated automatically to these nested subcompounds upon login, and the old keys are safely removed from the player's root tag list so tools like NBTExplorer display a clean, well-organized hierarchy with zero data loss.
 
+### Offline-mode profile isolation
+
+When running on an offline-mode server (`online-mode: false` in `server.properties`), `CachedProfileService` automatically bypasses external Mojang HTTP API lookups (`HttpRepositoryService`). Player profiles and UUIDs are resolved strictly against local sources (online player list, Paper/Bukkit cache, and the local `blockprot_usercache.sqlite` database). This eliminates external network latency, prevents thread hangs, and ensures offline player identity isolation.
+
 ## 12. Languages
 
 - `lang/lang.yml` lists all bundled languages; set each to `true` to enable it or
@@ -546,18 +550,20 @@ Legacy flat root tags are migrated automatically to these nested subcompounds up
 ## 13. Integrations (`integrations.yml`)
 
 The plugin auto-detects supported plugins when they are present (soft-depend):
-**Towny, PlaceholderAPI, WorldGuard, Lands, ClaimChunk, ViaVersion, ViaBackwards**,
+**Towny, PlaceholderAPI, WorldGuard, Zelly's Guard, Lands, ClaimChunk, ViaVersion, ViaBackwards, Geyser, Floodgate**,
 plus Residence and GriefPrevention support through their APIs.
 
 | Integration | What it does |
 |---|---|
 | WorldGuard | Respects regions via the `allow-blockprot` region flag (`enable_flag_functionality`). |
+| Zelly's Guard | Honors claim boundaries via event synchronization; prevents locking or accessing containers inside unowned claims. |
 | Lands | `allow_protecting_containers_in_wilderness`, `require_protect_for_friends_flag`. |
 | Towny | `cleanup_plots_after_unclaim`, bypass protection in ruined towns. |
 | ClaimChunk | `restrict_access_to_chunk_owner`. |
 | WorldEdit | Master toggle `enabled`; `paste_autolock.enabled` (default `false`), radius, max blocks per paste, delay. |
 | PlaceholderAPI | Placeholder support for other plugins. |
 | ViaVersion / ViaBackwards | Multi-version client support. |
+| Geyser / Floodgate | Native touch-friendly Bedrock forms (Cumulus API), Bedrock username prefixes, and profile/skin resolution. |
 | Residence | `restrict_access_to_residence_owner`. |
 | GriefPrevention | `restrict_access_to_claim_owner`. |
 
@@ -596,7 +602,7 @@ Run `/bp integrations` to list which are active on your server.
 | `/bp transferall <player>` | `blockprot.user` | Transfer all your blocks to another player. |
 | `/bp about` | `blockprot.user` | Plugin and fork information. |
 | `/bp disablehints` | `blockprot.user` | Disable the lock hint messages. |
-| `/bp logs [here|player <name>|<page>]` | `blockprot.user` | Paginated access audit log for your blocks, the targeted block (`here`), or another player (admin). |
+| `/bp logs [here\|<page>]` | `blockprot.user` | Paginated access audit log for your owned blocks or the targeted block (`here`). |
 
 ### Admin commands
 
@@ -611,6 +617,7 @@ OPs count as Owner, and `blockprot.user.admin` alone reaches T2 commands only.
 | `/bp tiers [setrole] [player] [tier]` | Admin or `blockprot.user.admin.owner` | Owner | Staff roles menu (chest inventory or dialog). Without arguments, opens the staff management GUI. With arguments, assigns an admin tier (`t1`, `t2`, `t3`, `owner`, `custom`, `none`) to a player when `admin_tiers.enabled: true`. |
 | `/bp lockables` | Admin | T2 | Browse and toggle which blocks are lockable (the GUI writes `blocks.yml`). This is the only in-game way to add lockable blocks; regular players cannot use it. |
 | `/bp info <player>` | Admin | T1 | Opens a player's block list. From the console, prints the owned blocks. |
+| `/bp logs [here\|player <name>\|<page>]` | Admin or `AdminAction.LOGS` | T1 | Paginated access audit log for the targeted block (`here`) or any specific player. Querying another player requires `AdminAction.LOGS` or admin permissions. |
 | `/bp unlock <player>` | Admin | T2 | Opens a GUI to unlock/remove protections for a player. From the console, lists the player's locked blocks. |
 | `/bp protdel [world]` | Admin | T3 | Delete all protections in a world (with confirmation). From the console: `/bp protdel <world> confirm`, and `/bp protdel undo` to restore the last deletion. |
 | `/bp reload` | Admin | Owner | Reload configuration (always creates a backup first). |
@@ -618,6 +625,13 @@ OPs count as Owner, and `blockprot.user.admin` alone reaches T2 commands only.
 | `/bp integrations` | Admin | Owner | List active integrations. |
 | `/bp debug` | Admin or `blockprot.debug` | T3 | Developer diagnostics. From the console it runs at world spawn; player-only screens are reported as SKIP. |
 | `/bp recommended blocks` / `config` / `all` | OP or `blockprot.user.admin.owner` | Owner | Apply the recommended `blocks.yml`, `config.yml`, or both (section 5). |
+
+### Dynamic feature gating
+
+Commands and tab-completion entries automatically adapt to server configuration toggles:
+- **`admin_tiers.enabled: false`:** `/bp tiers` is removed from tab-completion and rejected upon execution.
+- **`disable_friend_functionality: true`:** `/bp friends` (including `/bp friends addall`) is removed from tab-completion and rejected upon execution.
+- **`enable_session_log: false`:** `/bp logs` is removed from tab-completion and rejected upon execution.
 
 > In menu mode (`use_menus: true`), player-facing subcommands are hidden from
 > tab-complete and reachable via `/bp user` and `/bp admin`. The console always has
@@ -662,6 +676,34 @@ If your server runs without LuckPerms or another permissions plugin, you can man
   - In Chest Inventory GUI: left-click selects the Custom role and immediately opens the permissions configuration menu (`AdminCustomFlagsInventory`); right-click opens the configuration menu directly to view or edit existing custom permissions without reassigning.
   - In Paper Dialogs: two distinct buttons are provided ("Custom" to assign and open permissions; "Config" to open permissions directly).
   - Inside the custom permissions menu, clicking any of the 15 actions toggles that flag on or off for the player, persisting immediately to player NBT and `admins.yml`.
+
+#### The 15 staff tier actions
+Every administrative capability maps to one of 15 granular actions with a minimum required tier:
+
+| Action | Minimum Tier | Description |
+|---|---|---|
+| `INFO` | T1 (Moderator) | Inspect player protections and location lists (`/bp info`). |
+| `TELEPORT` | T1 (Moderator) | Teleport to protected block coordinates from inspection lists. |
+| `LOGS` | T1 (Moderator) | Query access audit logs and view history of other players (`/bp logs player <name>`). |
+| `BREAK` | T2 (Helper) | Break protected blocks owned by other players (clearing protection on break). |
+| `UNLOCK` | T2 (Helper) | Force unlock and remove protections via `/bp unlock`. |
+| `LOCKABLES` | T2 (Helper) | Open the materials browser to configure lockable blocks (`/bp lockables`). |
+| `CONTAINER_BYPASS` | T2 (Helper) | Bypass container protection when opening or interacting with blocks and entities. |
+| `PROTDEL` | T3 (Admin) | Bulk-delete protections across a world with undo support (`/bp protdel`). |
+| `CONFIG` | T3 (Admin) | Modify configuration settings in-game via `/bp admin -> Config`. |
+| `DEBUG` | T3 (Admin) | Execute developer diagnostics and tests (`/bp debug`). |
+| `RELOAD` | Owner | Reload configuration, translations, and blocks (`/bp reload`). |
+| `UPDATE` | Owner | Check and download updates from GitHub (`/bp update`). |
+| `INTEGRATIONS` | Owner | Inspect status of third-party plugins (`/bp integrations`). |
+| `RECOMMENDED` | Owner | Apply recommended configurations in-game (`/bp recommended`). |
+| `SETROLE` | Owner | Assign staff roles and admin tiers (`/bp tiers setrole`). |
+
+#### Scope of `CONTAINER_BYPASS`
+The `CONTAINER_BYPASS` action (granted to T2+ or via custom flags) provides comprehensive administrative bypass across all protected elements without modifying protection ownership or trust lists:
+- **Containers:** chests, double chests, trapped chests, shulker boxes, barrels, furnaces, blast furnaces, smokers, dispensers, droppers, and hoppers.
+- **Dragon Eggs:** allows interacting with locked dragon eggs without triggering unauthorized teleportation or denial events.
+- **Protected Entities:** allows opening, placing items into, or modifying protected item frames, glow item frames, chest boats, and storage/hopper minecarts.
+- **Villager Workstations:** allows accessing workstations and interacting or trading with villagers linked to protected job-sites.
 - Alternatively, use `/bp tiers setrole <player> <tier>` (or `/bp tiers <player> <tier>`, requires OP or `owner` tier) to assign a staff member's tier directly from chat or console.
 - Roles assigned this way are stored in the player's persistent NBT (`admin/tier`, `admin/custom_flags`) and mirrored to `admins.yml` in the plugin folder.
 - When `admin_tiers.enabled: true`, the plugin checks LuckPerms / Bukkit permissions first, then falls back to `admins.yml` and player NBT, ensuring offline staff remain recognized.

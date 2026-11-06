@@ -24,6 +24,8 @@ import de.sean.blockprot.bukkit.BlockProt;
 import de.sean.blockprot.bukkit.Permissions;
 import de.sean.blockprot.bukkit.TranslationKey;
 import de.sean.blockprot.bukkit.Translator;
+import de.sean.blockprot.bukkit.admin.AdminAction;
+import de.sean.blockprot.bukkit.admin.AdminTierManager;
 import de.sean.blockprot.bukkit.nbt.PlayerSettingsHandler;
 import de.sean.blockprot.bukkit.tasks.UpdateChecker;
 import de.sean.blockprot.bukkit.util.ComponentMessages;
@@ -52,7 +54,8 @@ public class JoinEventListener implements Listener {
         BlockProt.getFoliaLib().getScheduler().runAsync(asyncTask ->
             SkinCache.getOrFetch(player.getName(), player.getUniqueId()));
 
-        if (BlockProt.getDefaultConfig().shouldNotifyOpOfUpdates() && player.isOp()) {
+        if (BlockProt.getDefaultConfig().shouldNotifyOpOfUpdates()
+                && (player.isOp() || AdminTierManager.hasPermission(player, AdminAction.UPDATE))) {
             UpdateChecker checker = new UpdateChecker(BlockProt.getPluginVersion(), Collections.singletonList(player));
             BlockProt.getFoliaLib().getScheduler().runAsync(asyncTask -> checker.run());
         }

@@ -57,7 +57,8 @@ public final class FriendsAddAllCommand implements CommandExecutor {
 
     @Override
     public boolean canUseCommand(@NotNull CommandSender sender) {
-        return sender.hasPermission(Permissions.USER.key());
+        return !BlockProt.getDefaultConfig().isFriendFunctionalityDisabled()
+            && sender.hasPermission(Permissions.USER.key());
     }
 
     @Override

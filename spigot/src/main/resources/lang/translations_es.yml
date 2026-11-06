@@ -448,7 +448,7 @@ messages:
     outdated_dev: "<yellow>BlockProt tiene una nueva build de desarrollo experimental (BEDev) disponible: {version}. NO es una versión estable y solo se publica en GitHub."
     ahead: "<yellow>BlockProt Reloaded está por delante del lanzamiento publicado ({version})"
     ahead_hotfix: "<yellow>BlockProt Reloaded está ejecutando el hotfix {version}, por delante del lanzamiento publicado ({base_version})"
-    up_to_date: "<green>BlockProt está actualizado"
+    up_to_date: "<#98FF98>BlockProt Reloaded está actualizado."
     click_hint: "Haz clic para visitar la página de lanzamientos en GitHub"
   lockables:
     family_unknown: "No se pudo determinar la familia para {expression}"
@@ -624,7 +624,7 @@ dialogs:
     server_label: "Servidor: "
     api_label: "API: "
     java_label: "Java: "
-    issues_url: "github.com/VictorGugug/BlockProt-Reloaded/issues"
+    issues_url: "github.com/Zaynr-Ecosystem/BlockProt-Reloaded/issues"
     author_label: "Autor: spnda"
     maintainer_label: "Mantenedor: Zaynr (Zar)"
     db_engine_label: "Motor de Base de Datos: "
