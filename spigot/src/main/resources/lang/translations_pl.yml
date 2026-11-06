@@ -279,7 +279,7 @@ messages:
   friends_searching: §eWyszukiwanie §f{player}§e...
   friends_addall_success: §a§f{player}§a dodany jako przyjaciel do §f{count}§a bloku/bloków.
   friends_addall_usage: '§cUżycie: /blockprot friends addall <gracz>'
-  inactivity_cleanup_done: '§e[BlockProt] Czyszczenie nieaktywności: §f{count}§e blok/bloków
+  inactivity_cleanup_done: '§e[BlockProt Reloaded] Czyszczenie nieaktywności: §f{count}§e blok/bloków
     zwolniono.'
   friends_list_title: §6Twoi przyjaciele
   error_prefix:
@@ -411,10 +411,10 @@ messages:
     up_to_date:
     click_hint:
 worlds:
-  scan_start: '[BlockProt] Skanowanie światów... ({count} załadowano)'
-  scan_world_added: '[BlockProt] Świat ''{world}'' dodany do worlds.yml: ochrona WYŁĄCZONA
+  scan_start: '[BlockProt Reloaded] Skanowanie światów... ({count} załadowano)'
+  scan_world_added: '[BlockProt Reloaded] Świat ''{world}'' dodany do worlds.yml: ochrona WYŁĄCZONA
     domyślnie. Włącz ręcznie.'
-  scan_complete: '[BlockProt] Skanowanie zakończone. {added} nowy/nowe światy zarejestrowane.'
+  scan_complete: '[BlockProt Reloaded] Skanowanie zakończone. {added} nowy/nowe światy zarejestrowane.'
   status:
   protected_count:
   no_worlds:

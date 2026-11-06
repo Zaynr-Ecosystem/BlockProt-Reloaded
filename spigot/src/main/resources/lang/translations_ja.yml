@@ -277,7 +277,7 @@ messages:
   friends_searching: §e§f{player}§eを検索中...
   friends_addall_success: §a§f{player}§aを§f{count}§aブロックにフレンドとして追加しました。
   friends_addall_usage: '§c使用法: /blockprot friends addall <プレイヤー>'
-  inactivity_cleanup_done: '§e[BlockProt] 非アクティブ整理: §f{count}§eブロックを解放しました。'
+  inactivity_cleanup_done: '§e[BlockProt Reloaded] 非アクティブ整理: §f{count}§eブロックを解放しました。'
   friends_list_title: §6あなたのフレンド
   error_prefix:
   entity_death_notification:
@@ -408,9 +408,9 @@ messages:
     up_to_date:
     click_hint:
 worlds:
-  scan_start: '[BlockProt] ワールドをスキャン中... ({count} 読み込み済み)'
-  scan_world_added: '[BlockProt] ワールド ''{world}'' を worlds.yml に追加しました: 保護はデフォルトで無効です。手動で有効化してください。'
-  scan_complete: '[BlockProt] スキャン完了。{added} 件の新しいワールドが登録されました。'
+  scan_start: '[BlockProt Reloaded] ワールドをスキャン中... ({count} 読み込み済み)'
+  scan_world_added: '[BlockProt Reloaded] ワールド ''{world}'' を worlds.yml に追加しました: 保護はデフォルトで無効です。手動で有効化してください。'
+  scan_complete: '[BlockProt Reloaded] スキャン完了。{added} 件の新しいワールドが登録されました。'
   status:
   protected_count:
   no_worlds:

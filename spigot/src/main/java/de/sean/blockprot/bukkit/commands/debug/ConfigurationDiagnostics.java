@@ -25,7 +25,10 @@ import de.sean.blockprot.bukkit.BlockProtLogger;
 import de.sean.blockprot.bukkit.audit.AuditLogger;
 import de.sean.blockprot.bukkit.config.BlockFamilyParser;
 import de.sean.blockprot.bukkit.config.DefaultConfig;
+import de.sean.blockprot.bukkit.config.WorldsConfig;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -45,6 +48,8 @@ public final class ConfigurationDiagnostics {
         checkItemFrameProtection(ctx);
         checkRaidDetection(ctx);
         checkVillagerWorkstationProtection(ctx);
+        checkFeatureGating(ctx);
+        checkWorldsConfiguration(ctx);
     }
 
     private static void checkLockableMaterials(@NotNull DiagnosticsContext ctx) {
@@ -182,6 +187,50 @@ public final class ConfigurationDiagnostics {
             ctx.pass();
         } catch (Exception e) {
             BlockProtLogger.fail("Villager workstation protection", e.getMessage());
+            ctx.fail();
+        }
+    }
+
+    private static void checkFeatureGating(@NotNull DiagnosticsContext ctx) {
+        try {
+            var cfg = BlockProt.getInstance().getConfig();
+            boolean friendsDisabled = cfg.getBoolean("disable_friend_functionality", false);
+            boolean tiersEnabled = cfg.getBoolean("admin_tiers.enabled", true);
+            boolean auditEnabled = cfg.getBoolean("audit_log.enabled", true);
+            boolean useMenus = cfg.getBoolean("use_menus", true);
+            boolean useDialogs = cfg.getBoolean("use_dialogs", true);
+            boolean modernFamilies = cfg.getBoolean("modern_family_blocks", true);
+
+            BlockProtLogger.pass("Feature Gating: friends=" + (!friendsDisabled ? "enabled" : "disabled")
+                + " tiers=" + tiersEnabled
+                + " auditLog=" + auditEnabled
+                + " menus=" + useMenus
+                + " dialogs=" + useDialogs
+                + " modernFamilies=" + modernFamilies);
+            ctx.pass();
+        } catch (Exception e) {
+            BlockProtLogger.fail("Feature Gating", e.getMessage());
+            ctx.fail();
+        }
+    }
+
+    private static void checkWorldsConfiguration(@NotNull DiagnosticsContext ctx) {
+        try {
+            List<World> loadedWorlds = Bukkit.getWorlds();
+            WorldsConfig worldsCfg = BlockProt.getWorldsConfig();
+            int configured = 0;
+            if (worldsCfg != null) {
+                for (World w : loadedWorlds) {
+                    if (worldsCfg.hasWorldConfig(w)) {
+                        configured++;
+                    }
+                }
+            }
+            BlockProtLogger.pass("Worlds Configuration: loadedWorlds=" + loadedWorlds.size()
+                + " configuredOverrides=" + configured);
+            ctx.pass();
+        } catch (Exception e) {
+            BlockProtLogger.fail("Worlds Configuration", e.getMessage());
             ctx.fail();
         }
     }

@@ -279,11 +279,11 @@ messages:
   friends_searching: §eProcurando §f{player}§e...
   friends_addall_success: §a§f{player}§a adicionado como amigo em §f{count}§a bloco(s).
   friends_addall_usage: '§cUso: /blockprot friends addall <jogador>'
-  inactivity_cleanup_done: '§e[BlockProt] Limpeza de inatividade: §f{count}§e bloco(s)
+  inactivity_cleanup_done: '§e[BlockProt Reloaded] Limpeza de inatividade: §f{count}§e bloco(s)
     liberado(s).'
   friends_list_title: §6Seus amigos
   only_players: Apenas jogadores podem usar este comando.
-  reload_done: §aBlockProt foi recarregado com sucesso.
+  reload_done: "<#98FF98>BlockProt Reloaded foi recarregado com sucesso."
   integrations_enabled: '§7Integrações ativas ({count}): {integrations}'
   error_prefix:
   entity_death_notification:

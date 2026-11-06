@@ -279,7 +279,7 @@ messages:
   friends_searching: §eHľadám §f{player}§e...
   friends_addall_success: §a§f{player}§a pridaný ako priateľ do §f{count}§a bloku/blokov.
   friends_addall_usage: '§cPoužitie: /blockprot friends addall <hráč>'
-  inactivity_cleanup_done: '§e[BlockProt] Čistenie neaktivity: §f{count}§e blok/blokov
+  inactivity_cleanup_done: '§e[BlockProt Reloaded] Čistenie neaktivity: §f{count}§e blok/blokov
     uvoľnených.'
   friends_list_title: §6Tvoji priatelia
   error_prefix:
@@ -411,10 +411,10 @@ messages:
     up_to_date:
     click_hint:
 worlds:
-  scan_start: '[BlockProt] Skenovanie svetov... ({count} načítaných)'
-  scan_world_added: '[BlockProt] Svet ''{world}'' pridaný do worlds.yml: ochrana VYPNUTÁ
+  scan_start: '[BlockProt Reloaded] Skenovanie svetov... ({count} načítaných)'
+  scan_world_added: '[BlockProt Reloaded] Svet ''{world}'' pridaný do worlds.yml: ochrana VYPNUTÁ
     predvolene. Zapni ručne.'
-  scan_complete: '[BlockProt] Skenovanie dokončené. {added} nový/nové svety zaregistrované.'
+  scan_complete: '[BlockProt Reloaded] Skenovanie dokončené. {added} nový/nové svety zaregistrované.'
   status:
   protected_count:
   no_worlds:

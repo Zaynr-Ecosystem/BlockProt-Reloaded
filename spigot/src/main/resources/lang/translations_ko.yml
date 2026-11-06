@@ -276,7 +276,7 @@ messages:
   friends_searching: §e§f{player}§e 검색 중...
   friends_addall_success: §a§f{player}§a을(를) §f{count}§a 블록에 친구로 추가했습니다.
   friends_addall_usage: '§c사용법: /blockprot friends addall <플레이어>'
-  inactivity_cleanup_done: '§e[BlockProt] 비활성 정리: §f{count}§e 블록이 해제되었습니다.'
+  inactivity_cleanup_done: '§e[BlockProt Reloaded] 비활성 정리: §f{count}§e 블록이 해제되었습니다.'
   friends_list_title: §6당신의 친구들
   error_prefix:
   entity_death_notification:
@@ -407,10 +407,10 @@ messages:
     up_to_date:
     click_hint:
 worlds:
-  scan_start: '[BlockProt] 세계 검색 중... ({count} 로드됨)'
-  scan_world_added: '[BlockProt] 세계 ''{world}''가 worlds.yml에 추가되었습니다: 보호가 기본적으로 비활성화되어
+  scan_start: '[BlockProt Reloaded] 세계 검색 중... ({count} 로드됨)'
+  scan_world_added: '[BlockProt Reloaded] 세계 ''{world}''가 worlds.yml에 추가되었습니다: 보호가 기본적으로 비활성화되어
     있습니다. 수동으로 활성화하세요.'
-  scan_complete: '[BlockProt] 검색 완료. {added}개의 새로운 세계가 등록되었습니다.'
+  scan_complete: '[BlockProt Reloaded] 검색 완료. {added}개의 새로운 세계가 등록되었습니다.'
   status:
   protected_count:
   no_worlds:

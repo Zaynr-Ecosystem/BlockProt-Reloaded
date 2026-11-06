@@ -23,7 +23,6 @@ package de.sean.blockprot.bukkit.commands;
 import de.sean.blockprot.bukkit.BlockProt;
 import de.sean.blockprot.bukkit.BlockProtLogger;
 import de.sean.blockprot.bukkit.Permissions;
-import de.sean.blockprot.bukkit.admin.AdminAction;
 import de.sean.blockprot.bukkit.admin.AdminTierManager;
 import de.sean.blockprot.bukkit.TranslationKey;
 import de.sean.blockprot.bukkit.Translator;
@@ -104,7 +103,6 @@ public final class BlockProtCommand implements TabExecutor {
     public static Map<String, CommandExecutor> getActiveCommands(@NotNull CommandSender sender) {
         boolean menusEnabled = !BlockProt.getDefaultConfig().areExtraCommandsEnabled();
         boolean isAdmin = AdminTierManager.hasAnyAdminPermission(sender);
-        boolean canUpdate = sender.isOp() || AdminTierManager.hasPermission(sender, AdminAction.UPDATE);
 
         if (menusEnabled) {
             if (sender instanceof Player) {
@@ -112,9 +110,6 @@ public final class BlockProtCommand implements TabExecutor {
                 cmds.put("user", GUI_COMMANDS.get("user"));
                 if (isAdmin) {
                     cmds.put("admin", GUI_COMMANDS.get("admin"));
-                }
-                if (canUpdate) {
-                    cmds.put("update", CLI_COMMANDS.get("update"));
                 }
                 return Collections.unmodifiableMap(cmds);
             }

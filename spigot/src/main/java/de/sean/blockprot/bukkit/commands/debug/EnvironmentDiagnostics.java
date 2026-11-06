@@ -26,6 +26,9 @@ import de.sean.blockprot.bukkit.BukkitCompat;
 import de.sean.blockprot.bukkit.Edition;
 import de.sean.blockprot.bukkit.VersionCompat;
 import de.sean.blockprot.bukkit.tasks.BackupTask;
+import de.sean.blockprot.bukkit.tasks.UpdateChecker;
+import de.sean.blockprot.util.SemanticVersion;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -41,6 +44,9 @@ public final class EnvironmentDiagnostics {
         checkBukkitCompat(ctx);
         checkFoliaLib(ctx);
         checkEdition(ctx);
+        checkProfileAndAuth(ctx);
+        checkUpdateChecker(ctx);
+        checkMetrics(ctx);
     }
 
     private static void checkConfig(@NotNull DiagnosticsContext ctx) {
@@ -103,6 +109,46 @@ public final class EnvironmentDiagnostics {
             ctx.pass();
         } else {
             BlockProtLogger.fail("Edition", "id=" + edition.id() + " minecraftInRange=" + notOlder + " marker=" + marker);
+            ctx.fail();
+        }
+    }
+
+    private static void checkProfileAndAuth(@NotNull DiagnosticsContext ctx) {
+        try {
+            boolean online = Bukkit.getOnlineMode();
+            BlockProtLogger.pass("Profile & Auth: online-mode=" + online
+                + " (mojangLookup=" + (online ? "enabled" : "bypassed_offline_safe") + ")");
+            ctx.pass();
+        } catch (Exception e) {
+            BlockProtLogger.fail("Profile & Auth", e.getMessage());
+            ctx.fail();
+        }
+    }
+
+    private static void checkUpdateChecker(@NotNull DiagnosticsContext ctx) {
+        try {
+            boolean enabled = BlockProt.getInstance().getConfig().getBoolean("check_for_updates", true);
+            SemanticVersion latest = UpdateChecker.latestVersion;
+            SemanticVersion current = new SemanticVersion(BlockProt.getPluginVersion());
+            int cmp = (latest != null) ? current.compareTo(latest) : 0;
+            String state = (latest == null) ? "not_checked_yet" : (cmp > 0 ? "ahead" : (cmp == 0 ? "up_to_date" : "outdated"));
+            BlockProtLogger.pass("UpdateChecker: enabled=" + enabled
+                + " repo=Zaynr-Ecosystem/BlockProt-Reloaded current=" + current
+                + (latest != null ? " latest=" + latest + " (" + state + ")" : " (cached=none)"));
+            ctx.pass();
+        } catch (Exception e) {
+            BlockProtLogger.fail("UpdateChecker", e.getMessage());
+            ctx.fail();
+        }
+    }
+
+    private static void checkMetrics(@NotNull DiagnosticsContext ctx) {
+        try {
+            boolean enabled = BlockProt.getInstance().getConfig().getBoolean("metrics", true);
+            BlockProtLogger.pass("Metrics (bStats): enabled=" + enabled + " pluginId=31548");
+            ctx.pass();
+        } catch (Exception e) {
+            BlockProtLogger.fail("Metrics", e.getMessage());
             ctx.fail();
         }
     }

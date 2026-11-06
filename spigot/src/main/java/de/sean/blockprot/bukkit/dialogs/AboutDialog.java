@@ -73,7 +73,6 @@ public final class AboutDialog {
 
         body.add(DialogBodyEntry.text(Component.text()
             .append(Component.text(stripColor(Translator.get(TranslationKey.DIALOGS__ABOUT__DESCRIPTION)), SOFT_GRAY))
-            .append(Component.text(" BlockProt", NamedTextColor.WHITE, TextDecoration.BOLD))
             .build()));
         body.add(DialogBodyEntry.text(Component.text(
             stripColor(Translator.get(TranslationKey.DIALOGS__ABOUT__MAINTAINER)),

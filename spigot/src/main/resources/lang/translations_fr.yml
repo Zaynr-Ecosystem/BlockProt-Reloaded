@@ -52,7 +52,7 @@ search_aliases:
   brewing: "alambic, alambics"
   bookshelf: "bibliotheque, bibliotheques"
 about:
-  title: "§x§a§3§c§6§e§bBlockProt {version} - Spigot Plugin"
+  title: "<#a3c6eb>BlockProt Reloaded {version} - Spigot Plugin"
   fork_maintainers: "§7Mainteneurs du fork: §fVickey & Reim §8(alias ZarZey)"
   report_fork: §x§6§6§c§6§6§6Signaler des problèmes (BlockProt Reloaded)
   report_fork_hover: Cliquez pour ouvrir le suivi des problèmes sur GitHub
@@ -332,8 +332,8 @@ messages:
   permission_granted: Permission accordée.
   unlocked: Déverrouillé.
   no_permission: Aucune autorisation.
-  error_prefix: "<red>[BlockProt] : "
-  entity_death_notification: "<bold><red>[BlockProt] </red></bold><red>Votre familier </red><yellow>{pet_name}</yellow><red> est mort."
+  error_prefix: "<red>[BlockProt Reloaded] : "
+  entity_death_notification: "<bold><#F08080>[BlockProt Reloaded] </#F08080></bold><#F08080>Votre familier </#F08080><#F0E6A0>{pet_name}</#F0E6A0><#F08080> est mort."
   friend_added: Ami ajouté.
   friend_removed: Ami supprimé.
   friend_already_added: Ami déjà ajouté.
@@ -357,16 +357,16 @@ messages:
   chat_input_cancel_word: annuler
   chat_input_cancelled: §cRecherche annulée.
   item_count_suffix: " x{amount}"
-  entity_denied: "<red>[BlockProt] </red>Vous n'avez pas la permission d'interagir avec ce familier."
+  entity_denied: "<red>[BlockProt Reloaded] </red>Vous n'avez pas la permission d'interagir avec ce familier."
   lock_on_place_success: "§aBloc verrouillé !"
   friends_searching: "§eRecherche de §f{player}§e..."
   friends_addall_success: "§a§f{player}§a ajouté comme ami dans §f{count}§a bloc(s)."
   friends_addall_usage: "§cUsage: /blockprot friends addall <joueur>"
-  inactivity_cleanup_done: "§e[BlockProt] Nettoyage d'inactivité: §f{count}§e bloc(s)\
+  inactivity_cleanup_done: "§e[BlockProt Reloaded] Nettoyage d'inactivité: §f{count}§e bloc(s)\
     \ libéré(s)."
   friends_list_title: §6Vos amis
   only_players: Seuls les joueurs peuvent utiliser cette commande.
-  reload_done: §aBlockProt a été rechargé avec succès.
+  reload_done: "<#98FF98>BlockProt Reloaded a été rechargé avec succès."
   integrations_enabled: "§7Intégrations actives ({count}): {integrations}"
   transfer_success: "<green>Propriété transférée à </green><white>{player}</white><green>. Vous avez été ajouté comme ami."
   transfer_usage: "<red>Utilisation : /bp transferall \\<joueur>"
@@ -415,15 +415,15 @@ messages:
   notify_item_taken: "<gray>{player} </gray><white>a pris </white><yellow>{amount}x {item}</yellow><white> dans votre </white><yellow>{block}</yellow><white>."
   notify_item_placed: "<gray>{player} </gray><white>a placé </white><yellow>{amount}x {item}</yellow><white> dans votre </white><yellow>{block}</yellow><white>."
   raid_alert: "<red>! Raid possible ! </red><yellow>{block} </yellow><red>à </red><yellow>{world} [{x}, {y}, {z}]</yellow><red> - Auteur : </red><yellow>{actor}"
-  raid_coords: "<bold><red>[BlockProt] </red></bold><red>Raid possible sur votre </red><yellow>{block}</yellow><red> à </red><white>{world} [{x}, {y}, {z}]</white><red>. Auteur : </red><yellow>{actor}"
+  raid_coords: "<bold><#F08080>[BlockProt Reloaded] </#F08080></bold><#F08080>Raid possible sur votre </#F08080><#F0E6A0>{block}</#F0E6A0><#F08080> à </#F08080><white>{world} [{x}, {y}, {z}]</white><#F08080>. Auteur : </#F08080><#F0E6A0>{actor}"
   raid_tp_label: "<green>[Téléportation]"
-  raid_pending: "<bold><red>[BlockProt] </red></bold><red>Pendant que vous étiez hors ligne, un raid possible a été détecté sur votre bloc </red><yellow>{block}</yellow><red> à </red><white>{world} [{x}, {y}, {z}]</white><red>. Auteur : </red><yellow>{actor}"
+  raid_pending: "<bold><#F08080>[BlockProt Reloaded] </#F08080></bold><#F08080>Pendant que vous étiez hors ligne, un raid possible a été détecté sur votre bloc </#F08080><#F0E6A0>{block}</#F0E6A0><#F08080> à </#F08080><white>{world} [{x}, {y}, {z}]</white><#F08080>. Auteur : </#F08080><#F0E6A0>{actor}"
   raid_actor_environment: environnement
   no_permission_tp: "<red>[✗] Permission refusée : blockprot.blocks.tp"
   remote_unlock_warning: "<yellow>! Cela déverrouillera le bloc à distance. Cliquez à nouveau pour confirmer. Pour reverrouiller, visitez directement le bloc."
-  admin_reload_done: "<green>Configuration et traductions rechargées."
-  admin_reload_failed: "<red>Échec du rechargement: {error}"
-  admin_tiers_info: "<gray>[BlockProt] </gray><yellow>{player} </yellow><gray>- {role}\
+  admin_reload_done: "<#98FF98>Configuration et traductions rechargées."
+  admin_reload_failed: "<#F08080>Échec du rechargement: {error}"
+  admin_tiers_info: "<gray>[BlockProt Reloaded] </gray><yellow>{player} </yellow><gray>- {role}\
     \ </gray><gray>| </gray><red>OP: {op}"
   admin_tiers_op_yes: "<red>Oui"
   admin_tiers_op_no: "<gray>Non"
@@ -456,7 +456,7 @@ messages:
     toggle_family_feedback: "{action} {family} dans auto_drop_to_inventory"
     search_no_results: "Aucun bloc trouvé pour '{query}'."
   debug_usage: "<red>Utilisation : /bp debug \\<run|...>"
-  console_warn_prefix: "<red>[BlockProt WARN] "
+  console_warn_prefix: "<#F08080>[BlockProt Reloaded WARN] "
   cmd_usage_menus: "<red>Utilisation : /bp \\<user|admin>"
   cmd_usage_cli: "<red>Utilisation : /bp help pour les commandes disponibles"
   cmd_usage_cli_gui_only: "<red>Utilisez /bp user ou /bp admin en mode menu (activez use_menus dans config)"
@@ -476,16 +476,16 @@ messages:
     results_go_to_log: "<gray>Les résultats vont dans le journal de session. Résumé à la fin."
     checks_passed_actionbar: "<green>✔ Toutes les {passed} vérifications ont réussi"
     checks_failed_actionbar: "<red>✗ {failed} échouée(s) / {total}"
-    checks_passed_chat: "<bold><green>[BlockProt] </green></bold><green>Toutes les <bold>{passed}</bold></green><green> vérifications ont réussi."
-    checks_failed_chat: "<bold><red>[BlockProt] </red></bold><red>{failed} vérification(s) ONT ÉCHOUÉ - voir journal."
+    checks_passed_chat: "<bold><#98FF98>[BlockProt Reloaded] </#98FF98></bold><#98FF98>Toutes les <bold>{passed}</bold></#98FF98><#98FF98> vérifications ont réussi."
+    checks_failed_chat: "<bold><#F08080>[BlockProt Reloaded] </#F08080></bold><#F08080>{failed} vérification(s) ONT ÉCHOUÉ - voir journal."
     log_path: "<gray>Journal : </gray><white>{path}"
-    headless_start: "<yellow>[BlockProt] Exécution des diagnostics console au spawn\
+    headless_start: "<yellow>[BlockProt Reloaded] Exécution des diagnostics console au spawn\
       \ (aucun joueur connecté)..."
-    headless_player_context: "<yellow>[BlockProt] Exécution des diagnostics avec le\
+    headless_player_context: "<yellow>[BlockProt Reloaded] Exécution des diagnostics avec le\
       \ contexte du joueur: </yellow><white>{player}"
-    headless_finished: "<green>[BlockProt] Diagnostics console terminés: </green><white>{passed}\
+    headless_finished: "<green>[BlockProt Reloaded] Diagnostics console terminés: </green><white>{passed}\
       \ réussis, {failed} échoués ({total} au total)."
-    inventory_title: "<red>BlockProt Débogage"
+    inventory_title: "<#F08080>BlockProt Reloaded Débogage"
   time:
     days: jours
     day: jour
@@ -512,14 +512,14 @@ messages:
     just_now: "à l'instant"
     empty_contents: "<dark_gray>Vide"
   update:
-    outdated: "<red>BlockProt est obsolète ! Nouvelle version stable : {version}"
+    outdated: "<#F08080>BlockProt Reloaded est obsolète ! Nouvelle version stable : {version}"
     outdated_hotfix: "<red>IMPORTANT: BlockProt a un correctif important (hotfix)\
       \ disponible: {version}! Il corrige des bugs de la version actuelle ({base_version}).\
       \ Cliquez pour le télécharger."
     outdated_dev: "<yellow>BlockProt a une nouvelle version de développement expérimentale\
       \ (BEDev) disponible: {version}. Ce n'est PAS une version stable et elle est\
       \ publiée uniquement sur GitHub."
-    ahead: "<yellow>BlockProt Reloaded est en avance sur la version publiée ({version})"
+    ahead: "<#F0E6A0>BlockProt Reloaded est en avance sur la version publiée ({version})"
     ahead_hotfix: "<yellow>BlockProt Reloaded exécute le correctif {version}, en avance\
       \ sur la version publiée ({base_version})"
     up_to_date: "<#98FF98>BlockProt Reloaded est à jour."
@@ -602,7 +602,7 @@ console:
   bedrock_form_send_failed: "Échec de l'envoi du formulaire Bedrock ({platform}):\
     \ {error}"
   raid_log: "Raid potentiel: {block} à {world} [{x},{y},{z}] acteur={actor}"
-  startup_complete: "BlockProt v{version} activé."
+  startup_complete: "BlockProt Reloaded v{version} activé."
   auto_reload_disabled: "Le rechargement automatique est désactivé (auto_reload_configs: false). La configuration ne se rechargera PAS d'elle-même - utilisez /bp reload après chaque modification."
   boot_configuration: Configuration
   boot_listeners: Écouteurs
@@ -627,8 +627,8 @@ console:
   boot_update_download: "Télécharger: {url}"
   recommended_console_only: "<#f0a0a0>✖ </#f0a0a0><gray>Cette commande nécessite des permissions administratives."
   recommended_blocks_missing: "  <#f0a0a0>✖ </#f0a0a0><gray>Fichier </gray><white>blocks.yml </white><gray>introuvable. Démarrez le serveur une fois pour le générer."
-  recommended_header: "<#d2b48c>[BlockProt] </#d2b48c><white>Configuration Recommandée:"
-  recommended_usage_header: "<#d2b48c>[BlockProt] </#d2b48c><white>Utilisation de\
+  recommended_header: "<#d2b48c>[BlockProt Reloaded] </#d2b48c><white>Configuration Recommandée:"
+  recommended_usage_header: "<#d2b48c>[BlockProt Reloaded] </#d2b48c><white>Utilisation de\
     \ la Configuration Recommandée:"
   recommended_usage_apply: "  <#8fe3b0>● </#8fe3b0><white>/bp recommended <blocks|config|all>\
     \ [force] </white><dark_gray>- </dark_gray><gray>Appliquer les préréglages recommandés."
@@ -640,7 +640,7 @@ console:
   recommended_reload: "  <#a0c4e8>⏱ </#a0c4e8><gray>Rechargez avec </gray><white>/bp reload </white><gray>ou attendez le rechargement automatique."
   recommended_failed: "  <#f0a0a0>✖ </#f0a0a0><gray>Échec de l'écriture de </gray><white>{file}</white><gray> : </gray><red>{error}"
   recommended_already_applied: "  <#f3c27c>● </#f3c27c><gray>Les éléments recommandés </gray><white>{target} </white><gray>ont déjà été appliqués. Réexécutez avec </gray><white>/bp recommended {target} force</white><gray>."
-  recommended_undo_header: "<#d2b48c>[BlockProt] </#d2b48c><white>Annulation de la\
+  recommended_undo_header: "<#d2b48c>[BlockProt Reloaded] </#d2b48c><white>Annulation de la\
     \ Configuration Recommandée:"
   recommended_undo_done: "  <#8fe3b0>● </#8fe3b0><gray>Configuration recommandée </gray><white>{target}\
     \ </white><gray>rétablir à l'état par défaut."
@@ -824,7 +824,7 @@ dialogs:
     version_prefix: " v"
   debug:
     title: Infos de débogage
-    label_plugin: "BlockProt "
+    label_plugin: "BlockProt Reloaded "
     label_server: "Serveur : "
     label_api: "API : "
     label_java: "Java : "

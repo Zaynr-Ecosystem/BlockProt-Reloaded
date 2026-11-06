@@ -277,7 +277,7 @@ messages:
   friends_searching: §e§f{player}§e aranıyor...
   friends_addall_success: §a§f{player}§a, §f{count}§a blok/blokta arkadaş olarak eklendi.
   friends_addall_usage: '§cKullanım: /blockprot friends addall <oyuncu>'
-  inactivity_cleanup_done: '§e[BlockProt] Hareketsizlik temizliği: §f{count}§e blok/blok
+  inactivity_cleanup_done: '§e[BlockProt Reloaded] Hareketsizlik temizliği: §f{count}§e blok/blok
     serbest bırakıldı.'
   friends_list_title: §6Arkadaşların
   error_prefix:
@@ -409,10 +409,10 @@ messages:
     up_to_date:
     click_hint:
 worlds:
-  scan_start: '[BlockProt] Dünyalar taranıyor... ({count} yüklendi)'
-  scan_world_added: '[BlockProt] ''{world}'' dünyası worlds.yml''ye eklendi, koruma
+  scan_start: '[BlockProt Reloaded] Dünyalar taranıyor... ({count} yüklendi)'
+  scan_world_added: '[BlockProt Reloaded] ''{world}'' dünyası worlds.yml''ye eklendi, koruma
     varsayılan olarak KAPALI. Manuel olarak etkinleştir.'
-  scan_complete: '[BlockProt] Tarama tamamlandı. {added} yeni dünya kaydedildi.'
+  scan_complete: '[BlockProt Reloaded] Tarama tamamlandı. {added} yeni dünya kaydedildi.'
   status:
   protected_count:
   no_worlds:

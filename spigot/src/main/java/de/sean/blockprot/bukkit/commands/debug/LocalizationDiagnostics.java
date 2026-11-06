@@ -84,11 +84,7 @@ public final class LocalizationDiagnostics {
             BlockProtLogger.subGroup("Language files:");
 
             for (String fileName : allLangs) {
-                if (!LangConfig.isLanguageEnabled(fileName)) {
-                    skipped++;
-                    BlockProtLogger.skipSub(fileName, "disabled in config");
-                    continue;
-                }
+                boolean isEnabled = LangConfig.isLanguageEnabled(fileName);
                 boolean isActive = fileName.equals(active);
                 YamlConfiguration langFile = null;
                 File diskFile = new File(plugin.getDataFolder(), "lang/" + fileName);
@@ -124,7 +120,7 @@ public final class LocalizationDiagnostics {
                     }
                 }
                 int pct = totalKeys == 0 ? 0 : (int) Math.round(100.0 * presentKeys / totalKeys);
-                String status = isActive ? "ACTIVE" : "inactive";
+                String status = isActive ? "ACTIVE" : (isEnabled ? "enabled" : "disabled");
                 String detail = fileName + " [" + status + "]: " + pct + "% (" + presentKeys + "/" + totalKeys + " keys)";
                 if (pct < 100) {
                     int totalMissing = missingKeys.size();
@@ -137,8 +133,13 @@ public final class LocalizationDiagnostics {
                     if (totalMissing > showCount) sb.append(" ...");
                     detail += " missing=" + totalMissing + " ex: " + sb;
                 }
-                BlockProtLogger.passSub(detail);
-                langOk++;
+                if (isEnabled) {
+                    BlockProtLogger.passSub(detail);
+                    langOk++;
+                } else {
+                    skipped++;
+                    BlockProtLogger.skipSub(fileName, detail);
+                }
             }
 
             if (langFail == 0) {

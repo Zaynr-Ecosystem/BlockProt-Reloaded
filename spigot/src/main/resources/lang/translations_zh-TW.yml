@@ -275,7 +275,7 @@ messages:
   friends_searching: §e正在搜索 §f{player}§e...
   friends_addall_success: §a已將 §f{player}§a 作為信任者添加到 §f{count}§a 個方塊中。
   friends_addall_usage: '§c用法: /blockprot friends addall <玩家>'
-  inactivity_cleanup_done: '§e[BlockProt] 非活躍清理: §f{count}§e 個方塊已釋放。'
+  inactivity_cleanup_done: '§e[BlockProt Reloaded] 非活躍清理: §f{count}§e 個方塊已釋放。'
   friends_list_title: §6你的信任者
   error_prefix:
   entity_death_notification:
@@ -406,9 +406,9 @@ messages:
     up_to_date:
     click_hint:
 worlds:
-  scan_start: '[BlockProt] 正在掃描世界... ({count} 已載入)'
-  scan_world_added: '[BlockProt] 世界 ''{world}'' 已新增到 worlds.yml，保護預設禁用。請手動啟用。'
-  scan_complete: '[BlockProt] 掃描完成。{added} 個新世界已註冊。'
+  scan_start: '[BlockProt Reloaded] 正在掃描世界... ({count} 已載入)'
+  scan_world_added: '[BlockProt Reloaded] 世界 ''{world}'' 已新增到 worlds.yml，保護預設禁用。請手動啟用。'
+  scan_complete: '[BlockProt Reloaded] 掃描完成。{added} 個新世界已註冊。'
   status:
   protected_count:
   no_worlds:
