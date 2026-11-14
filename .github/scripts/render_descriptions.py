@@ -11,7 +11,7 @@ PLATFORM_README = REPO_ROOT / "docs" / "READ_MEs" / "MODR_HANG_README.md"
 OUTPUT_DIR = REPO_ROOT / "docs" / "READ_MEs" / "editions"
 TEMPLATE = OUTPUT_DIR / "MODR_HANG_README.bpr.md"
 EDITION_FILE = REPO_ROOT / ".github" / "EDITION"
-GUIDE_URL = "https://github.com/VictorGugug/BlockProt-Reloaded/blob/main/docs/READ_MEs/VERSION_GUIDE.md"
+GUIDE_URL = "https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/blob/main/docs/READ_MEs/VERSION_GUIDE.md"
 RENDERED = ("bpr-legacy", "bp-legacy")
 
 MAIN_BOX = f"> **Looking for another Minecraft version?** See the [version guide]({GUIDE_URL})."
