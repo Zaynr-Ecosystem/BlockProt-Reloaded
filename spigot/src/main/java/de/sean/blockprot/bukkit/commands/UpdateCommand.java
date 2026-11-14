@@ -48,7 +48,7 @@ public class UpdateCommand implements CommandExecutor {
         List<Player> recipients = (sender instanceof Player p)
             ? java.util.Collections.singletonList(p)
             : null;
-        UpdateChecker checker = new UpdateChecker(BlockProt.getPluginVersion(), recipients);
+        UpdateChecker checker = new UpdateChecker(BlockProt.getPluginVersion(), recipients, true);
         BlockProt.getFoliaLib().getScheduler().runAsync(asyncTask -> checker.run());
         return true;
     }

@@ -238,7 +238,7 @@ public class AdminMenuInventory extends BlockProtInventory {
             if (!opRecipients.contains(player)) {
                 opRecipients.add(player);
             }
-            UpdateChecker checker = new UpdateChecker(BlockProt.getPluginVersion(), opRecipients);
+            UpdateChecker checker = new UpdateChecker(BlockProt.getPluginVersion(), opRecipients, true);
             BlockProt.getFoliaLib().getScheduler().runAsync(asyncTask -> checker.run());
 
         } else if (slot == SLOT_INTEGRATIONS) {

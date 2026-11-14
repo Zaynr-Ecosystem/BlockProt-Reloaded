@@ -180,7 +180,7 @@ Copying settings sends an action bar confirmation. Pasting replaces the friend l
 
 ## Commands
 
-Command visibility is controlled by `use_menus` and active feature toggles in `config.yml`. When `use_menus: false`, all active subcommands are available via chat. When `use_menus: true`, players only see `/bp user` and `/bp admin` (administrators with `UPDATE` permission or OP keep `/bp update` access via chat); commands for disabled subsystems (`friends`, `tiers`, `logs`) are hidden from tab completion and return a localized disabled message when run directly. The console retains access to every subcommand.
+Command visibility is controlled by `use_menus` and active feature toggles in `config.yml`. When `use_menus: false`, all active subcommands are available via chat. When `use_menus: true`, players only see `/bp user` and `/bp admin` (administrators access update checks through `/bp admin`); commands for disabled subsystems (`friends`, `tiers`, `logs`) are hidden from tab completion and return a localized disabled message when run directly. The console retains access to every subcommand.
 
 **Menu Commands:**
 

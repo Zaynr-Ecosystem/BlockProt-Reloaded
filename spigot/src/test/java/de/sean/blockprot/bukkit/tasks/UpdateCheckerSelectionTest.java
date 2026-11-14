@@ -124,4 +124,23 @@ class UpdateCheckerSelectionTest {
         releases.add(release("1.4.2", false));
         assertEquals("1.4.2", UpdateChecker.selectBest(releases, new SemanticVersion("1.4.1-hotfix"), Edition.BPR).tagName);
     }
+
+    @Test
+    void stableServerDetectsNextStableOrHotfixIgnoringLegacyAndDevBuilds() {
+        List<UpdateChecker.GitHubRelease> releases = new ArrayList<>();
+        releases.add(release("bpl-1.4.0.1", false));
+        releases.add(release("bprl-1.4.0.1", false));
+        releases.add(release("1.4.2", false));
+        releases.add(release("1.4.3", false));
+        releases.add(release("1.4.4-BEDev.1", true));
+
+        assertEquals("1.4.3", UpdateChecker.selectBest(releases, new SemanticVersion("1.4.2"), Edition.BPR).tagName);
+        assertEquals("1.4.3", UpdateChecker.selectBest(releases, new SemanticVersion("1.4.3"), Edition.BPR).tagName);
+
+        releases.add(release("1.4.3-hotfix.1", true));
+        assertEquals("1.4.3-hotfix.1", UpdateChecker.selectBest(releases, new SemanticVersion("1.4.3"), Edition.BPR).tagName);
+
+        releases.add(release("1.4.4", false));
+        assertEquals("1.4.4", UpdateChecker.selectBest(releases, new SemanticVersion("1.4.3"), Edition.BPR).tagName);
+    }
 }

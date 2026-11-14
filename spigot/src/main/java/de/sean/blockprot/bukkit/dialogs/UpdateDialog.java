@@ -131,7 +131,7 @@ public final class UpdateDialog {
             Component.text(stripColor(Translator.get(TranslationKey.DIALOGS__UPDATE__CHECK_NOW)), NamedTextColor.WHITE),
             Component.text(stripColor(Translator.get(TranslationKey.DIALOGS__UPDATE__DOWNLOAD)), TextColor.color(0x888888)),
             p -> {
-                UpdateChecker checker = new UpdateChecker(pluginVersion, () ->
+                UpdateChecker checker = new UpdateChecker(pluginVersion, true, () ->
                     BlockProt.getFoliaLib().getScheduler().runAtEntity(p, syncTask -> {
                         if (p.isOnline()) UpdateDialog.show(p, backOrigin);
                     }));

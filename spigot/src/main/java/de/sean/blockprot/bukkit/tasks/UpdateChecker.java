@@ -69,7 +69,7 @@ public final class UpdateChecker implements Runnable {
      * {@code /releases} (list) is used instead so pre-releases are also detected.
      */
     private static final String GITHUB_API_URL =
-        "https://api.github.com/repos/Zaynr-Ecosystem/BlockProt-Reloaded/releases";
+        "https://api.github.com/repos/Zaynr-Ecosystem/BlockProt-Reloaded/releases?per_page=100";
 
     private static final String RELEASES_URL =
         "https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/releases";
@@ -108,33 +108,49 @@ public final class UpdateChecker implements Runnable {
     @NotNull
     private final SemanticVersion currentVersion;
 
+    private final boolean forceRefresh;
+
     public UpdateChecker(@NotNull final String version) {
-        this.pluginVersion = version;
-        this.recipients = null;
-        this.onComplete = null;
-        this.currentVersion = new SemanticVersion(version);
+        this(version, null, null, false);
     }
 
     public UpdateChecker(@NotNull final String version,
                          @Nullable final List<Player> recipients) {
-        this.recipients = recipients;
-        this.pluginVersion = version;
-        this.onComplete = null;
-        this.currentVersion = new SemanticVersion(version);
+        this(version, recipients, null, false);
+    }
+
+    public UpdateChecker(@NotNull final String version,
+                         @Nullable final List<Player> recipients,
+                         final boolean forceRefresh) {
+        this(version, recipients, null, forceRefresh);
     }
 
     public UpdateChecker(@NotNull final String version,
                          @Nullable final Runnable onComplete) {
+        this(version, null, onComplete, false);
+    }
+
+    public UpdateChecker(@NotNull final String version,
+                         final boolean forceRefresh,
+                         @Nullable final Runnable onComplete) {
+        this(version, null, onComplete, forceRefresh);
+    }
+
+    private UpdateChecker(@NotNull final String version,
+                          @Nullable final List<Player> recipients,
+                          @Nullable final Runnable onComplete,
+                          final boolean forceRefresh) {
         this.pluginVersion = version;
-        this.recipients = null;
+        this.recipients = recipients;
         this.onComplete = onComplete;
         this.currentVersion = new SemanticVersion(version);
+        this.forceRefresh = forceRefresh;
     }
 
     @Override
     public void run() {
         long now = System.currentTimeMillis();
-        if (latestVersion != null && (now - lastCheckTimeMillis < CACHE_TTL_MILLIS)) {
+        if (!forceRefresh && latestVersion != null && (now - lastCheckTimeMillis < CACHE_TTL_MILLIS)) {
             this.sendMessage(currentVersion, latestVersion, latestRelease);
             return;
         }
