@@ -42,11 +42,11 @@ import org.jetbrains.annotations.Nullable;
 
 public final class ProtdelDialog {
 
-    private static final TextColor PASTEL_CORAL = TextColor.color(0xF0A0A0);
+    private static final TextColor PASTEL_CORAL = TextColor.color(0xFF6B6B);
     private static final TextColor SOFT_GRAY = TextColor.color(0xAAAAAA);
-    private static final TextColor PASTEL_MINT = TextColor.color(0x8FE3B0);
-    private static final TextColor PASTEL_GOLD = TextColor.color(0xD2B48C);
-    private static final TextColor SOFT_BLUE = TextColor.color(0xA0C4E8);
+    private static final TextColor PASTEL_MINT = TextColor.color(0x98FF98);
+    private static final TextColor PASTEL_GOLD = TextColor.color(0xF0E6A0);
+    private static final TextColor SOFT_BLUE = TextColor.color(0x7EC8E3);
 
     private ProtdelDialog() {}
 
@@ -172,7 +172,7 @@ public final class ProtdelDialog {
             Component.text(stripColor(Translator.get(TranslationKey.DIALOGS__PROTDEL__CONFIRM)),
                 PASTEL_CORAL, TextDecoration.BOLD),
             Component.text(stripColor(Translator.get(TranslationKey.DIALOGS__PROTDEL__WORLD_HINT))
-                .replace("{world}", worldName), TextColor.color(0xF0A0A0)),
+                .replace("{world}", worldName), PASTEL_CORAL),
             p -> executeDelete(player, worldName, bridge, backOrigin)
         );
 

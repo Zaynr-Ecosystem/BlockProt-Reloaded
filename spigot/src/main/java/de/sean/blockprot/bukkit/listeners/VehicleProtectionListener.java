@@ -42,6 +42,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPlaceEvent;
+import org.bukkit.event.entity.PlayerLeashEntityEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
@@ -184,7 +185,6 @@ public final class VehicleProtectionListener implements Listener {
         EntityNBTHandler handler = new EntityNBTHandler(entity);
         if (!handler.isProtected()) return;
         if (!handler.isHopperProtectionEnabled()) return;
-        if (BlockProt.getDefaultConfig().isSimplifiedHopperLogic()) return;
 
         event.setCancelled(true);
         BlockProtLogger.log("entity-protection", "BLOCKED hopper extraction from "
@@ -203,11 +203,22 @@ public final class VehicleProtectionListener implements Listener {
         EntityNBTHandler handler = new EntityNBTHandler(entity);
         if (!handler.isProtected()) return;
         if (!handler.isHopperProtectionEnabled()) return;
-        if (BlockProt.getDefaultConfig().isSimplifiedHopperLogic()) return;
 
         event.setCancelled(true);
         BlockProtLogger.log("entity-protection", "BLOCKED hopper insertion into "
             + entity.getType().name() + " entity=" + entity.getUniqueId());
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onVehicleLeash(@NotNull PlayerLeashEntityEvent event) {
+        Entity vehicle = event.getEntity();
+        if (!isProtectedVehicleType(vehicle)) return;
+        if (BlockProt.getDefaultConfig().isWorldExcluded(vehicle.getWorld())) return;
+        EntityNBTHandler handler = new EntityNBTHandler(vehicle);
+        if (!handler.isProtected()) return;
+        if (!canModifyVehicle(event.getPlayer(), vehicle, handler)) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

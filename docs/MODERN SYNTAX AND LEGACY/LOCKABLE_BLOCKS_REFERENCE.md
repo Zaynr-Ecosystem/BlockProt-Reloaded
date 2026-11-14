@@ -25,11 +25,8 @@ Available in both menu mode and CLI mode - it is always accessible regardless of
 
 **Clicking a block in the GUI:**
 
-Clicking does not open anything or change any settings. It sends a clickable message to your chat.
-Click that message and the material name is copied to your clipboard, ready to paste into `blocks.yml`.
-
-- **Left-click** a block -> copies `MATERIAL_NAME` (green) - paste directly as a flat entry or as an inclusion token in a family expression
-- **Right-click** a block -> copies `-MATERIAL_NAME` (red) - the exclusion token to remove that material from an active sub-family
+- **Left-click** a block -> toggles its live lockable status in `blocks.yml` and refreshes the GUI (same for `[Select All]` / `[Enable All]` category headers)
+- **Right-click** a block -> sends a clickable message to your chat; clicking it copies `MATERIAL_NAME` to your clipboard, ready to paste into `blocks.yml`
 
 The info book in slot 46 shows the server version, your client version (if ViaVersion is installed),
 and a count of how many blocks are currently active vs inactive.

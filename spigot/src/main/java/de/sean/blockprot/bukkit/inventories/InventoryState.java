@@ -21,11 +21,14 @@
 package de.sean.blockprot.bukkit.inventories;
 
 import de.sean.blockprot.bukkit.events.BlockAccessMenuEvent;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Storage for the current state and location of each player's
@@ -34,13 +37,16 @@ import java.util.*;
  * @since 0.1.9
  */
 public final class InventoryState {
-    private static final HashMap<String, InventoryState> players = new HashMap<>();
+    private static final ConcurrentHashMap<String, InventoryState> players = new ConcurrentHashMap<>();
 
     @NotNull
     public final ArrayList<UUID> friendResultCache = new ArrayList<>();
 
     @Nullable
-    private final Block block;
+    private final UUID blockWorldUid;
+    private final int blockX;
+    private final int blockY;
+    private final int blockZ;
 
     @Nullable
     private UUID entityProtectionId = null;
@@ -95,7 +101,21 @@ public final class InventoryState {
     }
 
     public InventoryState(@Nullable Block block) {
-        this.block = block;
+        if (block != null && block.getWorld() != null) {
+            this.blockWorldUid = block.getWorld().getUID();
+            this.blockX = block.getX();
+            this.blockY = block.getY();
+            this.blockZ = block.getZ();
+        } else {
+            this.blockWorldUid = null;
+            this.blockX = 0;
+            this.blockY = 0;
+            this.blockZ = 0;
+        }
+    }
+
+    public static void clear() {
+        players.clear();
     }
 
     public static void set(String player, InventoryState state) {
@@ -133,7 +153,9 @@ public final class InventoryState {
 
     @Nullable
     public Block getBlock() {
-        return this.block;
+        if (this.blockWorldUid == null) return null;
+        World world = Bukkit.getWorld(this.blockWorldUid);
+        return world != null ? world.getBlockAt(this.blockX, this.blockY, this.blockZ) : null;
     }
 
     @Nullable

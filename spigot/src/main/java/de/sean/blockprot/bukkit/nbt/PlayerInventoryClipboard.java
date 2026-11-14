@@ -24,7 +24,7 @@ import de.tr7zw.changeme.nbtapi.NBTContainer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Serves as a clipboard database of configurations a player has copied
@@ -34,7 +34,7 @@ import java.util.HashMap;
  */
 public final class PlayerInventoryClipboard {
     @NotNull
-    private static final HashMap<String, NBTContainer> players = new HashMap<>();
+    private static final ConcurrentHashMap<String, NBTContainer> players = new ConcurrentHashMap<>();
 
     private PlayerInventoryClipboard() {}
 
@@ -49,6 +49,10 @@ public final class PlayerInventoryClipboard {
 
     public static void remove(@NotNull String player) {
         players.remove(player);
+    }
+
+    public static void clear() {
+        players.clear();
     }
 
     public static boolean contains(@NotNull String player) {

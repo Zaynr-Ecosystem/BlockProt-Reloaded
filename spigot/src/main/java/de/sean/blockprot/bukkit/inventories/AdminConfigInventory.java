@@ -50,11 +50,11 @@ import java.util.List;
 public final class AdminConfigInventory extends BlockProtInventory {
 
     static final TextColor SOFT_GRAY     = TextColor.color(0xAAAAAA);
-    static final TextColor PASTEL_MINT   = TextColor.color(0x8FE3B0);
-    static final TextColor PASTEL_CORAL  = TextColor.color(0xF0A0A0);
-    static final TextColor PASTEL_GOLD   = TextColor.color(0xD2B48C);
-    static final TextColor SOFT_BLUE     = TextColor.color(0xA0C4E8);
-    static final TextColor PASTEL_PURPLE = TextColor.color(0xC8A0E0);
+    static final TextColor PASTEL_MINT   = TextColor.color(0x98FF98);
+    static final TextColor PASTEL_CORAL  = TextColor.color(0xFF6B6B);
+    static final TextColor PASTEL_GOLD   = TextColor.color(0xF0E6A0);
+    static final TextColor SOFT_BLUE     = TextColor.color(0x7EC8E3);
+    static final TextColor PASTEL_PURPLE = TextColor.color(0xB39DDB);
 
     private static final int SLOT_LANGUAGE       = 9;
     private static final int SLOT_WORLDS         = 10;

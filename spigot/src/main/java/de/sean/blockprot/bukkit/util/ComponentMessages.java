@@ -69,6 +69,17 @@ public final class ComponentMessages {
     private ComponentMessages() {}
 
     /**
+     * Escapes MiniMessage tag brackets in untrusted strings before template insertion.
+     */
+    @NotNull
+    public static String escapeMiniMessage(@Nullable String input) {
+        if (input == null || input.isEmpty()) {
+            return "";
+        }
+        return net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().escapeTags(input);
+    }
+
+    /**
      * Sends a component to a command sender natively when supported, otherwise
      * as a legacy colour-coded string.
      */

@@ -75,9 +75,10 @@ public final class AuditLogger {
     private static final int    PRUNE_CHECK_INTERVAL = 500;
 
     private final String jdbcUrl;
-    /** Lightweight pool: three independent JDBC connections. */
+    /** Lightweight pool: three independent JDBC connections (slot 0 dedicated to serialized writes). */
     private final Connection[] pool = new Connection[3];
-    private int poolIdx = 0;
+    private final Object writeLock = new Object();
+    private int readIdx = 0;
 
     private volatile boolean closed = false;
     private int writesSincePrune = 0;
@@ -107,6 +108,7 @@ public final class AuditLogger {
         Connection conn = DriverManager.getConnection(jdbcUrl);
         conn.setAutoCommit(true);
         try (Statement s = conn.createStatement()) {
+            s.execute("PRAGMA busy_timeout=5000");
             // WAL mode: readers don't block the writer and vice-versa.
             s.execute("PRAGMA journal_mode=WAL");
             // Relaxed sync: safe with WAL; trades a tiny crash-window for ~3x write speed.
@@ -138,11 +140,9 @@ public final class AuditLogger {
         }
     }
 
-    /** Returns the next connection from the round-robin pool (thread-safe). */
-    private synchronized Connection acquire() {
-        Connection conn = pool[poolIdx % pool.length];
-        poolIdx++;
-        return conn;
+    private synchronized Connection acquireRead() {
+        int slot = 1 + (readIdx++ & 1);
+        return pool[slot];
     }
 
     /**
@@ -156,27 +156,32 @@ public final class AuditLogger {
         final int bx = loc.getBlockX(), by = loc.getBlockY(), bz = loc.getBlockZ();
         final long ts = System.currentTimeMillis();
         BlockProt.getFoliaLib().getScheduler().runAsync(asyncTask -> {
-            if (closed) return;
-            try {
-                pruneIfNeeded();
-                Connection conn = acquire();
-                try (PreparedStatement ps = conn.prepareStatement(
-                        "INSERT INTO audit_log(player_uuid,player_name,world,x,y,z,action,timestamp) VALUES(?,?,?,?,?,?,?,?)")) {
-                    ps.setString(1, player.toString());
-                    ps.setString(2, playerName);
-                    ps.setString(3, world);
-                    ps.setInt(4, bx);
-                    ps.setInt(5, by);
-                    ps.setInt(6, bz);
-                    ps.setString(7, action.name());
-                    ps.setLong(8, ts);
-                    ps.executeUpdate();
+            synchronized (writeLock) {
+                if (closed) return;
+                Connection conn = pool[0];
+                try {
+                    if (conn == null || conn.isClosed()) return;
+                    pruneIfNeeded(conn);
+                    try (PreparedStatement ps = conn.prepareStatement(
+                            "INSERT INTO audit_log(player_uuid,player_name,world,x,y,z,action,timestamp) VALUES(?,?,?,?,?,?,?,?)")) {
+                        ps.setString(1, player.toString());
+                        ps.setString(2, playerName);
+                        ps.setString(3, world);
+                        ps.setInt(4, bx);
+                        ps.setInt(5, by);
+                        ps.setInt(6, bz);
+                        ps.setString(7, action.name());
+                        ps.setLong(8, ts);
+                        ps.executeUpdate();
+                    }
+                    writesSincePrune++;
+                } catch (SQLException e) {
+                    if (!closed) {
+                        BlockProt.getInstance().getLogger().warning(
+                            Translator.get(TranslationKey.CONSOLE__AUDIT_LOGGER_FAILED)
+                                .replace("{error}", e.getMessage()));
+                    }
                 }
-                writesSincePrune++;
-            } catch (SQLException e) {
-                BlockProt.getInstance().getLogger().warning(
-                    Translator.get(TranslationKey.CONSOLE__AUDIT_LOGGER_FAILED)
-                        .replace("{error}", e.getMessage()));
             }
         });
     }
@@ -184,36 +189,52 @@ public final class AuditLogger {
     @NotNull
     public List<AuditEntry> getRecentEntries(int limit, int offset) {
         List<AuditEntry> entries = new ArrayList<>();
-        try {
-            Connection conn = acquire();
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "SELECT * FROM audit_log ORDER BY timestamp DESC LIMIT ? OFFSET ?")) {
-                ps.setInt(1, limit);
-                ps.setInt(2, offset);
-                try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) entries.add(mapRow(rs));
+        if (closed) return entries;
+        Connection conn = acquireRead();
+        if (conn == null) return entries;
+        synchronized (conn) {
+            if (closed) return entries;
+            try {
+                if (conn.isClosed()) return entries;
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "SELECT * FROM audit_log ORDER BY timestamp DESC LIMIT ? OFFSET ?")) {
+                    ps.setInt(1, limit);
+                    ps.setInt(2, offset);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        while (rs.next()) entries.add(mapRow(rs));
+                    }
+                }
+            } catch (SQLException e) {
+                if (!closed) {
+                    BlockProt.getInstance().getLogger().warning(
+                        Translator.get(TranslationKey.CONSOLE__AUDIT_LOGGER_FAILED)
+                            .replace("{error}", e.getMessage()));
                 }
             }
-        } catch (SQLException e) {
-            BlockProt.getInstance().getLogger().warning(
-                Translator.get(TranslationKey.CONSOLE__AUDIT_LOGGER_FAILED)
-                    .replace("{error}", e.getMessage()));
         }
         return entries;
     }
 
     public int countEntries() {
-        try {
-            Connection conn = acquire();
-            try (PreparedStatement ps = conn.prepareStatement("SELECT COUNT(*) FROM audit_log")) {
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) return rs.getInt(1);
+        if (closed) return 0;
+        Connection conn = acquireRead();
+        if (conn == null) return 0;
+        synchronized (conn) {
+            if (closed) return 0;
+            try {
+                if (conn.isClosed()) return 0;
+                try (PreparedStatement ps = conn.prepareStatement("SELECT COUNT(*) FROM audit_log")) {
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) return rs.getInt(1);
+                    }
+                }
+            } catch (SQLException e) {
+                if (!closed) {
+                    BlockProt.getInstance().getLogger().warning(
+                        Translator.get(TranslationKey.CONSOLE__AUDIT_LOGGER_FAILED)
+                            .replace("{error}", e.getMessage()));
                 }
             }
-        } catch (SQLException e) {
-            BlockProt.getInstance().getLogger().warning(
-                Translator.get(TranslationKey.CONSOLE__AUDIT_LOGGER_FAILED)
-                    .replace("{error}", e.getMessage()));
         }
         return 0;
     }
@@ -226,45 +247,61 @@ public final class AuditLogger {
     @NotNull
     public List<AuditEntry> getEntriesForBlock(@NotNull String world, int x, int y, int z, int limit, int offset) {
         List<AuditEntry> entries = new ArrayList<>();
-        try {
-            Connection conn = acquire();
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "SELECT * FROM audit_log WHERE world=? AND x=? AND y=? AND z=? ORDER BY timestamp DESC LIMIT ? OFFSET ?")) {
-                ps.setString(1, world);
-                ps.setInt(2, x);
-                ps.setInt(3, y);
-                ps.setInt(4, z);
-                ps.setInt(5, limit);
-                ps.setInt(6, offset);
-                try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) entries.add(mapRow(rs));
+        if (closed) return entries;
+        Connection conn = acquireRead();
+        if (conn == null) return entries;
+        synchronized (conn) {
+            if (closed) return entries;
+            try {
+                if (conn.isClosed()) return entries;
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "SELECT * FROM audit_log WHERE world=? AND x=? AND y=? AND z=? ORDER BY timestamp DESC LIMIT ? OFFSET ?")) {
+                    ps.setString(1, world);
+                    ps.setInt(2, x);
+                    ps.setInt(3, y);
+                    ps.setInt(4, z);
+                    ps.setInt(5, limit);
+                    ps.setInt(6, offset);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        while (rs.next()) entries.add(mapRow(rs));
+                    }
+                }
+            } catch (SQLException e) {
+                if (!closed) {
+                    BlockProt.getInstance().getLogger().warning(
+                        Translator.get(TranslationKey.CONSOLE__AUDIT_LOGGER_FAILED)
+                            .replace("{error}", e.getMessage()));
                 }
             }
-        } catch (SQLException e) {
-            BlockProt.getInstance().getLogger().warning(
-                Translator.get(TranslationKey.CONSOLE__AUDIT_LOGGER_FAILED)
-                    .replace("{error}", e.getMessage()));
         }
         return entries;
     }
 
     public int countEntriesForBlock(@NotNull String world, int x, int y, int z) {
-        try {
-            Connection conn = acquire();
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "SELECT COUNT(*) FROM audit_log WHERE world=? AND x=? AND y=? AND z=?")) {
-                ps.setString(1, world);
-                ps.setInt(2, x);
-                ps.setInt(3, y);
-                ps.setInt(4, z);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) return rs.getInt(1);
+        if (closed) return 0;
+        Connection conn = acquireRead();
+        if (conn == null) return 0;
+        synchronized (conn) {
+            if (closed) return 0;
+            try {
+                if (conn.isClosed()) return 0;
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "SELECT COUNT(*) FROM audit_log WHERE world=? AND x=? AND y=? AND z=?")) {
+                    ps.setString(1, world);
+                    ps.setInt(2, x);
+                    ps.setInt(3, y);
+                    ps.setInt(4, z);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) return rs.getInt(1);
+                    }
+                }
+            } catch (SQLException e) {
+                if (!closed) {
+                    BlockProt.getInstance().getLogger().warning(
+                        Translator.get(TranslationKey.CONSOLE__AUDIT_LOGGER_FAILED)
+                            .replace("{error}", e.getMessage()));
                 }
             }
-        } catch (SQLException e) {
-            BlockProt.getInstance().getLogger().warning(
-                Translator.get(TranslationKey.CONSOLE__AUDIT_LOGGER_FAILED)
-                    .replace("{error}", e.getMessage()));
         }
         return 0;
     }
@@ -277,39 +314,55 @@ public final class AuditLogger {
     @NotNull
     public List<AuditEntry> getEntriesForPlayer(@NotNull UUID player, int limit, int offset) {
         List<AuditEntry> entries = new ArrayList<>();
-        try {
-            Connection conn = acquire();
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "SELECT * FROM audit_log WHERE player_uuid=? ORDER BY timestamp DESC LIMIT ? OFFSET ?")) {
-                ps.setString(1, player.toString());
-                ps.setInt(2, limit);
-                ps.setInt(3, offset);
-                try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) entries.add(mapRow(rs));
+        if (closed) return entries;
+        Connection conn = acquireRead();
+        if (conn == null) return entries;
+        synchronized (conn) {
+            if (closed) return entries;
+            try {
+                if (conn.isClosed()) return entries;
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "SELECT * FROM audit_log WHERE player_uuid=? ORDER BY timestamp DESC LIMIT ? OFFSET ?")) {
+                    ps.setString(1, player.toString());
+                    ps.setInt(2, limit);
+                    ps.setInt(3, offset);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        while (rs.next()) entries.add(mapRow(rs));
+                    }
+                }
+            } catch (SQLException e) {
+                if (!closed) {
+                    BlockProt.getInstance().getLogger().warning(
+                        Translator.get(TranslationKey.CONSOLE__AUDIT_LOGGER_FAILED)
+                            .replace("{error}", e.getMessage()));
                 }
             }
-        } catch (SQLException e) {
-            BlockProt.getInstance().getLogger().warning(
-                Translator.get(TranslationKey.CONSOLE__AUDIT_LOGGER_FAILED)
-                    .replace("{error}", e.getMessage()));
         }
         return entries;
     }
 
     public int countEntriesForPlayer(@NotNull UUID player) {
-        try {
-            Connection conn = acquire();
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "SELECT COUNT(*) FROM audit_log WHERE player_uuid=?")) {
-                ps.setString(1, player.toString());
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) return rs.getInt(1);
+        if (closed) return 0;
+        Connection conn = acquireRead();
+        if (conn == null) return 0;
+        synchronized (conn) {
+            if (closed) return 0;
+            try {
+                if (conn.isClosed()) return 0;
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "SELECT COUNT(*) FROM audit_log WHERE player_uuid=?")) {
+                    ps.setString(1, player.toString());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) return rs.getInt(1);
+                    }
+                }
+            } catch (SQLException e) {
+                if (!closed) {
+                    BlockProt.getInstance().getLogger().warning(
+                        Translator.get(TranslationKey.CONSOLE__AUDIT_LOGGER_FAILED)
+                            .replace("{error}", e.getMessage()));
                 }
             }
-        } catch (SQLException e) {
-            BlockProt.getInstance().getLogger().warning(
-                Translator.get(TranslationKey.CONSOLE__AUDIT_LOGGER_FAILED)
-                    .replace("{error}", e.getMessage()));
         }
         return 0;
     }
@@ -326,14 +379,9 @@ public final class AuditLogger {
         );
     }
 
-    /**
-     * Prunes old entries when the table grows too large.
-     * Only runs a COUNT(*) every {@link #PRUNE_CHECK_INTERVAL} writes to avoid overhead.
-     */
-    private synchronized void pruneIfNeeded() throws SQLException {
+    private void pruneIfNeeded(@NotNull Connection conn) throws SQLException {
         if (writesSincePrune < PRUNE_CHECK_INTERVAL) return;
         writesSincePrune = 0;
-        Connection conn = acquire();
         try (Statement stmt = conn.createStatement()) {
             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM audit_log");
             if (rs.next() && rs.getInt(1) > MAX_ENTRIES) {
@@ -345,10 +393,15 @@ public final class AuditLogger {
 
     public void close() {
         closed = true;
-        for (Connection conn : pool) {
-            try {
-                if (conn != null && !conn.isClosed()) conn.close();
-            } catch (SQLException ignored) {}
+        synchronized (writeLock) {
+            for (Connection conn : pool) {
+                if (conn == null) continue;
+                synchronized (conn) {
+                    try {
+                        if (!conn.isClosed()) conn.close();
+                    } catch (SQLException ignored) {}
+                }
+            }
         }
     }
 }

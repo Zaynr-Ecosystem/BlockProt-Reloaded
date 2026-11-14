@@ -42,9 +42,9 @@ import org.jetbrains.annotations.Nullable;
 public final class AutoDropFamilyDialog {
 
     private static final TextColor SOFT_GRAY = TextColor.color(0xAAAAAA);
-    private static final TextColor PASTEL_MINT = TextColor.color(0x8FE3B0);
-    private static final TextColor PASTEL_CORAL = TextColor.color(0xF0A0A0);
-    private static final TextColor PASTEL_GOLD = TextColor.color(0xD2B48C);
+    private static final TextColor PASTEL_MINT = TextColor.color(0x98FF98);
+    private static final TextColor PASTEL_CORAL = TextColor.color(0xFF6B6B);
+    private static final TextColor PASTEL_GOLD = TextColor.color(0xF0E6A0);
 
     private static final int PER_PAGE = 6;
 

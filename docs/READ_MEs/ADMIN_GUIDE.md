@@ -550,13 +550,12 @@ When running on an offline-mode server (`online-mode: false` in `server.properti
 ## 13. Integrations (`integrations.yml`)
 
 The plugin auto-detects supported plugins when they are present (soft-depend):
-**Towny, PlaceholderAPI, WorldGuard, Zelly's Guard, Lands, ClaimChunk, ViaVersion, ViaBackwards, Geyser, Floodgate**,
-plus Residence and GriefPrevention support through their APIs.
+**Towny, PlaceholderAPI, WorldGuard, Lands, ClaimChunk, ViaVersion, ViaBackwards, Geyser, Floodgate**,
+plus Residence and GriefPrevention support.
 
 | Integration | What it does |
 |---|---|
 | WorldGuard | Respects regions via the `allow-blockprot` region flag (`enable_flag_functionality`). |
-| Zelly's Guard | Honors claim boundaries via event synchronization; prevents locking or accessing containers inside unowned claims. |
 | Lands | `allow_protecting_containers_in_wilderness`, `require_protect_for_friends_flag`. |
 | Towny | `cleanup_plots_after_unclaim`, bypass protection in ruined towns. |
 | ClaimChunk | `restrict_access_to_chunk_owner`. |

@@ -47,9 +47,9 @@ import java.util.List;
  */
 public class AboutCommand implements CommandExecutor {
     private static final TextColor SOFT_GRAY = TextColor.color(0xAAAAAA);
-    private static final TextColor PASTEL_MINT = TextColor.color(0x8FE3B0);
-    private static final TextColor PASTEL_GOLD = TextColor.color(0xD2B48C);
-    private static final TextColor SOFT_BLUE = TextColor.color(0xA0C4E8);
+    private static final TextColor PASTEL_MINT = TextColor.color(0x98FF98);
+    private static final TextColor PASTEL_GOLD = TextColor.color(0xF0E6A0);
+    private static final TextColor SOFT_BLUE = TextColor.color(0x7EC8E3);
 
     @Override
     public boolean canUseCommand(@NotNull CommandSender sender) {

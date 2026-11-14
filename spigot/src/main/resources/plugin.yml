@@ -8,6 +8,16 @@ prefix: BlockProt Reloaded
 website: https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded
 folia-supported: true
 permissions:
+  blockprot.*:
+    default: op
+    description: >
+      Wildcard permission granting full administrative and player access to BlockProt Reloaded.
+    children:
+      blockprot.user.admin.owner: true
+      blockprot.user.admin: true
+      blockprot.lockmax: true
+      blockprot.blocks.tp: true
+      blockprot.debug: true
   blockprot.user:
     default: true
     description: >
@@ -34,6 +44,7 @@ permissions:
       Tier 2 Helper: Intervention commands, unlocking blocks, breaking protected blocks, and lockables configuration.
     children:
       blockprot.user.admin.t1: true
+      blockprot.user.admin: true
   blockprot.user.admin.t3:
     default: false
     description: >
@@ -88,3 +99,5 @@ softdepend:
   - ViaBackwards
   - Floodgate
   - Geyser-Spigot
+  - Residence
+  - GriefPrevention

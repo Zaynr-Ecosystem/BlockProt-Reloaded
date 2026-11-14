@@ -28,10 +28,12 @@ import de.sean.blockprot.bukkit.admin.AdminAction;
 import de.sean.blockprot.bukkit.admin.AdminTierManager;
 import de.sean.blockprot.bukkit.audit.AuditLogger;
 import de.sean.blockprot.bukkit.dialogs.AuditDialog;
+import de.sean.blockprot.bukkit.dialogs.BpDialogStyles;
 import de.sean.blockprot.bukkit.nbt.BlockNBTHandler;
 import de.sean.blockprot.bukkit.nbt.FriendHandler;
 import de.sean.blockprot.bukkit.storage.ProtectedBlockCache;
 import de.sean.blockprot.bukkit.util.ComponentMessages;
+import de.sean.blockprot.bukkit.util.PlayerNameResolver;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -48,6 +50,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -65,6 +68,14 @@ public final class LogsCommand implements CommandExecutor {
             && sender.hasPermission(Permissions.USER.key());
     }
 
+    @NotNull
+    public static String[] normalizeArgs(@NotNull String[] args) {
+        if (args.length > 0 && args[0].equalsIgnoreCase("logs")) {
+            return Arrays.copyOfRange(args, 1, args.length);
+        }
+        return args;
+    }
+
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
                              @NotNull String label, @NotNull String[] args) {
@@ -74,19 +85,21 @@ public final class LogsCommand implements CommandExecutor {
             return true;
         }
 
-        if (args.length > 0 && args[0].equalsIgnoreCase("here")) {
+        String[] effectiveArgs = normalizeArgs(args);
+
+        if (effectiveArgs.length > 0 && effectiveArgs[0].equalsIgnoreCase("here")) {
             if (!(sender instanceof Player player)) {
                 ComponentMessages.sendLegacy(sender, Translator.get(TranslationKey.MESSAGES__ONLY_PLAYERS));
                 return true;
             }
-            return handleHere(player, args);
+            return handleHere(player, effectiveArgs);
         }
 
-        if (args.length > 0 && args[0].equalsIgnoreCase("player")) {
-            return handlePlayer(sender, args);
+        if (effectiveArgs.length > 0 && effectiveArgs[0].equalsIgnoreCase("player")) {
+            return handlePlayer(sender, effectiveArgs);
         }
 
-        return handleGeneral(sender, args);
+        return handleGeneral(sender, effectiveArgs);
     }
 
     private boolean handleHere(@NotNull Player player, @NotNull String[] args) {
@@ -154,8 +167,18 @@ public final class LogsCommand implements CommandExecutor {
             return true;
         }
 
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
-        UUID targetUuid = target.getUniqueId();
+        OfflinePlayer target = PlayerNameResolver.findOfflinePlayer(args[1]);
+        UUID targetUuid = target != null ? target.getUniqueId() : null;
+        if (targetUuid == null) {
+            try {
+                targetUuid = UUID.fromString(args[1]);
+            } catch (IllegalArgumentException ignored) {}
+        }
+        if (targetUuid == null) {
+            ComponentMessages.sendLegacy(sender, Translator.get(TranslationKey.MESSAGES__ADMIN_INFO_PLAYER_NOT_FOUND)
+                .replace("{player}", args[1]));
+            return true;
+        }
 
         int page = 1;
         if (args.length > 2) {
@@ -239,18 +262,25 @@ public final class LogsCommand implements CommandExecutor {
         for (AuditLogger.AuditEntry entry : entries) {
             String timeStr = DATE_FMT.format(new Date(entry.timestamp()));
             TextColor actionColor = switch (entry.action()) {
-                case ACCESS_DENIED, RAID_EXPLOSION -> TextColor.color(0xFF6B6B);
-                case OPENED -> TextColor.color(0x74B9FF);
-                case ITEM_TAKEN -> TextColor.color(0xFDCB6E);
-                case ITEM_PLACED -> TextColor.color(0x00B894);
+                case ACCESS_DENIED, RAID_EXPLOSION -> BpDialogStyles.PASTEL_CORAL;
+                case OPENED -> BpDialogStyles.SOFT_BLUE;
+                case ITEM_TAKEN -> BpDialogStyles.PASTEL_GOLD;
+                case ITEM_PLACED -> BpDialogStyles.PASTEL_MINT;
                 default -> NamedTextColor.WHITE;
             };
 
+            String actor = entry.playerName() != null
+                ? entry.playerName()
+                : (entry.action() == AuditLogger.Action.RAID_EXPLOSION
+                    ? BpDialogStyles.stripColor(Translator.get(TranslationKey.MESSAGES__RAID_ACTOR_ENVIRONMENT))
+                    : "?");
+            String locationSuffix = " @ " + entry.world() + " (" + entry.x() + ", " + entry.y() + ", " + entry.z() + ")";
+
             Component line = Component.text()
                 .append(Component.text("[" + timeStr + "] ", TextColor.color(0x888888)))
-                .append(Component.text(entry.playerName() != null ? entry.playerName() : "Unknown", NamedTextColor.WHITE))
+                .append(Component.text(actor, NamedTextColor.WHITE))
                 .append(Component.text(" " + entry.action().name(), actionColor))
-                .append(Component.text(" @ " + entry.world() + " (" + entry.x() + ", " + entry.y() + ", " + entry.z() + ")", TextColor.color(0xAAAAAA)))
+                .append(Component.text(locationSuffix, BpDialogStyles.SOFT_GRAY))
                 .build();
             ComponentMessages.send(sender, line);
         }
@@ -262,17 +292,24 @@ public final class LogsCommand implements CommandExecutor {
         ComponentMessages.sendLegacy(sender, pageInfo);
 
         Component nav = Component.empty();
+        String pageTemplate = BpDialogStyles.stripColor(Translator.get(TranslationKey.DIALOGS__PAGE));
         if (page > 1) {
+            String prevHover = pageTemplate
+                .replace("{current}", String.valueOf(page - 1))
+                .replace("{total}", String.valueOf(totalPages));
             Component prev = Component.text(Translator.get(TranslationKey.MESSAGES__LOGS_PREV))
                 .clickEvent(ClickEvent.runCommand(baseCommand + " " + (page - 1)))
-                .hoverEvent(HoverEvent.showText(Component.text("Page " + (page - 1))));
+                .hoverEvent(HoverEvent.showText(Component.text(prevHover)));
             nav = nav.append(prev);
         }
         if (page < totalPages) {
             if (page > 1) nav = nav.append(Component.text("  ", NamedTextColor.GRAY));
+            String nextHover = pageTemplate
+                .replace("{current}", String.valueOf(page + 1))
+                .replace("{total}", String.valueOf(totalPages));
             Component next = Component.text(Translator.get(TranslationKey.MESSAGES__LOGS_NEXT))
                 .clickEvent(ClickEvent.runCommand(baseCommand + " " + (page + 1)))
-                .hoverEvent(HoverEvent.showText(Component.text("Page " + (page + 1))));
+                .hoverEvent(HoverEvent.showText(Component.text(nextHover)));
             nav = nav.append(next);
         }
 
@@ -285,19 +322,20 @@ public final class LogsCommand implements CommandExecutor {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                                       @NotNull String alias, @NotNull String[] args) {
-        if (args.length == 1) {
+        String[] effectiveArgs = normalizeArgs(args);
+        if (effectiveArgs.length == 1) {
             List<String> completions = new ArrayList<>();
-            if ("here".startsWith(args[0].toLowerCase())) completions.add("here");
+            if ("here".startsWith(effectiveArgs[0].toLowerCase())) completions.add("here");
             if (AdminTierManager.hasPermission(sender, AdminAction.LOGS)
                     || sender.hasPermission(Permissions.USER_ADMIN.key())) {
-                if ("player".startsWith(args[0].toLowerCase())) completions.add("player");
+                if ("player".startsWith(effectiveArgs[0].toLowerCase())) completions.add("player");
             }
             return completions;
         }
-        if (args.length == 2 && args[0].equalsIgnoreCase("player")) {
+        if (effectiveArgs.length == 2 && effectiveArgs[0].equalsIgnoreCase("player")) {
             List<String> players = new ArrayList<>();
             for (Player p : Bukkit.getOnlinePlayers()) {
-                if (p.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
+                if (p.getName().toLowerCase().startsWith(effectiveArgs[1].toLowerCase())) {
                     players.add(p.getName());
                 }
             }

@@ -32,11 +32,11 @@ import net.kyori.adventure.text.format.TextColor;
 public final class BpDialogStyles {
 
     public static final TextColor SOFT_GRAY     = TextColor.color(0xAAAAAA);
-    public static final TextColor PASTEL_MINT   = TextColor.color(0x8FE3B0);
-    public static final TextColor PASTEL_CORAL  = TextColor.color(0xF0A0A0);
-    public static final TextColor PASTEL_GOLD   = TextColor.color(0xD2B48C);
-    public static final TextColor SOFT_BLUE     = TextColor.color(0xA0C4E8);
-    public static final TextColor PASTEL_PURPLE = TextColor.color(0xC8A0E0);
+    public static final TextColor PASTEL_MINT   = TextColor.color(0x98FF98);
+    public static final TextColor PASTEL_CORAL  = TextColor.color(0xFF6B6B);
+    public static final TextColor PASTEL_GOLD   = TextColor.color(0xF0E6A0);
+    public static final TextColor SOFT_BLUE     = TextColor.color(0x7EC8E3);
+    public static final TextColor PASTEL_PURPLE = TextColor.color(0xB39DDB);
 
     private BpDialogStyles() {}
 
@@ -47,7 +47,7 @@ public final class BpDialogStyles {
     public static TextColor stateColor(long active, long total) {
         if (active == 0) return PASTEL_CORAL;
         if (active == total) return PASTEL_MINT;
-        return TextColor.color(0xF3C27C);
+        return PASTEL_GOLD;
     }
 
     public static net.kyori.adventure.text.Component indicator(boolean enabled, boolean colorblind) {

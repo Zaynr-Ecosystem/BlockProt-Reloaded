@@ -25,6 +25,8 @@ import de.sean.blockprot.bukkit.BlockProtLogger;
 import de.sean.blockprot.bukkit.Permissions;
 import de.sean.blockprot.bukkit.TranslationKey;
 import de.sean.blockprot.bukkit.Translator;
+import de.sean.blockprot.bukkit.admin.AdminAction;
+import de.sean.blockprot.bukkit.admin.AdminTierManager;
 import de.sean.blockprot.bukkit.audit.AuditLogger;
 import de.sean.blockprot.bukkit.events.BlockAccessMenuEvent;
 import de.sean.blockprot.bukkit.dialogs.BlockLockDialog;
@@ -37,14 +39,19 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.GlowItemFrame;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDropItemEvent;
+import org.bukkit.event.entity.EntityTeleportEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.Inventory;
@@ -170,7 +177,19 @@ public final class ItemFrameListener implements Listener {
             if (blockHandler.isProtected()
                     && !blockHandler.isOwner(player.getUniqueId().toString())
                     && blockHandler.getFriend(player.getUniqueId().toString()).isEmpty()
-                    && !player.hasPermission(Permissions.USER_ADMIN.key())) {
+                    && !player.hasPermission(Permissions.USER_ADMIN.key())
+                    && !AdminTierManager.hasPermission(player, AdminAction.UNLOCK)
+                    && !AdminTierManager.hasPermission(player, AdminAction.INFO)) {
+                sendActionBar(player, Translator.get(TranslationKey.MESSAGES__NO_PERMISSION));
+                return;
+            }
+
+            BlockAccessMenuEvent menuEvent = new BlockAccessMenuEvent(linkedBlock, player);
+            for (BlockAccessMenuEvent.MenuPermission perm : resolveLinkedBlockMenuPermissions(player, blockHandler)) {
+                menuEvent.addPermission(perm);
+            }
+            org.bukkit.Bukkit.getPluginManager().callEvent(menuEvent);
+            if (menuEvent.isCancelled() || menuEvent.getPermissions().isEmpty()) {
                 sendActionBar(player, Translator.get(TranslationKey.MESSAGES__NO_PERMISSION));
                 return;
             }
@@ -179,7 +198,7 @@ public final class ItemFrameListener implements Listener {
                 BlockLockDialog.show(player, linkedBlock, blockHandler);
             } else {
                 InventoryState state = new InventoryState(linkedBlock);
-                state.menuPermissions = resolveLinkedBlockMenuPermissions(player, blockHandler);
+                state.menuPermissions = menuEvent.getPermissions();
                 InventoryState.set(player.getUniqueId(), state);
 
                 Inventory inv = new BlockLockInventory().fill(player, linkedBlock.getType(), blockHandler);
@@ -221,6 +240,13 @@ public final class ItemFrameListener implements Listener {
         String playerUuid = player.getUniqueId().toString();
         boolean isAdmin = player.hasPermission(Permissions.USER_ADMIN.key());
 
+        if (AdminTierManager.hasPermission(player, AdminAction.UNLOCK)) {
+            permissions.add(BlockAccessMenuEvent.MenuPermission.LOCK);
+            permissions.add(BlockAccessMenuEvent.MenuPermission.INFO);
+        } else if (!blockHandler.isNotProtected() && AdminTierManager.hasPermission(player, AdminAction.INFO)) {
+            permissions.add(BlockAccessMenuEvent.MenuPermission.INFO);
+        }
+
         if (blockHandler.isOwner(playerUuid) || isAdmin) {
             permissions.add(BlockAccessMenuEvent.MenuPermission.LOCK);
             permissions.add(BlockAccessMenuEvent.MenuPermission.INFO);
@@ -229,6 +255,7 @@ public final class ItemFrameListener implements Listener {
             permissions.add(BlockAccessMenuEvent.MenuPermission.LOCK);
         } else {
             blockHandler.getFriend(playerUuid).ifPresent(friend -> {
+                if (friend.canOpenMenu()) permissions.add(BlockAccessMenuEvent.MenuPermission.INFO);
                 if (friend.isManager()) permissions.add(BlockAccessMenuEvent.MenuPermission.MANAGER);
             });
         }
@@ -263,10 +290,9 @@ public final class ItemFrameListener implements Listener {
     public void onFrameBreakByPlayer(@NotNull HangingBreakByEntityEvent event) {
         if (!(event.getEntity() instanceof ItemFrame frame)) return;
         if (!isFrameProtectionEnabled(frame)) return;
-        if (!(event.getRemover() instanceof Player player)) return;
+        if (BlockProt.getDefaultConfig().isWorldExcluded(frame.getWorld())) return;
 
-        if (BlockProt.getDefaultConfig().isWorldExcluded(player.getWorld())) return;
-
+        Player player = resolveAttacker(event.getRemover());
         EntityNBTHandler handler = new EntityNBTHandler(frame);
 
         Block linkedBlock = resolveLinkedBlock(handler);
@@ -274,6 +300,10 @@ public final class ItemFrameListener implements Listener {
             try {
                 BlockNBTHandler blockHandler = new BlockNBTHandler(linkedBlock);
                 if (!blockHandler.isProtected()) return;
+                if (player == null) {
+                    event.setCancelled(true);
+                    return;
+                }
                 if (!blockHandler.canAccess(player.getUniqueId().toString())
                         && !player.hasPermission(Permissions.USER_ADMIN.key())) {
                     event.setCancelled(true);
@@ -286,6 +316,10 @@ public final class ItemFrameListener implements Listener {
         }
 
         if (!handler.isProtected()) return;
+        if (player == null) {
+            event.setCancelled(true);
+            return;
+        }
 
         if (!handler.canAccess(player.getUniqueId().toString())
                 && !player.hasPermission(Permissions.USER_ADMIN.key())) {
@@ -300,10 +334,9 @@ public final class ItemFrameListener implements Listener {
     public void onFrameDamageByEntity(@NotNull EntityDamageByEntityEvent event) {
         if (!(event.getEntity() instanceof ItemFrame frame)) return;
         if (!isFrameProtectionEnabled(frame)) return;
-        if (!(event.getDamager() instanceof Player player)) return;
+        if (BlockProt.getDefaultConfig().isWorldExcluded(frame.getWorld())) return;
 
-        if (BlockProt.getDefaultConfig().isWorldExcluded(player.getWorld())) return;
-
+        Player player = resolveAttacker(event.getDamager());
         EntityNBTHandler handler = new EntityNBTHandler(frame);
 
         Block linkedBlock = resolveLinkedBlock(handler);
@@ -311,6 +344,10 @@ public final class ItemFrameListener implements Listener {
             try {
                 BlockNBTHandler blockHandler = new BlockNBTHandler(linkedBlock);
                 if (!blockHandler.isProtected()) return;
+                if (player == null) {
+                    event.setCancelled(true);
+                    return;
+                }
                 if (!blockHandler.canAccess(player.getUniqueId().toString())
                         && !player.hasPermission(Permissions.USER_ADMIN.key())) {
                     event.setCancelled(true);
@@ -323,6 +360,10 @@ public final class ItemFrameListener implements Listener {
         }
 
         if (!handler.isProtected()) return;
+        if (player == null) {
+            event.setCancelled(true);
+            return;
+        }
 
         if (!handler.canAccess(player.getUniqueId().toString())
                 && !player.hasPermission(Permissions.USER_ADMIN.key())) {
@@ -331,6 +372,15 @@ public final class ItemFrameListener implements Listener {
             BlockProtLogger.log("entity-protection", "ACCESS_DENIED frame damage: "
                 + frame.getType().name() + " entity=" + frame.getUniqueId() + " player=" + player.getName());
         }
+    }
+
+    @Nullable
+    private static Player resolveAttacker(@Nullable Entity source) {
+        if (source instanceof Player p) return p;
+        if (source instanceof Projectile projectile && projectile.getShooter() instanceof Player shooter) {
+            return shooter;
+        }
+        return null;
     }
 
     private boolean isFrameProtectionEnabled(@NotNull ItemFrame frame) {
@@ -406,6 +456,47 @@ public final class ItemFrameListener implements Listener {
         de.sean.blockprot.bukkit.util.TemporaryActionBar.show(player,
             Translator.get(TranslationKey.MESSAGES__LOCK_ON_PLACE_SUCCESS));
         // No session log for auto-lock: would spam on every frame placement.
+    }
+
+    private boolean isProtectedFrame(@NotNull ItemFrame frame) {
+        if (!isFrameProtectionEnabled(frame)) return false;
+        if (BlockProt.getDefaultConfig().isWorldExcluded(frame.getWorld())) return false;
+        EntityNBTHandler handler = new EntityNBTHandler(frame);
+        Block linkedBlock = resolveLinkedBlock(handler);
+        if (linkedBlock != null) {
+            try {
+                if (new BlockNBTHandler(linkedBlock).isProtected()) return true;
+            } catch (RuntimeException ignored) {}
+        }
+        return handler.isProtected();
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onHangingBreak(@NotNull HangingBreakEvent event) {
+        if (event instanceof HangingBreakByEntityEvent) return;
+        if (!(event.getEntity() instanceof ItemFrame frame)) return;
+        if (!isProtectedFrame(frame)) return;
+        if (event.getCause() == HangingBreakEvent.RemoveCause.EXPLOSION
+                && !BlockProt.getDefaultConfig().shouldProtectLockedBlocksFromExplosions()) {
+            return;
+        }
+        event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onEntityTeleport(@NotNull EntityTeleportEvent event) {
+        if (!(event.getEntity() instanceof ItemFrame frame)) return;
+        if (isProtectedFrame(frame)) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onEntityDropItem(@NotNull EntityDropItemEvent event) {
+        if (!(event.getEntity() instanceof ItemFrame frame)) return;
+        if (isProtectedFrame(frame)) {
+            event.setCancelled(true);
+        }
     }
 
     private void sendActionBar(@NotNull Player player, @NotNull String text) {

@@ -24,29 +24,35 @@ import de.sean.blockprot.bukkit.BlockProt;
 import de.sean.blockprot.bukkit.nbt.BlockNBTHandler;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.FallingBlock;
-import org.bukkit.entity.minecart.StorageMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
-import org.bukkit.event.entity.EntityPickupItemEvent;
-import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Prevents entities (endermen, falling blocks, storage minecarts) from
+ * Prevents entities (endermen, falling blocks) from
  * interacting with or bypassing protection on locked blocks.
  */
 public final class EntityEventListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onEntityChangeBlock(@NotNull final EntityChangeBlockEvent event) {
+        if (BlockProt.getDefaultConfig().isWorldExcluded(event.getBlock().getWorld())) return;
         Material blockType = event.getBlock().getType();
-        if (blockType == Material.AIR || blockType == Material.CAVE_AIR || blockType == Material.VOID_AIR) return;
-
         Entity entity = event.getEntity();
+        if (blockType == Material.AIR || blockType == Material.CAVE_AIR || blockType == Material.VOID_AIR) {
+            if (entity instanceof FallingBlock) {
+                Block below = event.getBlock().getRelative(BlockFace.DOWN);
+                if (de.sean.blockprot.bukkit.storage.ProtectedBlockCache.isProtected(below)) {
+                    event.setCancelled(true);
+                }
+            }
+            return;
+        }
         org.bukkit.World world = event.getBlock().getWorld();
         if (entity instanceof FallingBlock) {
             Material mat = ((FallingBlock) entity).getBlockData().getMaterial();
@@ -65,22 +71,6 @@ public final class EntityEventListener implements Listener {
             }
         } else if (BlockProt.getDefaultConfig().isLockable(blockType, world)) {
             BlockNBTHandler handler = new BlockNBTHandler(event.getBlock());
-            if (handler.isProtected()) event.setCancelled(true);
-        }
-    }
-
-    /**
-     * Prevents Chest Minecarts from entering a column directly below a protected chest.
-     * A chest minecart on the rails under a chest can pull items without going through
-     * the hopper pipeline, bypassing {@link HopperEventListener}.
-     */
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onStorageMinecartEnter(@NotNull VehicleEnterEvent event) {
-        if (!(event.getVehicle() instanceof StorageMinecart)) return;
-        Block above = event.getVehicle().getLocation().getBlock().getRelative(0, 1, 0);
-        if (BlockProt.getDefaultConfig().isLockableTileEntity(above.getType())) {
-            BlockNBTHandler handler;
-            try { handler = new BlockNBTHandler(above); } catch (RuntimeException ignored) { return; }
             if (handler.isProtected()) event.setCancelled(true);
         }
     }

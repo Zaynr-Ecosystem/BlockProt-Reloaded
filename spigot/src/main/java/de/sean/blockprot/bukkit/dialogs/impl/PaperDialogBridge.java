@@ -303,18 +303,18 @@ public final class PaperDialogBridge implements DialogBridge {
                 if ("search".equals(btn.id())) {
                     String currentText = view.getText(fieldKey);
                     final String query = currentText != null ? currentText : "";
-                    org.bukkit.Bukkit.getScheduler().runTask(
-                        de.sean.blockprot.bukkit.BlockProt.getInstance(),
+                    de.sean.blockprot.bukkit.util.RegionTasks.runFor(
+                        player,
                         () -> onSearch.accept(query)
                     );
                 } else if (handler != null) {
-                    org.bukkit.Bukkit.getScheduler().runTask(
-                        de.sean.blockprot.bukkit.BlockProt.getInstance(),
+                    de.sean.blockprot.bukkit.util.RegionTasks.runFor(
+                        player,
                         () -> handler.handle(player)
                     );
                 } else {
-                    org.bukkit.Bukkit.getScheduler().runTask(
-                        de.sean.blockprot.bukkit.BlockProt.getInstance(),
+                    de.sean.blockprot.bukkit.util.RegionTasks.runFor(
+                        player,
                         () -> closeDialogOrInventory(player)
                     );
                 }
@@ -335,7 +335,7 @@ public final class PaperDialogBridge implements DialogBridge {
             action = DialogAction.customClick(
                 (view, audience) -> {
                     if (audience instanceof Player player) {
-                        org.bukkit.Bukkit.getScheduler().runTask(de.sean.blockprot.bukkit.BlockProt.getInstance(), () -> closeDialogOrInventory(player));
+                        de.sean.blockprot.bukkit.util.RegionTasks.runFor(player, () -> closeDialogOrInventory(player));
                     }
                 },
                 CLICK_OPTIONS
@@ -344,7 +344,7 @@ public final class PaperDialogBridge implements DialogBridge {
             action = DialogAction.customClick(
                 (view, audience) -> {
                     if (audience instanceof Player player) {
-                        org.bukkit.Bukkit.getScheduler().runTask(de.sean.blockprot.bukkit.BlockProt.getInstance(), () -> handler.handle(player));
+                        de.sean.blockprot.bukkit.util.RegionTasks.runFor(player, () -> handler.handle(player));
                     }
                 },
                 CLICK_OPTIONS

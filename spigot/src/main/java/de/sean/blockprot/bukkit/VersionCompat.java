@@ -21,7 +21,9 @@
 package de.sean.blockprot.bukkit;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
@@ -174,5 +176,11 @@ public final class VersionCompat {
         } catch (NoSuchMethodError ignored) {
             return block.getState();
         }
+    }
+
+    @Nullable
+    public static Material matchMaterialIfAtLeast(@NotNull String name, int major, int minor) {
+        if (!isAtLeast(major, minor)) return null;
+        return Material.matchMaterial(name);
     }
 }

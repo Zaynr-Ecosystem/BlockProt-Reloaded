@@ -53,6 +53,33 @@ public final class BedrockBridge {
             || Bukkit.getPluginManager().isPluginEnabled("Geyser");
     }
 
+    @NotNull
+    public static String sanitizeHandshakeHostname(@Nullable String rawHostname) {
+        if (rawHostname == null) return "";
+        int nulIdx = rawHostname.indexOf('\0');
+        String clean = nulIdx >= 0 ? rawHostname.substring(0, nulIdx) : rawHostname;
+        int queryIdx = clean.indexOf('?');
+        return queryIdx >= 0 ? clean.substring(0, queryIdx) : clean;
+    }
+
+    @Nullable
+    public static String extractHandshakeQueryParam(@Nullable String rawHostname, @NotNull String paramName) {
+        if (rawHostname == null || paramName.isEmpty()) return null;
+        int nulIdx = rawHostname.indexOf('\0');
+        String clean = nulIdx >= 0 ? rawHostname.substring(0, nulIdx) : rawHostname;
+        int queryIdx = clean.indexOf('?');
+        if (queryIdx < 0 || queryIdx + 1 >= clean.length()) return null;
+        String query = clean.substring(queryIdx + 1);
+        for (String pair : query.split("&")) {
+            int eq = pair.indexOf('=');
+            String k = eq >= 0 ? pair.substring(0, eq) : pair;
+            if (k.equalsIgnoreCase(paramName)) {
+                return eq >= 0 ? pair.substring(eq + 1) : "";
+            }
+        }
+        return null;
+    }
+
     public static boolean isBedrockPlayer(@Nullable Player player) {
         if (player == null) return false;
         return isBedrockPlayer(player.getUniqueId());

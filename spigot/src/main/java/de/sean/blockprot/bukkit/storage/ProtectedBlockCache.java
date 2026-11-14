@@ -28,7 +28,6 @@ import org.bukkit.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -39,12 +38,14 @@ import java.util.concurrent.TimeUnit;
  * A location missing from the set is verified against the block NBT and the result is remembered,
  * so locks that survived a restart are protected without depending on the startup population.</p>
  *
- * <p>Thread-safe: all mutations use {@link ConcurrentHashMap} and are called from the
- * server main thread, but reads may happen from any thread.</p>
+ * <p>Thread-safe: all mutations use Caffeine caches and may be called from
+ * region/main threads while reads may happen from any thread.</p>
  */
 public final class ProtectedBlockCache {
 
-    private static final ConcurrentHashMap<Long, Boolean> PROTECTED = new ConcurrentHashMap<>(256);
+    private static final Cache<Long, UUID> PROTECTED = Caffeine.newBuilder()
+        .maximumSize(100_000)
+        .build();
 
     private static final Cache<Long, Boolean> VERIFIED_UNPROTECTED = Caffeine.newBuilder()
         .maximumSize(8192)
@@ -55,19 +56,19 @@ public final class ProtectedBlockCache {
 
     public static void mark(@NotNull Block block) {
         long key = key(block);
-        PROTECTED.put(key, Boolean.TRUE);
+        PROTECTED.put(key, block.getWorld().getUID());
         VERIFIED_UNPROTECTED.invalidate(key);
     }
 
     public static void unmark(@NotNull Block block) {
         long key = key(block);
-        PROTECTED.remove(key);
+        PROTECTED.invalidate(key);
         VERIFIED_UNPROTECTED.invalidate(key);
     }
 
     public static boolean isProtected(@NotNull Block block) {
         long key = key(block);
-        if (PROTECTED.containsKey(key)) return true;
+        if (PROTECTED.getIfPresent(key) != null) return true;
         if (VERIFIED_UNPROTECTED.getIfPresent(key) != null) return false;
         boolean nbtProtected;
         try {
@@ -77,18 +78,22 @@ public final class ProtectedBlockCache {
             VERIFIED_UNPROTECTED.put(key, Boolean.TRUE);
             return false;
         }
-        if (nbtProtected) PROTECTED.put(key, Boolean.TRUE);
+        if (nbtProtected) PROTECTED.put(key, block.getWorld().getUID());
         else VERIFIED_UNPROTECTED.put(key, Boolean.TRUE);
         return nbtProtected;
     }
 
+    public static void clearWorld(@NotNull UUID worldUid) {
+        PROTECTED.asMap().values().removeIf(uid -> uid.equals(worldUid));
+    }
+
     public static void clear() {
-        PROTECTED.clear();
+        PROTECTED.invalidateAll();
         VERIFIED_UNPROTECTED.invalidateAll();
     }
 
     public static int size() {
-        return PROTECTED.size();
+        return PROTECTED.asMap().size();
     }
 
     private static long key(@NotNull Block block) {

@@ -40,7 +40,7 @@ import org.jetbrains.annotations.NotNull;
 public final class FriendCandidateSelectionDialog {
 
     private static final TextColor SOFT_GRAY = TextColor.color(0xAAAAAA);
-    private static final TextColor PASTEL_GOLD = TextColor.color(0xD2B48C);
+    private static final TextColor PASTEL_GOLD = TextColor.color(0xF0E6A0);
 
     private static final int PER_PAGE = 6;
 

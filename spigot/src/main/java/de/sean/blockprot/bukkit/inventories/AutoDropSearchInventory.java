@@ -55,8 +55,8 @@ import java.util.List;
  */
 public final class AutoDropSearchInventory extends BlockProtInventory {
 
-    private static final TextColor PASTEL_CORAL = TextColor.color(0xF0A0A0);
-    private static final TextColor PASTEL_MINT  = TextColor.color(0x8FE3B0);
+    private static final TextColor PASTEL_CORAL = TextColor.color(0xFF6B6B);
+    private static final TextColor PASTEL_MINT  = TextColor.color(0x98FF98);
 
     private static final int CONTENT_SLOTS = 45;
     private static final int SLOT_PREV = 48;

@@ -68,6 +68,12 @@ public final class InactivityCleanupTask implements Runnable {
         this.thresholdMs = TimeUnit.DAYS.toMillis(days);
     }
 
+    public static boolean isEligibleOffline(@NotNull OfflinePlayer offline, long cutoffMs) {
+        if (offline.isOnline()) return false;
+        long lastActivity = Math.max(offline.getLastSeen(), offline.getLastPlayed());
+        return lastActivity > 0L && lastActivity <= cutoffMs;
+    }
+
     @Override
     public void run() {
         long cutoff = System.currentTimeMillis() - thresholdMs;
@@ -85,16 +91,11 @@ public final class InactivityCleanupTask implements Runnable {
 
             List<Candidate> candidates = new ArrayList<>();
             for (OfflinePlayer offline : batch) {
-                if (offline.isOnline()) continue;
-                if (offline.getLastSeen() > cutoff) continue;
+                if (!isEligibleOffline(offline, cutoff)) continue;
 
                 try {
                     var stat = new PlayerBlocksStatistic();
-                    if (offline.getPlayer() != null) {
-                        StatHandler.getStatistic(stat, offline.getPlayer());
-                    } else {
-                        continue; // Offline without a loaded player object: skip.
-                    }
+                    StatHandler.getStatisticByUuid(stat, offline.getUniqueId());
 
                     for (var entry : stat.get()) {
                         var loc = entry.get();

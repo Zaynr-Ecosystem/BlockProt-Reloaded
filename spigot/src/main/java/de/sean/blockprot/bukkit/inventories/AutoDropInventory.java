@@ -43,9 +43,9 @@ import java.util.Set;
 
 public final class AutoDropInventory extends BlockProtInventory {
 
-    private static final TextColor PASTEL_CORAL  = TextColor.color(0xF0A0A0);
-    private static final TextColor PASTEL_MINT   = TextColor.color(0x8FE3B0);
-    private static final TextColor PASTEL_GOLD   = TextColor.color(0xD2B48C);
+    private static final TextColor PASTEL_CORAL  = TextColor.color(0xFF6B6B);
+    private static final TextColor PASTEL_MINT   = TextColor.color(0x98FF98);
+    private static final TextColor PASTEL_GOLD   = TextColor.color(0xF0E6A0);
     private static final TextColor PASTEL_YELLOW = TextColor.color(0xF0E6A0);
 
     private record FamilyEntry(BlockFamilyParser.Family family, Material icon, int slot) {}

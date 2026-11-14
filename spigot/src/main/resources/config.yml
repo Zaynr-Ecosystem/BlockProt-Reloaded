@@ -76,7 +76,8 @@ modern_family_blocks: false
 # Route: Dialog: /bp admin -> Config -> Blocks -> Behavior | Menu: /bp admin -> Config -> Blocks -> Behavior (slot 13)
 redstone_disallowed_by_default: false
 
-# Enable simpler hopper logic to save server performance.
+# Use the cached source-extraction fast path for hoppers to reduce server overhead
+# while preserving siphon protection on locked blocks.
 # Route: Dialog: /bp admin -> Config -> Blocks -> Behavior | Menu: /bp admin -> Config -> Blocks -> Behavior (slot 14)
 simplified_hopper_logic: false
 

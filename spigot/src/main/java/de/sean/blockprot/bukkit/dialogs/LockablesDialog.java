@@ -43,11 +43,11 @@ import org.jetbrains.annotations.NotNull;
 public final class LockablesDialog {
 
     private static final TextColor SOFT_GRAY = TextColor.color(0xAAAAAA);
-    private static final TextColor PASTEL_MINT = TextColor.color(0x8FE3B0);
-    private static final TextColor PASTEL_CORAL = TextColor.color(0xF0A0A0);
-    private static final TextColor PASTEL_GOLD = TextColor.color(0xD2B48C);
-    private static final TextColor SOFT_BLUE = TextColor.color(0xA0C4E8);
-    private static final TextColor PASTEL_PURPLE = TextColor.color(0xC8A0E0);
+    private static final TextColor PASTEL_MINT = TextColor.color(0x98FF98);
+    private static final TextColor PASTEL_CORAL = TextColor.color(0xFF6B6B);
+    private static final TextColor PASTEL_GOLD = TextColor.color(0xF0E6A0);
+    private static final TextColor SOFT_BLUE = TextColor.color(0x7EC8E3);
+    private static final TextColor PASTEL_PURPLE = TextColor.color(0xB39DDB);
     private static final TextColor PASTEL_ORANGE = TextColor.color(0xDFB98E);
 
     private static final int PER_PAGE = 6;

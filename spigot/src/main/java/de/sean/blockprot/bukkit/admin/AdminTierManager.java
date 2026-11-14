@@ -100,20 +100,28 @@ public final class AdminTierManager {
         return new File(BlockProt.getInstance().getDataFolder(), "admins.yml");
     }
 
+    private static boolean isNegated(@NotNull Player player, @NotNull String node) {
+        return player.isPermissionSet(node) && !player.hasPermission(node);
+    }
+
     @NotNull
     public static AdminTier getPlayerTier(@NotNull Player player) {
-        if (player.hasPermission(Permissions.ADMIN_OWNER.key())) return AdminTier.OWNER;
-        if (player.hasPermission(Permissions.ADMIN_T3.key())) return AdminTier.T3;
-        if (player.hasPermission(Permissions.ADMIN_T2.key())) return AdminTier.T2;
-        if (player.hasPermission(Permissions.ADMIN_T1.key())) return AdminTier.T1;
-        if (player.hasPermission(Permissions.ADMIN_CUSTOM.key())) return AdminTier.CUSTOM;
+        if (player.hasPermission(Permissions.ADMIN_OWNER.key()) && !isNegated(player, Permissions.ADMIN_OWNER.key())) return AdminTier.OWNER;
+        if (player.hasPermission(Permissions.ADMIN_T3.key()) && !isNegated(player, Permissions.ADMIN_T3.key())) return AdminTier.T3;
+        if (player.hasPermission(Permissions.ADMIN_T2.key()) && !isNegated(player, Permissions.ADMIN_T2.key())) return AdminTier.T2;
+        if (player.hasPermission(Permissions.ADMIN_T1.key()) && !isNegated(player, Permissions.ADMIN_T1.key())) return AdminTier.T1;
+        if (player.hasPermission(Permissions.ADMIN_CUSTOM.key()) && !isNegated(player, Permissions.ADMIN_CUSTOM.key())) return AdminTier.CUSTOM;
 
         AdminRoleEntry entry = ADMIN_ENTRIES.get(player.getUniqueId());
         if (entry != null && entry.tier() != AdminTier.NONE) {
             return entry.tier();
         }
 
-        if (player.isOp()) return AdminTier.OWNER;
+        if (player.isOp()
+                && !isNegated(player, Permissions.ADMIN_OWNER.key())
+                && !isNegated(player, Permissions.USER_ADMIN.key())) {
+            return AdminTier.OWNER;
+        }
         return AdminTier.NONE;
     }
 
@@ -131,10 +139,18 @@ public final class AdminTierManager {
         if (sender instanceof ConsoleCommandSender) return true;
         if (!(sender instanceof Player player)) return sender.isOp();
 
+        String actionNode = "blockprot.user.admin.action." + action.name().toLowerCase(Locale.ROOT);
+        if (isNegated(player, actionNode)) return false;
+        if (action == AdminAction.CONTAINER_BYPASS && isNegated(player, "blockprot.admin.bypass")) return false;
+
         if (!BlockProt.getDefaultConfig().isAdminTiersEnabled()) {
             if (action == AdminAction.RECOMMENDED) {
+                if (isNegated(player, Permissions.ADMIN_OWNER.key()) || isNegated(player, Permissions.USER_ADMIN.key())) {
+                    return false;
+                }
                 return player.isOp() || player.hasPermission(Permissions.ADMIN_OWNER.key());
             }
+            if (isNegated(player, Permissions.USER_ADMIN.key())) return false;
             return player.isOp() || player.hasPermission(Permissions.USER_ADMIN.key());
         }
 
@@ -143,7 +159,7 @@ public final class AdminTierManager {
         if (tier.includes(action.getMinimumTier())) return true;
 
         if (tier == AdminTier.CUSTOM || player.hasPermission(Permissions.ADMIN_CUSTOM.key())) {
-            if (player.hasPermission("blockprot.user.admin.action." + action.name().toLowerCase(Locale.ROOT))) {
+            if (player.hasPermission(actionNode)) {
                 return true;
             }
             if (getCustomFlags(player).contains(action)) {
@@ -151,7 +167,7 @@ public final class AdminTierManager {
             }
         }
 
-        if (player.hasPermission(Permissions.USER_ADMIN.key())) {
+        if (!isNegated(player, Permissions.USER_ADMIN.key()) && player.hasPermission(Permissions.USER_ADMIN.key())) {
             return action.getMinimumTier().getLevel() <= AdminTier.T2.getLevel();
         }
 
