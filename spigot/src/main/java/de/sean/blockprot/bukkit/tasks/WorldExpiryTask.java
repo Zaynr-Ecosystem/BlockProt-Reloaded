@@ -74,7 +74,6 @@ public class WorldExpiryTask implements Runnable {
 
     private void scanWorld(@NotNull World world, long durationMs) {
         long cutoff = System.currentTimeMillis() - durationMs;
-        List<Location> expired = new ArrayList<>();
 
         Chunk[] chunks = world.getLoadedChunks();
         Set<Material> nonTileTypes = new HashSet<>();
@@ -84,29 +83,54 @@ public class WorldExpiryTask implements Runnable {
         }
 
         for (Chunk chunk : chunks) {
-            for (BlockState state : chunk.getTileEntities()) {
-                Location loc = state.getLocation();
-                if (!ProtectedBlockCache.isProtected(loc.getBlock())) continue;
-                try {
-                    BlockNBTHandler handler = new BlockNBTHandler(loc.getBlock());
-                    if (handler.isProtected() && handler.getLockedAt() > 0 && handler.getLockedAt() < cutoff) {
-                        expired.add(loc.clone());
-                    }
-                } catch (RuntimeException ignored) {}
+            Location chunkAnchor = new Location(
+                world,
+                (chunk.getX() << 4) + 8.0,
+                Math.max(world.getMinHeight(), 64),
+                (chunk.getZ() << 4) + 8.0
+            );
+            int chunkX = chunk.getX();
+            int chunkZ = chunk.getZ();
+            BlockProt.getFoliaLib().getScheduler().runAtLocation(chunkAnchor, task -> {
+                if (!world.isChunkLoaded(chunkX, chunkZ)) return;
+                Chunk loadedChunk = world.getChunkAt(chunkX, chunkZ);
+                scanChunkAndExpire(world, loadedChunk, nonTileTypes, cutoff);
+            });
+        }
+    }
+
+    private void scanChunkAndExpire(@NotNull World world,
+                                    @NotNull Chunk chunk,
+                                    @NotNull Set<Material> nonTileTypes,
+                                    long cutoff) {
+        List<Location> expired = new ArrayList<>();
+
+        for (BlockState state : chunk.getTileEntities()) {
+            Location loc = state.getLocation();
+            if (!ProtectedBlockCache.isProtected(loc.getBlock())) continue;
+            try {
+                BlockNBTHandler handler = new BlockNBTHandler(loc.getBlock());
+                if (handler.isProtected() && handler.getLockedAt() > 0 && handler.getLockedAt() < cutoff) {
+                    expired.add(loc.clone());
+                }
+            } catch (RuntimeException e) {
+                BlockProtLogger.log("world-expiry", "Failed scanning tile block at " + loc + ": " + e.getMessage());
             }
-            for (int x = 0; x < 16; x++) {
-                for (int z = 0; z < 16; z++) {
-                    for (int y = world.getMinHeight(); y < world.getMaxHeight(); y++) {
-                        Block block = chunk.getBlock(x, y, z);
-                        if (block.getState() instanceof TileState) continue;
-                        if (nonTileTypes.contains(block.getType())) {
-                            if (!ProtectedBlockCache.isProtected(block)) continue;
-                            try {
-                                BlockNBTHandler handler = new BlockNBTHandler(block);
-                                if (handler.isProtected() && handler.getLockedAt() > 0 && handler.getLockedAt() < cutoff) {
-                                    expired.add(block.getLocation().clone());
-                                }
-                            } catch (RuntimeException ignored) {}
+        }
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                for (int y = world.getMinHeight(); y < world.getMaxHeight(); y++) {
+                    Block block = chunk.getBlock(x, y, z);
+                    if (block.getState() instanceof TileState) continue;
+                    if (nonTileTypes.contains(block.getType())) {
+                        if (!ProtectedBlockCache.isProtected(block)) continue;
+                        try {
+                            BlockNBTHandler handler = new BlockNBTHandler(block);
+                            if (handler.isProtected() && handler.getLockedAt() > 0 && handler.getLockedAt() < cutoff) {
+                                expired.add(block.getLocation().clone());
+                            }
+                        } catch (RuntimeException e) {
+                            BlockProtLogger.log("world-expiry", "Failed scanning block at " + block.getLocation() + ": " + e.getMessage());
                         }
                     }
                 }
@@ -131,7 +155,9 @@ public class WorldExpiryTask implements Runnable {
                         StatHandler.removeContainerByUuid(UUID.fromString(ownerUuid), loc);
                     } catch (IllegalArgumentException ignored) {}
                 }
-            } catch (RuntimeException ignored) {}
+            } catch (RuntimeException e) {
+                BlockProtLogger.log("world-expiry", "Failed to clear expired block at " + loc + ": " + e.getMessage());
+            }
         }
 
         BlockProtLogger.log("world-expiry",

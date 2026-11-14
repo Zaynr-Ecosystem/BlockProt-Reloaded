@@ -42,6 +42,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Optional MySQL/MariaDB index for BlockProt.
@@ -54,9 +55,12 @@ public final class HybridDatabase {
 
     private final BlockProt plugin;
     private final ConcurrentMap<String, Set<String>> globalTrustCache = new ConcurrentHashMap<>();
+    private final AtomicInteger activeTasks = new AtomicInteger(0);
+    private final Object shutdownLock = new Object();
 
     private HikariDataSource dataSource;
     private volatile boolean enabled;
+    private volatile boolean shuttingDown;
 
     public HybridDatabase(@NotNull BlockProt plugin) {
         this.plugin = plugin;
@@ -99,7 +103,25 @@ public final class HybridDatabase {
     }
 
     public void close() {
+        shuttingDown = true;
         enabled = false;
+        long deadline = System.nanoTime() + java.util.concurrent.TimeUnit.SECONDS.toNanos(2);
+        synchronized (shutdownLock) {
+            while (activeTasks.get() > 0) {
+                long remainingNanos = deadline - System.nanoTime();
+                if (remainingNanos <= 0L) {
+                    break;
+                }
+                try {
+                    long millis = remainingNanos / 1_000_000L;
+                    int nanos = (int) (remainingNanos % 1_000_000L);
+                    shutdownLock.wait(Math.max(1L, millis), nanos);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }
         if (dataSource != null) {
             dataSource.close();
             dataSource = null;
@@ -293,12 +315,22 @@ public final class HybridDatabase {
     }
 
     private void runAsync(@NotNull SqlRunnable runnable) {
+        if (shuttingDown) return;
         BlockProt.getFoliaLib().getScheduler().runAsync(asyncTask -> {
+            HikariDataSource ds = this.dataSource;
+            if (shuttingDown || ds == null || ds.isClosed()) return;
+            activeTasks.incrementAndGet();
             try {
                 runnable.run();
             } catch (SQLException e) {
                 plugin.getLogger().warning(Translator.get(TranslationKey.CONSOLE__MYSQL_OPERATION_FAILED)
                     .replace("{error}", e.getMessage()));
+            } finally {
+                if (activeTasks.decrementAndGet() <= 0) {
+                    synchronized (shutdownLock) {
+                        shutdownLock.notifyAll();
+                    }
+                }
             }
         });
     }

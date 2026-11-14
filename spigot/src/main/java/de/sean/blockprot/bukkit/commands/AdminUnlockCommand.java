@@ -32,6 +32,7 @@ import de.sean.blockprot.bukkit.inventories.InventoryState;
 import de.sean.blockprot.bukkit.nbt.StatHandler;
 import de.sean.blockprot.bukkit.nbt.stats.PlayerBlocksStatistic;
 import de.sean.blockprot.bukkit.util.ComponentMessages;
+import de.sean.blockprot.bukkit.util.PlayerNameResolver;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -83,9 +84,8 @@ public final class AdminUnlockCommand implements CommandExecutor {
 
         String targetName = args[1];
 
-        @SuppressWarnings("deprecation")
-        OfflinePlayer target = Bukkit.getOfflinePlayer(targetName);
-        if (target == null || target.getName() == null) {
+        OfflinePlayer target = PlayerNameResolver.findOfflinePlayer(targetName);
+        if (target == null) {
             ComponentMessages.sendLegacy(player, Translator.get(TranslationKey.MESSAGES__BP_UNLOCK_PLAYER_NOT_FOUND)
                 .replace("{player}", targetName));
             return true;
@@ -120,23 +120,23 @@ public final class AdminUnlockCommand implements CommandExecutor {
             ComponentMessages.sendLegacy(sender, Translator.get(TranslationKey.MESSAGES__BP_UNLOCK_USAGE));
             return;
         }
-        @SuppressWarnings("deprecation")
-        OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
-        if (target.getName() == null) {
+        OfflinePlayer target = PlayerNameResolver.findOfflinePlayer(args[1]);
+        if (target == null) {
             ComponentMessages.sendLegacy(sender, Translator.get(TranslationKey.MESSAGES__BP_UNLOCK_PLAYER_NOT_FOUND)
                 .replace("{player}", args[1]));
             return;
         }
+        String resolvedName = target.getName() != null ? target.getName() : args[1];
         PlayerBlocksStatistic stat = new PlayerBlocksStatistic();
         StatHandler.getStatisticByUuid(stat, target.getUniqueId());
         var entries = stat.get();
         if (entries.isEmpty()) {
             ComponentMessages.sendLegacy(sender, Translator.get(TranslationKey.MESSAGES__BP_UNLOCK_NO_BLOCKS)
-                .replace("{player}", target.getName()));
+                .replace("{player}", resolvedName));
             return;
         }
         ComponentMessages.sendLegacy(sender, Translator.get(TranslationKey.MESSAGES__BP_UNLOCK_CONSOLE_HEADER)
-            .replace("{player}", target.getName())
+            .replace("{player}", resolvedName)
             .replace("{count}", String.valueOf(entries.size())));
         for (var entry : entries) {
             var loc = entry.get();

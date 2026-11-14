@@ -84,7 +84,13 @@ public final class EntityProtectionListener implements Listener {
         if (handler == null || !handler.isProtected() || !handler.isNoDamage()) return;
 
         Player attacker = resolvePlayer(event.getDamager());
-        if (attacker == null) return;
+        if (attacker == null) {
+            if (isPetAttack(event.getDamager())) {
+                return;
+            }
+            event.setCancelled(true);
+            return;
+        }
         if (isBypassing(attacker, handler)) return;
 
         event.setCancelled(true);
@@ -186,6 +192,16 @@ public final class EntityProtectionListener implements Listener {
         // Wolf or other pet attacking on behalf of a player: intentionally ignored;
         // pet-on-pet PvP is considered vanilla and not blocked by default.
         return null;
+    }
+
+    private boolean isPetAttack(@NotNull Entity damager) {
+        if (damager instanceof Tameable tamed && tamed.isTamed()) {
+            return true;
+        }
+        if (damager instanceof Projectile proj && proj.getShooter() instanceof Tameable tamed && tamed.isTamed()) {
+            return true;
+        }
+        return false;
     }
 
     private boolean isBypassing(@NotNull Player player, @NotNull EntityProtectionHandler handler) {

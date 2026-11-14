@@ -22,13 +22,17 @@ package de.sean.blockprot.bukkit.listeners;
 
 import de.sean.blockprot.bukkit.BlockProt;
 import de.sean.blockprot.bukkit.nbt.BlockNBTHandler;
+import de.sean.blockprot.bukkit.nbt.EntityNBTHandler;
 import de.sean.blockprot.bukkit.storage.ProtectedBlockCache;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
 import org.bukkit.block.DoubleChest;
+import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
+import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.InventoryHolder;
 import org.jetbrains.annotations.NotNull;
@@ -111,42 +115,86 @@ public class HopperEventListener implements Listener {
         cache.invalidate(cacheKey(block));
     }
 
+    public static void clear() {
+        cache.invalidateAll();
+    }
+
     @EventHandler
     public void onItemMove(InventoryMoveItemEvent event) {
-        if (event.getSource().getHolder() == null) return;
-        if (BlockProt.getDefaultConfig().isWorldExcluded(event.getSource().getHolder())) return;
-        if (event.getDestination().getType() != InventoryType.HOPPER
-                && event.getSource().getType() != InventoryType.HOPPER) return;
+        InventoryHolder sourceHolder = event.getSource().getHolder();
+        InventoryHolder destHolder = event.getDestination().getHolder();
+        if (sourceHolder == null && destHolder == null) return;
+        boolean simplified = BlockProt.getDefaultConfig().isSimplifiedHopperLogic();
 
-        Block source = getBlock(event.getSource().getHolder());
-        if (source == null) return;
-        if (!BlockProt.getDefaultConfig().isLockable(source.getType(), source.getWorld())) return;
-
-        // Early-exit: skip NBT if this location has never been protected.
-        if (!ProtectedBlockCache.isProtected(source)) return;
-
-        if (BlockProt.getDefaultConfig().isSimplifiedHopperLogic()) return;
-
-        CacheEntry sourceEntry = getEntry(source);
-        if (sourceEntry == null || !sourceEntry.isProtected()) return;
-
-        if (!sourceEntry.hopperProtection()) return;
-
-        // Source is protected and hopper-protection is on.
-        // Allow the move only when the destination is a container owned by the same player.
-        InventoryHolder destinationHolder = event.getDestination().getHolder();
-        if (destinationHolder instanceof Container || destinationHolder instanceof DoubleChest) {
-            Block destination = getBlock(destinationHolder);
-            // Guard: only attempt NBT read if the destination is a known lockable type.
-            // Without this check, getEntry() would construct a BlockNBTHandler for non-lockable
-            // containers (e.g. minecart chests) and throw a RuntimeException caught silently by Paper.
-            if (destination != null && BlockProt.getDefaultConfig().isLockable(destination.getType(), destination.getWorld())) {
-                CacheEntry destEntry = getEntry(destination);
-                if (destEntry != null && destEntry.owner().equals(sourceEntry.owner())) return;
+        if (sourceHolder != null && !BlockProt.getDefaultConfig().isWorldExcluded(sourceHolder)) {
+            Block source = getBlock(sourceHolder);
+            if (source != null
+                    && BlockProt.getDefaultConfig().isLockable(source.getType(), source.getWorld())
+                    && ProtectedBlockCache.isProtected(source)) {
+                CacheEntry sourceEntry = getEntry(source);
+                if (sourceEntry != null && sourceEntry.isProtected() && sourceEntry.hopperProtection()) {
+                    if (!isMatchingOwner(destHolder, sourceEntry.owner())) {
+                        event.setCancelled(true);
+                        return;
+                    }
+                }
             }
         }
 
-        event.setCancelled(true);
+        if (simplified) return;
+
+        if (destHolder != null && !BlockProt.getDefaultConfig().isWorldExcluded(destHolder)) {
+            Block dest = getBlock(destHolder);
+            if (dest != null
+                    && (event.getDestination().getType() == InventoryType.HOPPER || event.getSource().getType() == InventoryType.HOPPER)
+                    && BlockProt.getDefaultConfig().isLockable(dest.getType(), dest.getWorld())
+                    && ProtectedBlockCache.isProtected(dest)) {
+                CacheEntry destEntry = getEntry(dest);
+                if (destEntry != null && destEntry.isProtected() && destEntry.hopperProtection()) {
+                    if (!isMatchingOwner(sourceHolder, destEntry.owner())) {
+                        event.setCancelled(true);
+                    }
+                }
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onItemPickup(@NotNull InventoryPickupItemEvent event) {
+        InventoryHolder holder = event.getInventory().getHolder();
+        if (holder == null || BlockProt.getDefaultConfig().isWorldExcluded(holder)) return;
+
+        UUID thrower = event.getItem().getThrower();
+        if (holder instanceof Entity entity) {
+            EntityNBTHandler entityHandler = new EntityNBTHandler(entity);
+            if (!entityHandler.isProtected() || !entityHandler.isHopperProtectionEnabled()) return;
+            if (thrower != null && entityHandler.isOwner(thrower.toString())) return;
+            event.setCancelled(true);
+            return;
+        }
+
+        Block block = getBlock(holder);
+        if (block == null || !ProtectedBlockCache.isProtected(block)) return;
+        if (!BlockProt.getDefaultConfig().isLockable(block.getType(), block.getWorld())) return;
+        CacheEntry entry = getEntry(block);
+        if (entry != null && entry.isProtected() && entry.hopperProtection()) {
+            if (thrower != null && entry.owner().equals(thrower.toString())) return;
+            event.setCancelled(true);
+        }
+    }
+
+    private boolean isMatchingOwner(@Nullable InventoryHolder holder, @NotNull String ownerUuid) {
+        if (holder == null) return false;
+        if (holder instanceof Entity entity) {
+            EntityNBTHandler entityHandler = new EntityNBTHandler(entity);
+            return entityHandler.isProtected() && entityHandler.isOwner(ownerUuid);
+        }
+        Block block = getBlock(holder);
+        if (block != null && BlockProt.getDefaultConfig().isLockable(block.getType(), block.getWorld())) {
+            CacheEntry entry = getEntry(block);
+            return entry != null && entry.isProtected() && entry.owner().equals(ownerUuid);
+        }
+        return false;
     }
 
     @Nullable

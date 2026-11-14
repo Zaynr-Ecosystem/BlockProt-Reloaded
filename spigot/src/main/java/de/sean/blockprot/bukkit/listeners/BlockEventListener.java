@@ -32,10 +32,13 @@ import de.sean.blockprot.bukkit.events.BlockLockOnPlaceEvent;
 import de.sean.blockprot.bukkit.events.BlockProtLockEvent;
 import de.sean.blockprot.bukkit.integrations.PluginIntegration;
 import de.sean.blockprot.bukkit.nbt.BlockNBTHandler;
+import de.sean.blockprot.bukkit.nbt.PlayerInventoryClipboard;
 import de.sean.blockprot.bukkit.nbt.PlayerSettingsHandler;
 import de.sean.blockprot.bukkit.nbt.StatHandler;
 import de.sean.blockprot.bukkit.nbt.stats.BlockCountStatistic;
 import de.sean.blockprot.bukkit.nbt.stats.PlayerBlocksStatistic;
+import de.sean.blockprot.bukkit.dialogs.DialogState;
+import de.sean.blockprot.bukkit.inventories.InventoryState;
 import de.sean.blockprot.bukkit.storage.ProtectedBlockCache;
 import de.sean.blockprot.bukkit.util.BlockUtil;
 import de.sean.blockprot.bukkit.util.ComponentMessages;
@@ -61,7 +64,12 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.world.StructureGrowEvent;
+import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
@@ -114,6 +122,34 @@ public class BlockEventListener implements Listener {
         if (!BlockProt.getDefaultConfig().isLockable(event.getBlock().getType(), event.getBlock().getWorld())) return;
         if (!ProtectedBlockCache.isProtected(event.getBlock())) return;
         BlockNBTHandler handler = new BlockNBTHandler(event.getBlock());
+        if (handler.isProtected()) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBlockIgnite(@NotNull final BlockIgniteEvent event) {
+        Block block = event.getBlock();
+        if (BlockProt.getDefaultConfig().isWorldExcluded(block.getWorld())) return;
+        if (!BlockProt.getDefaultConfig().isLockable(block.getType(), block.getWorld())) return;
+        if (!ProtectedBlockCache.isProtected(block)) return;
+        BlockNBTHandler handler = new BlockNBTHandler(block);
+        if (!handler.isProtected()) return;
+        Player player = event.getPlayer();
+        if (player != null && (handler.canAccess(player.getUniqueId().toString())
+                || de.sean.blockprot.bukkit.admin.AdminTierManager.hasPermission(player, de.sean.blockprot.bukkit.admin.AdminAction.BREAK))) {
+            return;
+        }
+        event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBlockSpread(@NotNull final BlockSpreadEvent event) {
+        Block block = event.getBlock();
+        if (BlockProt.getDefaultConfig().isWorldExcluded(block.getWorld())) return;
+        if (!BlockProt.getDefaultConfig().isLockable(block.getType(), block.getWorld())) return;
+        if (!ProtectedBlockCache.isProtected(block)) return;
+        BlockNBTHandler handler = new BlockNBTHandler(block);
         if (handler.isProtected()) {
             event.setCancelled(true);
         }
@@ -273,6 +309,7 @@ public class BlockEventListener implements Listener {
 
         if ((isShulkerOwner || isShulkerAdmin) && (!event.isCancelled() && event.isDropItems() && shulkerBreaker.getGameMode() != GameMode.CREATIVE)) {
             StatHandler.removeContainer(shulkerBreaker, event.getBlock());
+            ProtectedBlockCache.unmark(event.getBlock());
             HopperEventListener.invalidate(event.getBlock());
             event.setDropItems(false);
             Collection<ItemStack> itemsToDrop = event.getBlock().getDrops();
@@ -406,6 +443,17 @@ public class BlockEventListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onBlockDispense(@NotNull BlockDispenseEvent event) {
         if (BlockProt.getDefaultConfig().isWorldExcluded(event.getBlock().getWorld())) return;
+        org.bukkit.block.Block sourceBlock = event.getBlock();
+        if (BlockProt.getDefaultConfig().isLockable(sourceBlock.getType(), sourceBlock.getWorld())
+                && ProtectedBlockCache.isProtected(sourceBlock)) {
+            try {
+                BlockNBTHandler sourceHandler = new BlockNBTHandler(sourceBlock);
+                if (sourceHandler.isProtected() && sourceHandler.getRedstoneHandler().getCurrentProtection()) {
+                    event.setCancelled(true);
+                    return;
+                }
+            } catch (RuntimeException ignored) {}
+        }
         org.bukkit.block.BlockFace facing = null;
         try {
             org.bukkit.block.data.Directional dir =
@@ -421,9 +469,93 @@ public class BlockEventListener implements Listener {
         } catch (RuntimeException ignored) {}
     }
 
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onStructureGrow(@NotNull final StructureGrowEvent event) {
+        if (BlockProt.getDefaultConfig().isWorldExcluded(event.getWorld())) return;
+        for (BlockState state : event.getBlocks()) {
+            if (ProtectedBlockCache.isProtected(state.getBlock())) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBlockFromTo(@NotNull final BlockFromToEvent event) {
+        if (BlockProt.getDefaultConfig().isWorldExcluded(event.getToBlock().getWorld())) return;
+        if (ProtectedBlockCache.isProtected(event.getToBlock())
+                || ProtectedBlockCache.isProtected(event.getBlock())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onProjectileHit(@NotNull final ProjectileHitEvent event) {
+        Block hitBlock = event.getHitBlock();
+        if (hitBlock == null || BlockProt.getDefaultConfig().isWorldExcluded(hitBlock.getWorld())) return;
+        if (hitBlock.getType() != Material.DECORATED_POT) return;
+        if (!ProtectedBlockCache.isProtected(hitBlock)) return;
+
+        if (event.getEntity().getShooter() instanceof Player shooter) {
+            try {
+                BlockNBTHandler handler = new BlockNBTHandler(hitBlock);
+                if (!handler.isProtected()) return;
+                if (handler.canAccess(shooter.getUniqueId().toString())
+                        || de.sean.blockprot.bukkit.admin.AdminTierManager.hasPermission(shooter, de.sean.blockprot.bukkit.admin.AdminAction.BREAK)) {
+                    return;
+                }
+            } catch (RuntimeException ignored) {
+                return;
+            }
+        }
+        event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBucketEmpty(@NotNull final PlayerBucketEmptyEvent event) {
+        if (!canModifyWaterlog(event.getPlayer(), event.getBlockClicked(), event.getBlock())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onBucketFill(@NotNull final PlayerBucketFillEvent event) {
+        if (!canModifyWaterlog(event.getPlayer(), event.getBlockClicked(), event.getBlock())) {
+            event.setCancelled(true);
+        }
+    }
+
+    private boolean canModifyWaterlog(@NotNull Player player, @NotNull Block clicked, @NotNull Block target) {
+        return canAccessProtectedBlock(player, clicked) && canAccessProtectedBlock(player, target);
+    }
+
+    private boolean canAccessProtectedBlock(@NotNull Player player, @NotNull Block block) {
+        if (BlockProt.getDefaultConfig().isWorldExcluded(block.getWorld())) return true;
+        if (!BlockProt.getDefaultConfig().isLockable(block.getType(), block.getWorld())) return true;
+        if (!ProtectedBlockCache.isProtected(block)) return true;
+        try {
+            BlockNBTHandler handler = new BlockNBTHandler(block);
+            if (!handler.isProtected()) return true;
+            return handler.canAccess(player.getUniqueId().toString())
+                || de.sean.blockprot.bukkit.admin.AdminTierManager.hasPermission(player, de.sean.blockprot.bukkit.admin.AdminAction.CONTAINER_BYPASS);
+        } catch (RuntimeException ignored) {
+            return true;
+        }
+    }
+
     @EventHandler
     public void onPlayerQuit(@NotNull final PlayerQuitEvent event) {
-        settingsCache.invalidate(event.getPlayer().getUniqueId());
+        UUID uuid = event.getPlayer().getUniqueId();
+        settingsCache.invalidate(uuid);
+        InventoryState.remove(uuid);
+        PlayerInventoryClipboard.remove(uuid.toString());
+        DialogState.clear(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onWorldUnload(@NotNull final WorldUnloadEvent event) {
+        ProtectedBlockCache.clearWorld(event.getWorld().getUID());
+        HopperEventListener.clear();
     }
 
     @EventHandler

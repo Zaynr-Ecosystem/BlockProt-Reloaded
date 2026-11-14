@@ -43,6 +43,10 @@ public final class DialogState {
         BACK_STACKS.remove(player.getUniqueId());
     }
 
+    public static void clearAll() {
+        BACK_STACKS.clear();
+    }
+
     public static void push(@NotNull Player player, @NotNull Consumer<Player> backAction) {
         BACK_STACKS.computeIfAbsent(player.getUniqueId(), k -> new ArrayDeque<>()).push(backAction);
     }

@@ -57,10 +57,15 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class RaidDetectionListener implements Listener {
 
-    private static final Map<UUID, List<String>> pendingAlerts = new HashMap<>();
+    private static final Map<UUID, List<String>> pendingAlerts = new ConcurrentHashMap<>();
     private static final Map<UUID, Long> lastAlertTimes = new ConcurrentHashMap<>();
     private static final UUID ENVIRONMENT_UUID = new UUID(0L, 0L);
     private static final long ALERT_COOLDOWN_MS = 5000L;
+
+    public static void clear() {
+        pendingAlerts.clear();
+        lastAlertTimes.clear();
+    }
 
     @Nullable
     public static List<String> popPendingAlerts(@NotNull UUID uuid) {

@@ -133,8 +133,15 @@ public final class VillagerWorkstationProtectionListener implements Listener {
         int vRadius  = BlockProt.getDefaultConfig().getVillagerWorkstationProtectionVerticalRadius();
         for (int dx = -radius; dx <= radius; dx++) {
             for (int dz = -radius; dz <= radius; dz++) {
+                int bx = block.getX() + dx;
+                int bz = block.getZ() + dz;
+                if (!block.getWorld().isChunkLoaded(bx >> 4, bz >> 4)) continue;
                 for (int dy = -vRadius; dy <= vRadius; dy++) {
                     Block b = block.getRelative(dx, dy, dz);
+                    if (BlockProt.hasFoliaLib()
+                        && !BlockProt.getFoliaLib().getScheduler().isOwnedByCurrentRegion(b.getLocation())) {
+                        continue;
+                    }
                     if (isWorkstation(b.getType())) {
                         try {
                             BlockNBTHandler handler = new BlockNBTHandler(b);
@@ -163,6 +170,10 @@ public final class VillagerWorkstationProtectionListener implements Listener {
     private static Block getProtectedLinkedWorkstation(@NotNull Villager villager) {
         Location jobSite = getJobSite(villager);
         if (jobSite == null || jobSite.getWorld() == null) return null;
+        if (!jobSite.getWorld().isChunkLoaded(jobSite.getBlockX() >> 4, jobSite.getBlockZ() >> 4)) return null;
+        if (BlockProt.hasFoliaLib() && !BlockProt.getFoliaLib().getScheduler().isOwnedByCurrentRegion(jobSite)) {
+            return null;
+        }
         Block block = jobSite.getBlock();
         if (!isWorkstation(block.getType())) return null;
         if (!isWithinProtectedArea(villager.getLocation(), block.getLocation())) return null;

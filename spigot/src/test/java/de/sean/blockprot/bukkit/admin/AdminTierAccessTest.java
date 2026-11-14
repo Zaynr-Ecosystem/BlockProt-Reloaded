@@ -132,4 +132,19 @@ class AdminTierAccessTest {
         }
         assertFalse(AdminTierManager.canTeleport(user));
     }
+
+    @Test
+    void negatedAdminNodesOverrideOpFallback() throws Exception {
+        useTiers(false);
+        PlayerMock op = server.addPlayer("NegatedOp");
+        op.setOp(true);
+        var attachment = op.addAttachment(MockBukkit.createMockPlugin());
+        attachment.setPermission("blockprot.user.admin", false);
+        assertFalse(AdminTierManager.hasPermission(op, AdminAction.UNLOCK));
+        assertFalse(AdminTierManager.hasPermission(op, AdminAction.INFO));
+
+        useTiers(true);
+        attachment.setPermission("blockprot.user.admin.action.unlock", false);
+        assertFalse(AdminTierManager.hasPermission(op, AdminAction.UNLOCK));
+    }
 }
