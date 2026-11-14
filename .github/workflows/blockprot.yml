@@ -66,6 +66,7 @@ jobs:
   edition:
     name: Resolve Edition
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       edition: ${{ steps.resolve.outputs.edition }}
       operation: ${{ steps.resolve.outputs.operation }}
@@ -107,6 +108,7 @@ jobs:
     needs: [edition]
     if: needs.edition.outputs.operation == 'ci'
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     permissions:
       contents: read
       pull-requests: read
@@ -218,7 +220,10 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: BlockProtReloaded-build-artifacts
-          path: spigot/build/libs/${{ needs.edition.outputs.jar_base }}-*.jar
+          path: |
+            spigot/build/libs/${{ needs.edition.outputs.jar_base }}-*.jar
+            !spigot/build/libs/*-javadoc*
+            !spigot/build/libs/*-sources*
           retention-days: 7
 
       - name: Upload CI verification and audit reports
@@ -247,6 +252,7 @@ jobs:
     name: Real Server Diagnostics (${{ matrix.project }} ${{ matrix.version }})
     needs: [edition, ci]
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.edition.outputs.smoke_matrix) }}
@@ -276,7 +282,7 @@ jobs:
 
       - name: Boot server and run console diagnostics
         run: |
-          JAR=$(find build/ci-jar -name "${{ needs.edition.outputs.jar_base }}-*.jar" | head -1)
+          JAR=$(find build/ci-jar -name "${{ needs.edition.outputs.jar_base }}-*.jar" ! -name "*-javadoc*" ! -name "*-sources*" | head -1)
           {
             echo "## Real Server Diagnostics"
             echo ""
@@ -292,7 +298,7 @@ jobs:
           name: smoke-${{ needs.edition.outputs.edition }}-${{ matrix.project }}-${{ matrix.version }}
           path: |
             build/smoke-server/console.log
-            build/smoke-server/plugins/BlockProtReloaded/logs/
+            build/smoke-server/plugins/*/logs/
           retention-days: 7
 
   player-tests-plan:
@@ -300,6 +306,7 @@ jobs:
     needs: [edition]
     if: ${{ needs.edition.outputs.operation != 'sync' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
       jar_base: ${{ steps.matrix.outputs.jar_base }}
@@ -323,6 +330,7 @@ jobs:
     needs: [edition, ci, player-tests-plan]
     if: ${{ !cancelled() && (needs.ci.result == 'success' || needs.ci.result == 'skipped') && needs.player-tests-plan.result == 'success' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
         with:
@@ -411,7 +419,7 @@ jobs:
           name: e2e-${{ matrix.project }}-${{ matrix.version }}
           path: |
             build/e2e-server/console.log
-            build/e2e-server/plugins/BlockProtReloaded/logs/
+            build/e2e-server/plugins/*/logs/
           retention-days: 7
 
   player-tests-verdict:
@@ -419,6 +427,7 @@ jobs:
     needs: [edition, player-tests-plan, player-tests-build, player-tests]
     if: always() && needs.player-tests-plan.result == 'success'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Fail unless every server passed
         run: |
@@ -433,6 +442,7 @@ jobs:
     needs: [edition]
     if: needs.edition.outputs.operation == 'sync'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       version: ${{ steps.status.outputs.version }}
       tag: ${{ steps.status.outputs.tag }}
@@ -456,6 +466,7 @@ jobs:
     needs: [edition, sync-check]
     if: ${{ !cancelled() && needs.edition.result == 'success' && (needs.sync-check.outputs.needed == 'true' || needs.edition.outputs.operation == 'preview' || needs.edition.outputs.operation == 'publish') }}
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     outputs:
       plugin_version: ${{ steps.meta.outputs.plugin_version }}
       release_tag: ${{ steps.meta.outputs.release_tag }}
@@ -810,6 +821,7 @@ jobs:
     needs: [edition, sync-check, inspect-and-build, player-tests-verdict]
     if: ${{ !cancelled() && needs.inspect-and-build.result == 'success' && (needs.player-tests-verdict.result == 'success' || needs.player-tests-verdict.result == 'skipped') && (needs.edition.outputs.operation == 'publish' || needs.sync-check.outputs.needed == 'true') }}
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: write
     env:
@@ -1165,6 +1177,7 @@ jobs:
     needs: [edition, inspect-and-build, publish-platforms]
     if: ${{ !cancelled() && needs.publish-platforms.result == 'success' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout repository
@@ -1212,6 +1225,7 @@ jobs:
     needs: [edition]
     if: needs.edition.outputs.operation == 'maintenance'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
       issues: write
