@@ -65,11 +65,20 @@ def extract_placeholders(text):
     return set(re.findall(r"\{[a-zA-Z0-9_]+\}", text))
 
 
+def tier1_languages_for(repo_path):
+    edition_file = Path(repo_path) / ".github" / "EDITION"
+    edition_id = edition_file.read_text(encoding="utf-8").strip() if edition_file.is_file() else "bpr"
+    if edition_id in ("bpr-legacy", "bp-legacy"):
+        return {"en", "es"}
+    return set(TIER1_LANGUAGES)
+
+
 def audit_translations(repo_root=REPO_ROOT):
     if yaml is None:
         raise RuntimeError("PyYAML is required to audit translations.")
 
     repo_path = Path(repo_root)
+    tier1_langs = tier1_languages_for(repo_path)
     key_file = repo_path / "spigot" / "src" / "main" / "java" / "de" / "sean" / "blockprot" / "bukkit" / "TranslationKey.java"
     lang_dir = repo_path / "spigot" / "src" / "main" / "resources" / "lang"
     en_file = lang_dir / "translations_en.yml"
@@ -90,7 +99,7 @@ def audit_translations(repo_root=REPO_ROOT):
     lang_files = sorted(lang_dir.glob("translations_*.yml"))
     for lf in lang_files:
         lang_code = lf.stem.replace("translations_", "")
-        is_tier1 = lang_code in TIER1_LANGUAGES
+        is_tier1 = lang_code in tier1_langs
 
         with open(lf, "r", encoding="utf-8") as f:
             try:

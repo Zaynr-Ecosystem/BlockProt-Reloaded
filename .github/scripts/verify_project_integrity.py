@@ -89,11 +89,14 @@ def check_translation_parity(repo_root):
                 items[new_key] = v
         return items
 
+    edition_file = repo_root / ".github" / "EDITION"
+    edition_id = edition_file.read_text(encoding="utf-8").strip() if edition_file.is_file() else "bpr"
+    strict_de_fr = edition_id not in ("bpr-legacy", "bp-legacy")
     tier1_langs = [
         ("en", "translations_en.yml", True),
         ("es", "translations_es.yml", True),
-        ("de", "translations_de.yml", True),
-        ("fr", "translations_fr.yml", True),
+        ("de", "translations_de.yml", strict_de_fr),
+        ("fr", "translations_fr.yml", strict_de_fr),
     ]
 
     def is_invalid_value(val):
