@@ -23,6 +23,7 @@ package de.sean.blockprot.bukkit.audit;
 import de.sean.blockprot.bukkit.BlockProt;
 import de.sean.blockprot.bukkit.TranslationKey;
 import de.sean.blockprot.bukkit.Translator;
+import de.sean.blockprot.bukkit.storage.PluginDataLayout;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
@@ -68,7 +69,6 @@ public final class AuditLogger {
         long timestamp
     ) {}
 
-    private static final String DB_NAME    = "blockprot_audit.sqlite";
     private static final int    MAX_ENTRIES = 50_000;
     private static final int    PRUNE_BATCH = 5_000;
     /** Only run a COUNT(*) check every N writes to avoid a full-table scan on each insert. */
@@ -84,17 +84,10 @@ public final class AuditLogger {
     private int writesSincePrune = 0;
 
     public AuditLogger(@NotNull File dataFolder) throws SQLException {
-        File mysqlDir = new File(dataFolder, "mysql");
-        if (!mysqlDir.exists()) mysqlDir.mkdirs();
-
-        // Migrate the old database from the root folder to mysql/ if it still exists there.
-        File oldDb = new File(dataFolder, DB_NAME);
-        File newDb = new File(mysqlDir, DB_NAME);
-        if (oldDb.exists() && !newDb.exists()) {
-            oldDb.renameTo(newDb);
-        } else if (oldDb.exists()) {
-            oldDb.delete();
-        }
+        PluginDataLayout.migrateAuditDb(dataFolder);
+        File newDb = PluginDataLayout.auditDbFile(dataFolder);
+        File parent = newDb.getParentFile();
+        if (parent != null && !parent.exists()) parent.mkdirs();
 
         jdbcUrl = "jdbc:sqlite:" + newDb.getAbsolutePath();
 

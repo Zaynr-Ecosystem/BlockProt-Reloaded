@@ -520,6 +520,8 @@ messages:
       \ Release ({base_version})"
     up_to_date: "<#98FF98>BlockProt Reloaded ist auf dem neuesten Stand."
     click_hint: "Klicken, um die GitHub-Releases-Seite aufzurufen"
+    upgraded_notice: "<#98FF98>BlockProt Reloaded wurde auf v{version} aktualisiert! <#7EC8E3>Klicken, um die Änderungen auf GitHub zu lesen."
+    notes_header: "<#7EC8E3>Versionshinweise für v{version}:"
 console:
   config_change_detected: Konfigurationsänderung erkannt; wird neu geladen...
   config_reloaded: Konfiguration automatisch neu geladen.
@@ -820,6 +822,10 @@ dialogs:
     checking: Suche nach Updates...
     download: "Herunterladen:"
     version_prefix: " v"
+    view_notes: "Versionshinweise"
+    notes_title: "Versionshinweise - v{version}"
+    open_github: "Vollständiges Änderungsprotokoll auf GitHub:"
+    notes_unavailable: "Noch keine zwischengespeicherten Hinweise. Öffne GitHub oder klicke auf Jetzt prüfen."
   debug:
     title: "Debug-Informationen"
     label_plugin: "BlockProt Reloaded "

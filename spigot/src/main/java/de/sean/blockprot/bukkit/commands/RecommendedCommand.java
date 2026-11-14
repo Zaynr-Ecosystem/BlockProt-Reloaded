@@ -27,6 +27,7 @@ import de.sean.blockprot.bukkit.TranslationKey;
 import de.sean.blockprot.bukkit.Translator;
 import de.sean.blockprot.bukkit.config.BlockFamilyParser;
 import de.sean.blockprot.bukkit.config.DefaultConfig;
+import de.sean.blockprot.bukkit.storage.PluginDataLayout;
 import de.sean.blockprot.bukkit.util.ComponentMessages;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -353,26 +354,12 @@ public class RecommendedCommand implements CommandExecutor {
         return true;
     }
 
-    private static File getInternalStateFile() {
-        return new File(BlockProt.getInstance().getDataFolder(), ".recommended_state.yml");
-    }
-
     private static boolean isStateApplied(String key) {
-        File f = getInternalStateFile();
-        if (!f.exists()) return false;
-        YamlConfiguration cfg = YamlConfiguration.loadConfiguration(f);
-        return cfg.getBoolean(key, false);
+        return PluginDataLayout.isRecommendedApplied(BlockProt.getInstance().getDataFolder(), key);
     }
 
     private static void setInternalState(String key, boolean value) {
-        File f = getInternalStateFile();
-        YamlConfiguration cfg = f.exists() ? YamlConfiguration.loadConfiguration(f) : new YamlConfiguration();
-        cfg.set(key, value);
-        try {
-            cfg.save(f);
-        } catch (IOException e) {
-            BlockProtLogger.warn("Failed to save recommended state file: " + e.getMessage());
-        }
+        PluginDataLayout.setRecommendedApplied(BlockProt.getInstance().getDataFolder(), key, value);
     }
 
     @Override

@@ -21,16 +21,22 @@
 package de.sean.blockprot.bukkit.bedrock.forms;
 
 import de.sean.blockprot.bukkit.BlockProt;
+import de.sean.blockprot.bukkit.Edition;
 import de.sean.blockprot.bukkit.TranslationKey;
 import de.sean.blockprot.bukkit.Translator;
 import de.sean.blockprot.bukkit.admin.AdminAction;
 import de.sean.blockprot.bukkit.admin.AdminTierManager;
 import de.sean.blockprot.bukkit.bedrock.BedrockBridge;
+import de.sean.blockprot.bukkit.tasks.UpdateChecker;
 import de.sean.blockprot.bukkit.util.ComponentMessages;
+import de.sean.blockprot.util.ReleaseNotesFormatter;
+import de.sean.blockprot.util.SemanticVersion;
 import org.bukkit.entity.Player;
 import org.geysermc.cumulus.form.SimpleForm;
 import org.geysermc.cumulus.util.FormImage;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 import static de.sean.blockprot.bukkit.dialogs.BpDialogStyles.stripColor;
 
@@ -47,6 +53,7 @@ public final class BedrockAdminMenuForm {
         String lockables = stripColor(Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__LOCKABLES));
         String autoDrop = stripColor(Translator.get(TranslationKey.INVENTORIES__AUTO_DROP__TITLE));
         String reload = stripColor(Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__RELOAD));
+        String update = stripColor(Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__UPDATE));
         String close = stripColor(Translator.get(TranslationKey.DIALOGS__CLOSE));
 
         SimpleForm.Builder builder = SimpleForm.builder()
@@ -56,6 +63,7 @@ public final class BedrockAdminMenuForm {
             .button(lockables, FormImage.Type.PATH, "textures/items/book_normal")
             .button(autoDrop, FormImage.Type.PATH, "textures/items/hopper")
             .button(reload, FormImage.Type.PATH, "textures/ui/refresh_light")
+            .button(update, FormImage.Type.PATH, "textures/items/book_writable")
             .button(close, FormImage.Type.PATH, "textures/ui/cancel")
             .validResultHandler(response -> {
                 int clicked = response.clickedButtonId();
@@ -65,6 +73,7 @@ public final class BedrockAdminMenuForm {
                         case 0 -> AdminAction.CONFIG;
                         case 1, 2 -> AdminAction.LOCKABLES;
                         case 3 -> AdminAction.RELOAD;
+                        case 4 -> AdminAction.UPDATE;
                         default -> null;
                     };
                     if (required != null && AdminTierManager.deny(player, required)) return;
@@ -79,10 +88,67 @@ public final class BedrockAdminMenuForm {
                             ComponentMessages.sendLegacy(player, Translator.get(TranslationKey.MESSAGES__RELOAD_DONE));
                             show(player);
                         }
+                        case 4 -> showUpdateForm(player);
                     }
                 });
             });
 
         BedrockBridge.sendForm(player, builder.build());
+    }
+
+    private static void showUpdateForm(@NotNull Player player) {
+        BlockProt.clearPendingUpgradeNotice();
+        String pluginVersion = BlockProt.getPluginVersion();
+        SemanticVersion current = new SemanticVersion(pluginVersion);
+        SemanticVersion cached = UpdateChecker.latestVersion;
+        boolean outdated = cached != null && cached.compareTo(current) > 0;
+        UpdateChecker.GitHubRelease release = outdated ? UpdateChecker.latestRelease : UpdateChecker.installedRelease;
+        String notesVersion = outdated ? cached.toString() : pluginVersion;
+        String url = release != null && release.getHtmlUrl() != null && !release.getHtmlUrl().isBlank()
+            ? release.getHtmlUrl()
+            : UpdateChecker.tagReleaseUrl(notesVersion, Edition.current());
+
+        StringBuilder content = new StringBuilder();
+        content.append(stripColor(Translator.get(TranslationKey.DIALOGS__UPDATE__CURRENT)))
+            .append(" v").append(pluginVersion).append('\n');
+        if (cached != null) {
+            content.append(stripColor(Translator.get(TranslationKey.DIALOGS__UPDATE__LATEST)))
+                .append(" v").append(cached).append('\n');
+        }
+        List<String> lines = release != null
+            ? ReleaseNotesFormatter.formatSummaryLines(release.getBody(), 8, 60)
+            : List.of();
+        content.append('\n');
+        if (lines.isEmpty()) {
+            content.append(stripColor(Translator.get(TranslationKey.DIALOGS__UPDATE__NOTES_UNAVAILABLE)));
+        } else {
+            for (String line : lines) {
+                content.append(line).append('\n');
+            }
+        }
+        content.append("\nGitHub: ").append(url);
+
+        SimpleForm form = SimpleForm.builder()
+            .title(stripColor(Translator.get(TranslationKey.DIALOGS__UPDATE__TITLE)))
+            .content(content.toString())
+            .button(stripColor(Translator.get(TranslationKey.DIALOGS__UPDATE__CHECK_NOW)),
+                FormImage.Type.PATH, "textures/ui/refresh_light")
+            .button(stripColor(Translator.get(TranslationKey.DIALOGS__BACK)),
+                FormImage.Type.PATH, "textures/ui/cancel")
+            .validResultHandler(response -> {
+                if (response.clickedButtonId() == 0) {
+                    UpdateChecker checker = new UpdateChecker(pluginVersion, true, () ->
+                        BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                            if (player.isOnline()) showUpdateForm(player);
+                        }));
+                    BlockProt.getFoliaLib().getScheduler().runAsync(asyncTask -> checker.run());
+                } else {
+                    BlockProt.getFoliaLib().getScheduler().runAtEntity(player, task -> {
+                        if (player.isOnline()) show(player);
+                    });
+                }
+            })
+            .build();
+        BedrockBridge.sendForm(player, form);
     }
 }

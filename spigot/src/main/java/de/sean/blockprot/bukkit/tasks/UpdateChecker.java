@@ -27,11 +27,11 @@ import de.sean.blockprot.bukkit.Edition;
 import de.sean.blockprot.bukkit.TranslationKey;
 import de.sean.blockprot.bukkit.Translator;
 import de.sean.blockprot.bukkit.util.ComponentMessages;
+import de.sean.blockprot.util.ReleaseNotesFormatter;
 import de.sean.blockprot.util.SemanticVersion;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -47,6 +47,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -78,6 +79,10 @@ public final class UpdateChecker implements Runnable {
         return Edition.current().tagPrefix().isEmpty() ? RELEASES_URL + "/latest" : RELEASES_URL;
     }
 
+    public static @NotNull String tagReleaseUrl(@NotNull String rawVersion, @NotNull Edition edition) {
+        return RELEASES_URL + "/tag/" + edition.tagPrefix() + rawVersion;
+    }
+
     /**
      * Cached result of the last successful GitHub API call.
      * Package-accessible so {@link BackupTask} can read the cached value
@@ -95,6 +100,9 @@ public final class UpdateChecker implements Runnable {
      */
     @Nullable
     public static volatile GitHubRelease latestRelease;
+
+    @Nullable
+    public static volatile GitHubRelease installedRelease;
 
     @Nullable
     private final List<Player> recipients;
@@ -185,7 +193,12 @@ public final class UpdateChecker implements Runnable {
             GitHubRelease[] releases = new com.google.gson.Gson().fromJson(
                 response.body(), GitHubRelease[].class);
 
-            GitHubRelease bestRelease = selectBest(Arrays.asList(releases), currentVersion, Edition.current());
+            List<GitHubRelease> releaseList = releases != null ? Arrays.asList(releases) : Collections.emptyList();
+            GitHubRelease currentRelease = selectInstalled(releaseList, currentVersion, Edition.current());
+            if (currentRelease != null) {
+                UpdateChecker.installedRelease = currentRelease;
+            }
+            GitHubRelease bestRelease = selectBest(releaseList, currentVersion, Edition.current());
             if (bestRelease == null) {
                 if (onComplete != null) onComplete.run();
                 return;
@@ -227,6 +240,18 @@ public final class UpdateChecker implements Runnable {
         return bestRelease;
     }
 
+    static @Nullable GitHubRelease selectInstalled(@NotNull List<GitHubRelease> releases,
+                                                   @NotNull SemanticVersion current,
+                                                   @NotNull Edition edition) {
+        for (GitHubRelease rel : releases) {
+            if (rel.draft || !rel.belongsTo(edition)) continue;
+            if (rel.asSemantic(edition).compareTo(current) == 0) {
+                return rel;
+            }
+        }
+        return null;
+    }
+
     private void sendMessage(SemanticVersion currentVersion, SemanticVersion latestVersion,
                              @Nullable GitHubRelease release) {
         boolean isOutdated = latestVersion.compareTo(currentVersion) > 0;
@@ -264,12 +289,13 @@ public final class UpdateChecker implements Runnable {
                 String message = Translator.get(outdatedMessageKey(latestVersion))
                     .replace("{version}", latestVersion.toString())
                     .replace("{base_version}", latestVersion.baseVersion());
+                String downloadLabel = stripTrailingColon(Translator.get(TranslationKey.DIALOGS__UPDATE__DOWNLOAD));
                 comp = legacy.deserialize(message)
                     .color(latestVersion.isHotfix()
                         ? TextColor.color(0xF08080)
                         : TextColor.color(0xF0E6A0))
-                    .append(Component.text(" | " + Translator.get(TranslationKey.DIALOGS__UPDATE__DOWNLOAD), TextColor.color(0xF0E6A0))
-                        .append(Component.text(releaseUrl, NamedTextColor.WHITE, TextDecoration.UNDERLINED)))
+                    .append(Component.text(" [" + downloadLabel + " v" + latestVersion + "]",
+                        TextColor.color(0x7EC8E3), TextDecoration.UNDERLINED))
                     .clickEvent(ClickEvent.openUrl(releaseUrl))
                     .hoverEvent(HoverEvent.showText(
                         Component.text(Translator.get(TranslationKey.MESSAGES__UPDATE__CLICK_HINT))));
@@ -290,12 +316,76 @@ public final class UpdateChecker implements Runnable {
             }
             for (Player player : recipients) {
                 ComponentMessages.send(player, comp);
+                if (isOutdated && release != null) {
+                    sendHighlightLines(player, release, 4);
+                }
             }
         }
 
         if (onComplete != null) {
             onComplete.run();
         }
+    }
+
+    public static void sendHighlightLines(@NotNull Player player,
+                                          @NotNull GitHubRelease release,
+                                          int maxLines) {
+        List<String> lines = ReleaseNotesFormatter.formatSummaryLines(release.body, maxLines, 90);
+        for (String line : lines) {
+            ComponentMessages.send(player, Component.text("  " + line, TextColor.color(0xC8D0D8)));
+        }
+    }
+
+    public static void sendReleaseNotesChat(@NotNull Player player,
+                                            @Nullable GitHubRelease release,
+                                            @NotNull String version,
+                                            @NotNull String fallbackUrl,
+                                            int maxLines) {
+        String url = release != null && release.htmlUrl != null && !release.htmlUrl.isBlank()
+            ? release.htmlUrl
+            : fallbackUrl;
+        List<String> summaryLines = release != null
+            ? ReleaseNotesFormatter.formatSummaryLines(release.body, maxLines, 90)
+            : Collections.emptyList();
+        if (!summaryLines.isEmpty()) {
+            String headerRaw = Translator.getRaw(TranslationKey.MESSAGES__UPDATE__NOTES_HEADER);
+            if (headerRaw.isBlank()) {
+                headerRaw = "<#7EC8E3>Release notes for v{version}:";
+            }
+            Component header = MiniMessage.miniMessage().deserialize(headerRaw.replace("{version}", version))
+                .clickEvent(ClickEvent.openUrl(url))
+                .hoverEvent(HoverEvent.showText(Component.text(Translator.get(TranslationKey.MESSAGES__UPDATE__CLICK_HINT))));
+            ComponentMessages.send(player, header);
+            for (String line : summaryLines) {
+                ComponentMessages.send(player, Component.text("  " + line, TextColor.color(0xC8D0D8)));
+            }
+        }
+
+        String changelogLabel = stripTrailingColon(Translator.get(TranslationKey.DIALOGS__UPDATE__OPEN_GITHUB));
+        Component link = Component.text(changelogLabel, TextColor.color(0x7EC8E3), TextDecoration.UNDERLINED)
+            .clickEvent(ClickEvent.openUrl(url))
+            .hoverEvent(HoverEvent.showText(Component.text(Translator.get(TranslationKey.MESSAGES__UPDATE__CLICK_HINT))));
+        ComponentMessages.send(player, link);
+    }
+
+    private static String stripTrailingColon(@NotNull String raw) {
+        String trimmed = raw.stripTrailing();
+        if (trimmed.endsWith(":")) {
+            return trimmed.substring(0, trimmed.length() - 1).stripTrailing();
+        }
+        return trimmed;
+    }
+
+    public static void sendLatestOrInstalledNotesChat(@NotNull Player player,
+                                                      @NotNull String pluginVersion,
+                                                      int maxLines) {
+        SemanticVersion cached = UpdateChecker.latestVersion;
+        SemanticVersion current = new SemanticVersion(pluginVersion);
+        boolean outdated = cached != null && cached.compareTo(current) > 0;
+        GitHubRelease target = outdated ? UpdateChecker.latestRelease : UpdateChecker.installedRelease;
+        String ver = outdated ? cached.toString() : pluginVersion;
+        String url = tagReleaseUrl(ver, Edition.current());
+        sendReleaseNotesChat(player, target, ver, url, maxLines);
     }
 
     /**
@@ -341,6 +431,9 @@ public final class UpdateChecker implements Runnable {
         @SerializedName("draft")
         boolean draft;
 
+        @SerializedName("body")
+        String body;
+
         boolean belongsTo(@NotNull Edition edition) {
             if (tagName == null) return false;
             return edition.tagPrefix().isEmpty()
@@ -368,6 +461,21 @@ public final class UpdateChecker implements Runnable {
         @Nullable
         public String getHtmlUrl() {
             return htmlUrl;
+        }
+
+        @Nullable
+        public String getBody() {
+            return body;
+        }
+
+        @Nullable
+        public String getTagName() {
+            return tagName;
+        }
+
+        @Nullable
+        public String getName() {
+            return name;
         }
     }
 }

@@ -450,6 +450,8 @@ messages:
     ahead_hotfix: "<#F0E6A0>BlockProt Reloaded está ejecutando el hotfix {version}, por delante del lanzamiento publicado ({base_version})"
     up_to_date: "<#98FF98>BlockProt Reloaded está actualizado."
     click_hint: "Haz clic para visitar la página de lanzamientos en GitHub"
+    upgraded_notice: "<#98FF98>¡BlockProt Reloaded se actualizó a v{version}! <#7EC8E3>Haz clic para leer las novedades en GitHub."
+    notes_header: "<#7EC8E3>Novedades de la versión v{version}:"
   lockables:
     family_unknown: "No se pudo determinar la familia para {expression}"
     toggle_feedback: "{action} {name} en blocks.yml"
@@ -797,6 +799,10 @@ dialogs:
     checking: "Comprobando actualizaciones..."
     download: "Descargar:"
     version_prefix: " v"
+    view_notes: "Notas de la versión"
+    notes_title: "Novedades - v{version}"
+    open_github: "Ver historial completo en GitHub:"
+    notes_unavailable: "Aún no hay notas en caché. Abre GitHub o pulsa Comprobar Ahora."
   debug:
     title: "Info de Depuración"
     label_plugin: "BlockProt Reloaded "

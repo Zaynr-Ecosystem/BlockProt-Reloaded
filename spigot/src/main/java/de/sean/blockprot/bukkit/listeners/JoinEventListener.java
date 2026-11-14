@@ -21,6 +21,7 @@
 package de.sean.blockprot.bukkit.listeners;
 
 import de.sean.blockprot.bukkit.BlockProt;
+import de.sean.blockprot.bukkit.Edition;
 import de.sean.blockprot.bukkit.Permissions;
 import de.sean.blockprot.bukkit.TranslationKey;
 import de.sean.blockprot.bukkit.Translator;
@@ -32,6 +33,8 @@ import de.sean.blockprot.bukkit.util.ComponentMessages;
 import de.sean.blockprot.bukkit.util.SkinCache;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -54,10 +57,29 @@ public class JoinEventListener implements Listener {
         BlockProt.getFoliaLib().getScheduler().runAsync(asyncTask ->
             SkinCache.getOrFetch(player.getName(), player.getUniqueId()));
 
-        if (BlockProt.getDefaultConfig().shouldNotifyOpOfUpdates()
-                && (player.isOp() || AdminTierManager.hasPermission(player, AdminAction.UPDATE))) {
-            UpdateChecker checker = new UpdateChecker(BlockProt.getPluginVersion(), Collections.singletonList(player));
-            BlockProt.getFoliaLib().getScheduler().runAsync(asyncTask -> checker.run());
+        if (player.isOp() || AdminTierManager.hasPermission(player, AdminAction.UPDATE)) {
+            if (BlockProt.consumePendingUpgradeNotice()) {
+                String currentVersion = BlockProt.getPluginVersion();
+                UpdateChecker.GitHubRelease installed = UpdateChecker.installedRelease;
+                String releaseUrl = installed != null && installed.getHtmlUrl() != null && !installed.getHtmlUrl().isBlank()
+                    ? installed.getHtmlUrl()
+                    : UpdateChecker.tagReleaseUrl(currentVersion, Edition.current());
+                String raw = Translator.getRaw(TranslationKey.MESSAGES__UPDATE__UPGRADED_NOTICE);
+                if (raw.isBlank()) {
+                    raw = "<#98FF98>BlockProt Reloaded updated to v{version}! <#7EC8E3>Click to read release notes on GitHub.";
+                }
+                Component notice = MiniMessage.miniMessage().deserialize(raw.replace("{version}", currentVersion))
+                    .clickEvent(ClickEvent.openUrl(releaseUrl))
+                    .hoverEvent(HoverEvent.showText(Component.text(Translator.get(TranslationKey.MESSAGES__UPDATE__CLICK_HINT))));
+                ComponentMessages.send(player, notice);
+                if (installed != null) {
+                    UpdateChecker.sendHighlightLines(player, installed, 4);
+                }
+            }
+            if (BlockProt.getDefaultConfig().shouldNotifyOpOfUpdates()) {
+                UpdateChecker checker = new UpdateChecker(BlockProt.getPluginVersion(), Collections.singletonList(player));
+                BlockProt.getFoliaLib().getScheduler().runAsync(asyncTask -> checker.run());
+            }
         }
         if (BlockProt.getDefaultConfig().publicIsFriendByDefault() && !player.hasPlayedBefore()) {
             new PlayerSettingsHandler(player).addEveryoneAsFriend();

@@ -238,8 +238,16 @@ public class AdminMenuInventory extends BlockProtInventory {
             if (!opRecipients.contains(player)) {
                 opRecipients.add(player);
             }
-            UpdateChecker checker = new UpdateChecker(BlockProt.getPluginVersion(), opRecipients, true);
-            BlockProt.getFoliaLib().getScheduler().runAsync(asyncTask -> checker.run());
+            String pluginVersion = BlockProt.getPluginVersion();
+            UpdateChecker checker = new UpdateChecker(pluginVersion, opRecipients, true);
+            BlockProt.getFoliaLib().getScheduler().runAsync(asyncTask -> {
+                checker.run();
+                BlockProt.getFoliaLib().getScheduler().runAtEntity(player, syncTask -> {
+                    if (player.isOnline()) {
+                        UpdateChecker.sendLatestOrInstalledNotesChat(player, pluginVersion, 5);
+                    }
+                });
+            });
 
         } else if (slot == SLOT_INTEGRATIONS) {
             player.closeInventory();

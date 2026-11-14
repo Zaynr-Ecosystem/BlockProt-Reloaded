@@ -166,6 +166,7 @@ public final class UserSettingsDialog {
                     boolean nextState = !h.getPreferDialogs();
                     h.setPreferDialogs(nextState);
                     if (!nextState) {
+                        prepareInventoryStateForSettings(p, backOrigin);
                         p.openInventory(new de.sean.blockprot.bukkit.inventories.UserSettingsInventory().fill(p));
                     } else {
                         show(p, backOrigin);
@@ -176,6 +177,20 @@ public final class UserSettingsDialog {
         }
 
         bridge.showMultiAction(player, title, body, actions, exitBtn, 1);
+    }
+
+    private static void prepareInventoryStateForSettings(@NotNull Player player,
+                                                         @NotNull DialogOrigin backOrigin) {
+        de.sean.blockprot.bukkit.inventories.InventoryState state =
+            new de.sean.blockprot.bukkit.inventories.InventoryState(null);
+        state.friendSearchState = de.sean.blockprot.bukkit.inventories.InventoryState.FriendSearchState.DEFAULT_FRIEND_SEARCH;
+        if (DialogBridgeFactory.resolveOrigin(backOrigin) == DialogOrigin.USER_MENU) {
+            state.origin = de.sean.blockprot.bukkit.inventories.InventoryState.MenuOrigin.USER_MENU;
+            state.originStack.push(de.sean.blockprot.bukkit.inventories.InventoryState.MenuOrigin.USER_MENU);
+        } else {
+            state.origin = de.sean.blockprot.bukkit.inventories.InventoryState.MenuOrigin.NONE;
+        }
+        de.sean.blockprot.bukkit.inventories.InventoryState.set(player.getUniqueId(), state);
     }
 
     static Component originHint(DialogOrigin origin) {

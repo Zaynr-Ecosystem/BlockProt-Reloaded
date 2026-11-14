@@ -25,13 +25,11 @@ import de.sean.blockprot.bukkit.BlockProtLogger;
 import de.sean.blockprot.bukkit.BukkitCompat;
 import de.sean.blockprot.bukkit.Edition;
 import de.sean.blockprot.bukkit.VersionCompat;
-import de.sean.blockprot.bukkit.tasks.BackupTask;
+import de.sean.blockprot.bukkit.storage.PluginDataLayout;
 import de.sean.blockprot.bukkit.tasks.UpdateChecker;
 import de.sean.blockprot.util.SemanticVersion;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
-
-import java.io.File;
 
 public final class EnvironmentDiagnostics {
 
@@ -103,7 +101,7 @@ public final class EnvironmentDiagnostics {
         Edition edition = Edition.current();
         boolean notOlder = edition.supports(VersionCompat.MAJOR, VersionCompat.MINOR, VersionCompat.PATCH)
             || edition.isNewerThanRange(VersionCompat.MAJOR, VersionCompat.MINOR, VersionCompat.PATCH);
-        boolean marker = new File(BlockProt.getInstance().getDataFolder(), BackupTask.MARKER_FILE).isFile();
+        boolean marker = PluginDataLayout.readEditionMarker(BlockProt.getInstance().getDataFolder()) != null;
         if (notOlder && marker) {
             BlockProtLogger.pass("Edition: " + edition.id() + " range=" + edition.rangeLabel() + " marker=present");
             ctx.pass();

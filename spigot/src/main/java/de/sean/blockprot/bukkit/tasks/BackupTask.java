@@ -27,6 +27,7 @@ import de.sean.blockprot.bukkit.Edition;
 import de.sean.blockprot.bukkit.TranslationKey;
 import de.sean.blockprot.bukkit.Translator;
 import de.sean.blockprot.bukkit.VersionCompat;
+import de.sean.blockprot.bukkit.storage.PluginDataLayout;
 import de.sean.blockprot.util.SemanticVersion;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,7 +36,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.time.Instant;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -221,31 +221,12 @@ public final class BackupTask implements Runnable {
     }
 
     static @Nullable Properties readMarker(@NotNull File dataFolder) {
-        File file = new File(dataFolder, MARKER_FILE);
-        if (!file.isFile()) return null;
-        try (FileInputStream in = new FileInputStream(file)) {
-            Properties properties = new Properties();
-            properties.load(in);
-            return properties;
-        } catch (IOException | IllegalArgumentException e) {
-            BlockProtLogger.log("backup", "Edition marker unreadable: " + e.getMessage());
-            return null;
-        }
+        return PluginDataLayout.readEditionMarker(dataFolder);
     }
 
     static void writeMarker(@NotNull File dataFolder, @NotNull Edition edition,
                             @NotNull String version, @NotNull String minecraft) {
-        Properties properties = new Properties();
-        properties.setProperty("edition", edition.id());
-        properties.setProperty("version", version);
-        properties.setProperty("minecraft", minecraft);
-        properties.setProperty("written", Instant.now().toString());
-        if (!dataFolder.isDirectory() && !dataFolder.mkdirs()) return;
-        try (FileOutputStream out = new FileOutputStream(new File(dataFolder, MARKER_FILE))) {
-            properties.store(out, null);
-        } catch (IOException e) {
-            BlockProtLogger.log("backup", "Edition marker not written: " + e.getMessage());
-        }
+        PluginDataLayout.writeEditionMarker(dataFolder, edition, version, minecraft);
     }
 
     /**
@@ -253,29 +234,32 @@ public final class BackupTask implements Runnable {
      * meaning this is an upgrade rather than a fresh installation.
      */
     public static boolean hasPriorData(@NotNull File dataFolder) {
+        if (PluginDataLayout.hasAuditDatabase(dataFolder)) return true;
         for (String name : DATA_SENTINELS) {
             if (new File(dataFolder, name).exists()) return true;
         }
+        File internalDataDir = PluginDataLayout.dataDir(dataFolder);
         File[] children = dataFolder.listFiles();
         if (children == null) return false;
         for (File child : children) {
             if (!child.isDirectory()) continue;
             String name = child.getName();
             if (name.equalsIgnoreCase("backups") || name.equalsIgnoreCase("lang")) continue;
-            if (containsLegacyData(child)) return true;
+            if (containsLegacyData(child, internalDataDir)) return true;
         }
         return false;
     }
 
-    private static boolean containsLegacyData(@NotNull File dir) {
+    private static boolean containsLegacyData(@NotNull File dir, @NotNull File internalDataDir) {
         File[] children = dir.listFiles();
         if (children == null) return false;
         for (File child : children) {
             if (child.isDirectory()) {
                 if (child.getName().equalsIgnoreCase("DIM-1") || child.getName().equalsIgnoreCase("DIM1")) return true;
-                if (containsLegacyData(child)) return true;
+                if (containsLegacyData(child, internalDataDir)) return true;
                 continue;
             }
+            if (PluginDataLayout.isManagedInternalFile(internalDataDir, child)) continue;
             String name = child.getName().toLowerCase(Locale.ROOT);
             if (name.endsWith(".yml") || name.endsWith(".db") || name.endsWith(".sqlite") || name.endsWith(".dat")) {
                 return true;

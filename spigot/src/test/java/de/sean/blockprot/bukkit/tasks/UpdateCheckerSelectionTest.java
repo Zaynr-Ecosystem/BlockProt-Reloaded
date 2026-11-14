@@ -143,4 +143,24 @@ class UpdateCheckerSelectionTest {
         releases.add(release("1.4.4", false));
         assertEquals("1.4.4", UpdateChecker.selectBest(releases, new SemanticVersion("1.4.3"), Edition.BPR).tagName);
     }
+
+    @Test
+    void selectsInstalledReleaseAndBuildsEditionTagUrl() {
+        UpdateChecker.GitHubRelease current = release("1.4.4", false);
+        current.body = "## Highlights\n- Added release notes";
+        current.htmlUrl = "https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/releases/tag/1.4.4";
+
+        List<UpdateChecker.GitHubRelease> releases = new ArrayList<>();
+        releases.add(release("bpl-1.4.4", false));
+        releases.add(release("1.4.3", false));
+        releases.add(current);
+
+        UpdateChecker.GitHubRelease matched = UpdateChecker.selectInstalled(releases, new SemanticVersion("1.4.4"), Edition.BPR);
+        assertEquals("1.4.4", matched.getTagName());
+        assertEquals("## Highlights\n- Added release notes", matched.getBody());
+        assertEquals("https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/releases/tag/1.4.4",
+            UpdateChecker.tagReleaseUrl("1.4.4", Edition.BPR));
+        assertEquals("https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/releases/tag/bprl-1.4.4",
+            UpdateChecker.tagReleaseUrl("1.4.4", Edition.BPR_LEGACY));
+    }
 }

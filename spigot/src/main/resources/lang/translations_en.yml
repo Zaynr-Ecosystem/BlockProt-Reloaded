@@ -513,6 +513,8 @@ messages:
     ahead_hotfix: "<#F0E6A0>BlockProt Reloaded is running hotfix {version}, ahead of the published release ({base_version})"
     up_to_date: "<#98FF98>BlockProt Reloaded is up to date."
     click_hint: "Click to visit the GitHub Releases page"
+    upgraded_notice: "<#98FF98>BlockProt Reloaded updated to v{version}! <#7EC8E3>Click to read release notes on GitHub."
+    notes_header: "<#7EC8E3>Release notes for v{version}:"
 
 console:
   config_change_detected: "Configuration change detected; reloading..."
@@ -780,6 +782,10 @@ dialogs:
     checking: "Checking for updates..."
     download: "Download:"
     version_prefix: " v"
+    view_notes: "Release Notes"
+    notes_title: "Release Notes - v{version}"
+    open_github: "View full changelog on GitHub:"
+    notes_unavailable: "No cached release notes yet. Open GitHub or click Check Now."
   debug:
     title: "Debug Info"
     label_plugin: "BlockProt Reloaded "

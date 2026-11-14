@@ -62,7 +62,9 @@ The plugin data folder is `plugins/BlockProtReloaded/` (named after the plugin).
 | `lang/translations_*.yml` | Translation files (English and Spanish are maintained). |
 | `mysql/mysql.yml` | Optional MySQL index (section 11). |
 | `integrations.yml` | Settings for supported third-party plugins (section 13). |
-| `mysql/blockprot_audit.sqlite` | Local SQLite audit log, stored in the `mysql/` subfolder (section 14). |
+| `data/audit.sqlite` | Local SQLite audit log (section 14; migrated automatically from legacy `mysql/blockprot_audit.sqlite`). |
+| `data/usercache.sqlite` | Local SQLite player profile cache (migrated automatically from root `blockprot_usercache.sqlite`). |
+| `data/state.yml` | Internal startup, edition, and setup markers (migrated automatically from legacy `.edition`, `.first_start_done`, and `.recommended_state.yml`). |
 | `admins.yml` | Standalone admin roles and custom action permissions without LuckPerms (section 16). |
 | `logs/blockprot-*.log` | Activity log written by the plugin. |
 | `backups/` | Automatic ZIP backups (section 14). |
@@ -534,7 +536,7 @@ Legacy flat root tags are migrated automatically to these nested subcompounds up
 
 ### Offline-mode profile isolation
 
-When running on an offline-mode server (`online-mode: false` in `server.properties`), `CachedProfileService` automatically bypasses external Mojang HTTP API lookups (`HttpRepositoryService`). Player profiles and UUIDs are resolved strictly against local sources (online player list, Paper/Bukkit cache, and the local `blockprot_usercache.sqlite` database). This eliminates external network latency, prevents thread hangs, and ensures offline player identity isolation.
+When running on an offline-mode server (`online-mode: false` in `server.properties`), `CachedProfileService` automatically bypasses external Mojang HTTP API lookups (`HttpRepositoryService`). Player profiles and UUIDs are resolved strictly against local sources (online player list, Paper/Bukkit cache, and the local `data/usercache.sqlite` database). This eliminates external network latency, prevents thread hangs, and ensures offline player identity isolation.
 
 ## 12. Languages
 
@@ -584,7 +586,7 @@ Run `/bp integrations` to list which are active on your server.
 - **Logs:** `plugins/BlockProtReloaded/logs/blockprot-*.log` records commands,
   reloads, denials, and protection decisions, with colors stripped for easy reading.
 - **Audit log:** denials and block activity are recorded in
-  `plugins/BlockProtReloaded/mysql/blockprot_audit.sqlite` and can be inspected in-game with `/bp logs [here|player <name>|<page>]` or via Paper dialogs.
+  `plugins/BlockProtReloaded/data/audit.sqlite` (migrated automatically from legacy `mysql/blockprot_audit.sqlite`) and can be inspected in-game with `/bp logs [here|player <name>|<page>]` or via Paper dialogs.
 
 ## 15. Command reference
 

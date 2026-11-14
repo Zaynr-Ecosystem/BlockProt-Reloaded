@@ -98,10 +98,8 @@ public class UserSettingsInventory extends BlockProtInventory {
                     boolean nextState = !h.getPreferBedrockForms();
                     h.setPreferBedrockForms(nextState);
                     if (nextState) {
-                        player.closeInventory();
-                        BlockProt.getFoliaLib().getScheduler().runAtEntityLater(player, () -> {
-                            de.sean.blockprot.bukkit.bedrock.forms.BedrockUserSettingsForm.show(player);
-                        }, 1L);
+                        switchToExternalUi(player, state,
+                            () -> de.sean.blockprot.bukkit.bedrock.forms.BedrockUserSettingsForm.show(player));
                     } else {
                         fill(player);
                         player.updateInventory();
@@ -112,10 +110,11 @@ public class UserSettingsInventory extends BlockProtInventory {
                     h.setPreferDialogs(nextState);
                     if (nextState) {
                         de.sean.blockprot.bukkit.dialogs.DialogOrigin dOrigin =
-                            (state.origin == InventoryState.MenuOrigin.NONE && state.originStack.isEmpty())
-                                ? de.sean.blockprot.bukkit.dialogs.DialogOrigin.NONE
-                                : de.sean.blockprot.bukkit.dialogs.DialogOrigin.USER_MENU;
-                        de.sean.blockprot.bukkit.dialogs.UserSettingsDialog.show(player, dOrigin);
+                            hasUserMenuOrigin(state)
+                                ? de.sean.blockprot.bukkit.dialogs.DialogOrigin.USER_MENU
+                                : de.sean.blockprot.bukkit.dialogs.DialogOrigin.NONE;
+                        switchToExternalUi(player, state,
+                            () -> de.sean.blockprot.bukkit.dialogs.UserSettingsDialog.show(player, dOrigin));
                     } else {
                         fill(player);
                         player.updateInventory();
@@ -160,6 +159,11 @@ public class UserSettingsInventory extends BlockProtInventory {
 
     @Override
     public void onClose(@NotNull InventoryCloseEvent event, @NotNull InventoryState state) {}
+
+    private static boolean hasUserMenuOrigin(@NotNull InventoryState state) {
+        return state.origin == InventoryState.MenuOrigin.USER_MENU
+            || state.originStack.contains(InventoryState.MenuOrigin.USER_MENU);
+    }
 
     public Inventory fill(Player player) {
         PlayerSettingsHandler settings = new PlayerSettingsHandler(player);

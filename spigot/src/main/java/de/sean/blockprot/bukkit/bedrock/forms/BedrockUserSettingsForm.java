@@ -99,6 +99,12 @@ public final class BedrockUserSettingsForm {
                             boolean next = !h.getPreferBedrockForms();
                             h.setPreferBedrockForms(next);
                             if (!next) {
+                                de.sean.blockprot.bukkit.inventories.InventoryState state =
+                                    new de.sean.blockprot.bukkit.inventories.InventoryState(null);
+                                state.friendSearchState = de.sean.blockprot.bukkit.inventories.InventoryState.FriendSearchState.DEFAULT_FRIEND_SEARCH;
+                                state.origin = de.sean.blockprot.bukkit.inventories.InventoryState.MenuOrigin.USER_MENU;
+                                state.originStack.push(de.sean.blockprot.bukkit.inventories.InventoryState.MenuOrigin.USER_MENU);
+                                de.sean.blockprot.bukkit.inventories.InventoryState.set(player.getUniqueId(), state);
                                 player.openInventory(new de.sean.blockprot.bukkit.inventories.UserSettingsInventory().fill(player));
                             } else {
                                 show(player);

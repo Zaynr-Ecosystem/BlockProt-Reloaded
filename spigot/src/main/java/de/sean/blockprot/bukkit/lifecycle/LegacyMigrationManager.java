@@ -25,6 +25,7 @@ import de.sean.blockprot.bukkit.BlockProtConsole;
 import de.sean.blockprot.bukkit.BlockProtLogger;
 import de.sean.blockprot.bukkit.TranslationKey;
 import de.sean.blockprot.bukkit.Translator;
+import de.sean.blockprot.bukkit.storage.PluginDataLayout;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -64,17 +65,12 @@ public final class LegacyMigrationManager {
 
     public boolean isFirstStart(@NotNull BlockProt plugin) {
         if (firstStartThisSession) return true;
-        File marker = new File(plugin.getDataFolder(), ".first_start_done");
-        firstStartThisSession = !marker.exists();
+        firstStartThisSession = !PluginDataLayout.isFirstStartDone(plugin.getDataFolder());
         return firstStartThisSession;
     }
 
     public void markFirstStartDone(@NotNull BlockProt plugin) {
-        try {
-            new File(plugin.getDataFolder(), ".first_start_done").createNewFile();
-        } catch (IOException e) {
-            BlockProtLogger.log("startup", "Could not create first-start marker: " + e.getMessage());
-        }
+        PluginDataLayout.markFirstStartDone(plugin.getDataFolder());
     }
 
     public void migrateFromLegacyFolders(@NotNull BlockProt plugin) {
@@ -111,6 +107,7 @@ public final class LegacyMigrationManager {
                     }
                 }
 
+                PluginDataLayout.migrateAll(plugin.getDataFolder(), null);
                 Files.createFile(legacyFolder.toPath().resolve(".migrated"));
                 pendingMigrationSuccess = true;
                 isMigrationPerformed = true;
@@ -142,21 +139,9 @@ public final class LegacyMigrationManager {
     }
 
     public void migrateLegacySqliteFile(@NotNull BlockProt plugin) {
-        File legacyFile = new File(Bukkit.getWorldContainer(), "blockprot_usercache.sqlite");
-        if (!legacyFile.exists()) return;
-        File newFile = new File(plugin.getDataFolder(), "blockprot_usercache.sqlite");
-        if (newFile.exists()) {
-            if (!legacyFile.delete()) {
-                plugin.getLogger().warning("Could not delete legacy blockprot_usercache.sqlite from server root.");
-            }
-            return;
-        }
-        try {
-            Files.move(legacyFile.toPath(), newFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        if (PluginDataLayout.migrateUserCache(plugin.getDataFolder(), Bukkit.getWorldContainer())) {
             isMigrationPerformed = true;
-            plugin.getLogger().info("Moved blockprot_usercache.sqlite into plugin data folder.");
-        } catch (IOException e) {
-            plugin.getLogger().warning("Failed to move blockprot_usercache.sqlite: " + e.getMessage());
+            plugin.getLogger().info("Moved blockprot_usercache.sqlite into data/usercache.sqlite.");
         }
     }
 

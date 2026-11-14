@@ -338,8 +338,20 @@ public abstract class BlockProtInventory implements InventoryHolder {
                     closeAndOpen(player, null);
                 }
             }
-            case USER_MENU -> player.openInventory(new UserMenuInventory().fill(player));
-            case ADMIN_MENU -> player.openInventory(new AdminMenuInventory().fill(player));
+            case USER_MENU -> {
+                if (BlockProt.getDefaultConfig().shouldUseDialogs(player)) {
+                    switchToExternalUi(player, state, () -> de.sean.blockprot.bukkit.dialogs.UserMenuDialog.show(player));
+                } else {
+                    player.openInventory(new UserMenuInventory().fill(player));
+                }
+            }
+            case ADMIN_MENU -> {
+                if (BlockProt.getDefaultConfig().shouldUseDialogs(player)) {
+                    switchToExternalUi(player, state, () -> de.sean.blockprot.bukkit.dialogs.AdminMenuDialog.show(player));
+                } else {
+                    player.openInventory(new AdminMenuInventory().fill(player));
+                }
+            }
             case FRIEND_MANAGE -> {
                 var inv = new FriendManageInventory().fill(player);
                 closeAndOpen(player, inv);
@@ -361,6 +373,21 @@ public abstract class BlockProtInventory implements InventoryHolder {
             player.closeInventory();
             InventoryState.remove(player.getUniqueId());
         }
+    }
+
+    protected static void switchToExternalUi(@NotNull Player player,
+                                             @NotNull InventoryState state,
+                                             @NotNull Runnable openTask) {
+        // Clear navigation stack before closing so onInventoryClose does not reopen the parent chest GUI.
+        state.suppressCloseReopen = true;
+        state.originStack.clear();
+        InventoryState.remove(player.getUniqueId());
+        player.closeInventory();
+        BlockProt.getFoliaLib().getScheduler().runAtEntityLater(player, () -> {
+            if (player.isOnline()) {
+                openTask.run();
+            }
+        }, 1L);
     }
 
     protected Material getProperMaterial(Material material) {

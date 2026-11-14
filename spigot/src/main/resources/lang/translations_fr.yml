@@ -524,6 +524,8 @@ messages:
       \ sur la version publiée ({base_version})"
     up_to_date: "<#98FF98>BlockProt Reloaded est à jour."
     click_hint: Cliquez pour visiter la page des versions GitHub
+    upgraded_notice: "<#98FF98>BlockProt Reloaded mis à jour vers v{version} ! <#7EC8E3>Cliquez pour lire les notes sur GitHub."
+    notes_header: "<#7EC8E3>Notes de version pour v{version} :"
 console:
   config_change_detected: Changement de configuration détecté ; rechargement...
   config_reloaded: Configuration rechargée automatiquement.
@@ -822,6 +824,10 @@ dialogs:
     checking: Recherche de mises à jour...
     download: "Téléchargement :"
     version_prefix: " v"
+    view_notes: "Notes de version"
+    notes_title: "Notes de version - v{version}"
+    open_github: "Voir l'historique complet sur GitHub :"
+    notes_unavailable: "Aucune note en cache pour le moment. Ouvrez GitHub ou cliquez sur Vérifier maintenant."
   debug:
     title: Infos de débogage
     label_plugin: "BlockProt Reloaded "

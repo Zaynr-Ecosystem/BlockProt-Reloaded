@@ -30,10 +30,14 @@ import de.sean.blockprot.bukkit.config.WorldsConfig;
 import de.sean.blockprot.bukkit.integrations.*;
 import de.sean.blockprot.bukkit.lifecycle.LegacyMigrationManager;
 import de.sean.blockprot.bukkit.listeners.*;
+import de.sean.blockprot.bukkit.metrics.FeatureUsageBarChart;
 import de.sean.blockprot.bukkit.metrics.IntegrationBarChart;
 import de.sean.blockprot.bukkit.metrics.LanguagePieChart;
+import de.sean.blockprot.bukkit.metrics.RecommendedUsagePieChart;
+import de.sean.blockprot.bukkit.metrics.UiModePieChart;
 import de.sean.blockprot.bukkit.nbt.StatHandler;
 import de.sean.blockprot.bukkit.storage.HybridDatabase;
+import de.sean.blockprot.bukkit.storage.PluginDataLayout;
 import de.sean.blockprot.bukkit.tasks.ConfigFileWatcher;
 import de.sean.blockprot.bukkit.tasks.BackupTask;
 import de.sean.blockprot.bukkit.tasks.InactivityCleanupTask;
@@ -85,6 +89,27 @@ public final class BlockProt extends JavaPlugin {
     @Nullable private static FoliaLib foliaLib = null;
 
     private Metrics metrics;
+
+    private static volatile boolean pendingUpgradeNotice = false;
+
+    public static boolean hasPendingUpgradeNotice() {
+        return pendingUpgradeNotice;
+    }
+
+    public static boolean consumePendingUpgradeNotice() {
+        if (!pendingUpgradeNotice) return false;
+        pendingUpgradeNotice = false;
+        String version = getPluginVersion();
+        BlockProt plugin = getInstanceOrNull();
+        if (plugin != null && !version.isEmpty()) {
+            PluginDataLayout.markChangelogSeen(plugin.getDataFolder(), version);
+        }
+        return true;
+    }
+
+    public static void clearPendingUpgradeNotice() {
+        consumePendingUpgradeNotice();
+    }
 
     public static boolean isFirstStartThisSession() {
         return legacyMigrationManager.isFirstStartThisSession();
@@ -155,7 +180,8 @@ public final class BlockProt extends JavaPlugin {
         pluginAuthors = this.getDescription().getAuthors();
         if (isUnsupportedMinecraft()) return;
         try {
-            File cacheFile = new File(this.getDataFolder(), "blockprot_usercache.sqlite");
+            PluginDataLayout.migrateAll(this.getDataFolder(), Bukkit.getWorldContainer());
+            File cacheFile = PluginDataLayout.userCacheFile(this.getDataFolder());
             if (!cacheFile.getParentFile().exists()) cacheFile.getParentFile().mkdirs();
             playerProfileCache   = new SQLiteCache(cacheFile);
             playerProfileService = new CachedProfileService(playerProfileCache);
@@ -272,7 +298,9 @@ public final class BlockProt extends JavaPlugin {
 
         boolean experimentalBuild = false;
         try { experimentalBuild = new SemanticVersion(version).isPreRelease(); } catch (Exception ignored) {}
-        boolean editionChanged = BackupTask.currentTransition(this.getDataFolder()).changed();
+        BackupTask.Transition transition = BackupTask.currentTransition(this.getDataFolder());
+        boolean editionChanged = transition.changed();
+        pendingUpgradeNotice = detectUpgradeNotice(this.getDataFolder(), version, transition);
         if ((legacyMigrationManager.isMigrationPerformed() || experimentalBuild || editionChanged) && defaultConfig.isBackupsEnabled()) {
             new BackupTask(this.getDataFolder()).run();
         }
@@ -313,6 +341,9 @@ public final class BlockProt extends JavaPlugin {
         metrics = new Metrics(this, pluginId);
         metrics.addCustomChart(new IntegrationBarChart());
         metrics.addCustomChart(new LanguagePieChart());
+        metrics.addCustomChart(new UiModePieChart());
+        metrics.addCustomChart(new RecommendedUsagePieChart());
+        metrics.addCustomChart(new FeatureUsageBarChart());
 
         final PluginManager pm = getServer().getPluginManager();
         registerEvent(pm, new BlockEventListener(this));
@@ -798,6 +829,23 @@ public final class BlockProt extends JavaPlugin {
             this.saveResource(name, replace);
         } catch (Exception e) {
             BlockProtLogger.log("resource", "Could not save resource " + name + ": " + e.getMessage());
+        }
+    }
+
+    private static boolean detectUpgradeNotice(@NotNull File dataFolder,
+                                               @NotNull String currentVersion,
+                                               @NotNull BackupTask.Transition transition) {
+        if (currentVersion.isEmpty()) return false;
+        String lastSeen = PluginDataLayout.getLastSeenChangelogVersion(dataFolder);
+        String baseline = lastSeen != null ? lastSeen : transition.fromVersion();
+        if (baseline == null || baseline.isBlank()) {
+            PluginDataLayout.markChangelogSeen(dataFolder, currentVersion);
+            return false;
+        }
+        try {
+            return new SemanticVersion(currentVersion).compareTo(new SemanticVersion(baseline)) > 0;
+        } catch (Exception ignored) {
+            return false;
         }
     }
 

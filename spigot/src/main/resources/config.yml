@@ -1,7 +1,7 @@
 # BlockProt Reloaded - config.yml
 # MySQL / Storage -> mysql/mysql.yml   |   Block definitions -> blocks.yml
 # All lockable lists default to empty. Configure via in-game /bp lockables GUI
-# or edit blocks.yml directly. See docs/BLOCK_FAMILY_SYNTAX.md for syntax.
+# or edit blocks.yml directly. See docs/MODERN SYNTAX AND LEGACY/BLOCK_FAMILY_SYNTAX.md for syntax.
 # Docs: https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/tree/main/docs
 
 # [Language]

@@ -53,7 +53,7 @@ Upgrading Minecraft usually means changing edition:
 3. Keep the `plugins/BlockProtReloaded/` data folder. Every edition uses the same folder, permissions and PlaceholderAPI identifier.
 4. Start the server.
 
-At startup the plugin records which edition wrote the data in `plugins/BlockProtReloaded/.edition`. When the edition or the Minecraft version changed since the last start, it makes a backup first, in `plugins/BlockProtReloaded/backups/`, named with both editions, for example `2026-10-01_12-00_bpr-legacy-1.3.9.1_to_bpr-1.4.0.zip`, and logs the path to the console.
+At startup the plugin records which edition wrote the data in `plugins/BlockProtReloaded/data/state.yml` (migrated automatically from the legacy `.edition` marker). When the edition or the Minecraft version changed since the last start, it makes a backup first, in `plugins/BlockProtReloaded/backups/`, named with both editions, for example `2026-10-01_12-00_bpr-legacy-1.3.9.1_to_bpr-1.4.0.zip`, and logs the path to the console.
 
 Rules that keep the data safe:
 
