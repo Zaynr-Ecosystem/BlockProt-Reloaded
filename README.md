@@ -180,7 +180,7 @@ Copying settings sends an action bar confirmation. Pasting replaces the friend l
 
 ## Commands
 
-Command visibility is controlled by `use_menus` in `config.yml`. When `use_menus: false`, all subcommands are available via chat. When `use_menus: true`, standard players only get `/bp user` and `/bp admin` (administrators with `UPDATE` permission or OP keep `/bp update` access via chat); the console keeps every subcommand.
+Command visibility is controlled by `use_menus` and active feature toggles in `config.yml`. When `use_menus: false`, all active subcommands are available via chat. When `use_menus: true`, players only see `/bp user` and `/bp admin` (administrators with `UPDATE` permission or OP keep `/bp update` access via chat); commands for disabled subsystems (`friends`, `tiers`, `logs`) are hidden from tab completion and return a localized disabled message when run directly. The console retains access to every subcommand.
 
 **Menu Commands:**
 
@@ -212,7 +212,7 @@ With `admin_tiers.enabled: false` (the default) the Permission column applies, w
 | `/bp info <player>` | Admin | T1 | Inspect all blocks owned by a player (online or offline); prints the list when run from the console |
 | `/bp logs [here\|player <name>\|<page>]` | Admin or `AdminAction.LOGS` | T1 | Inspect access audit history for targeted block or any specific player |
 | `/bp unlock <player>` | Admin | T2 | Inspect or unlock protections owned by a player; lists their locked blocks when run from the console |
-| `/bp lockables` | Admin | T2 | Interactive browser for all known materials with toggleable active status |
+| `/bp lockables` | Admin | T2 | Interactive browser for all known materials with live left-click toggling and right-click material token copy |
 | `/bp protdel` | Admin | T3 | Bulk delete protections in a world with undo support; from the console use `/bp protdel <world> confirm` and `/bp protdel undo` |
 | `/bp debug <subcommand>` | Admin or `blockprot.debug` | T3 | Run the full diagnostic suite and class coverage scans; also runs from the console at world spawn |
 | `/bp reload` | Admin | Owner | Create safety backup and reload configs, blocks, and translations |
@@ -227,24 +227,25 @@ The console can run every command.
 
 | Permission | Default | Description |
 |---|---|---|
+| `blockprot.*` | op | Wildcard granting full administrative and player access (`admin.owner`, `admin`, `lockmax`, `blocks.tp`, `debug`) |
 | `blockprot.user` | true | Standard player features: lock, friends, settings, stats, transfer |
-| `blockprot.user.admin` | op | Full administrator privileges and GUI inspection |
+| `blockprot.user.admin` | op | Administrative privileges and GUI inspection |
 | `blockprot.user.admin.t1` | false | Staff Tier 1 (Moderator): player block lists, read-only block info and audit logs, teleport from admin lists |
-| `blockprot.user.admin.t2` | false | Staff Tier 2 (Helper): unlock, break protected blocks, container bypass, lockables GUI |
+| `blockprot.user.admin.t2` | false | Staff Tier 2 (Helper): unlock, break protected blocks, container bypass, lockables GUI (includes `blockprot.user.admin`, capped at T2 actions when `admin_tiers.enabled: true`) |
 | `blockprot.user.admin.t3` | false | Staff Tier 3 (Admin): T2 plus world protection deletion, config editor, and debug |
 | `blockprot.user.admin.owner` | op | Staff Tier 4 (Owner): full control, reload, update, staff role assignments |
-| `blockprot.user.admin.custom` | false | Custom staff role evaluating granular action flags from admins.yml |
+| `blockprot.user.admin.custom` | false | Custom staff role evaluating granular action flags from `admins.yml` |
 | `blockprot.lockmax` | false | Exemption from the `player_max_locked_block_count` limit |
 | `blockprot.locklimit.<N>` | false | Assigns a custom maximum locked block limit to the player |
 | `blockprot.blocks.tp` | op | Allows teleportation to blocks from statistics and admin block lists |
 | `blockprot.debug` | op | Access to `/bp debug` system diagnostics |
 
-The tier nodes only take effect with `admin_tiers.enabled: true`. Every button of the `/bp admin` hub checks the tier of its action, so a staff member only uses what their tier allows.
+The tier nodes only take effect with `admin_tiers.enabled: true`; explicit permission negations (e.g. from a permissions plugin) take precedence over OP fallback. Every button of the `/bp admin` hub checks the tier of its action, so a staff member only uses what their tier allows.
 
 ## Key Features
 
 ### Minecraft Compatibility
-Runs on Java 21 and newer (Minecraft 26.x servers need Java 25). The declared range is 1.21.7 through 26.3, and every release is tested on it in real Paper, Folia, and Purpur servers. Versions are compared numerically at runtime, so a newer patch release is not rejected at startup, but it is not tested until a later plugin release declares it.
+Runs on Java 21 and newer (Minecraft 26.x servers need Java 25). The declared range is 1.21.7 through 26.3, and every release is tested on it in real Paper, Folia, and Purpur servers. Versions and block materials are resolved defensively at runtime (unknown materials are skipped safely, new copper/shelf/grate families degrade cleanly on older servers, and handshake query strings are stripped during Bedrock prefix checks), so newer releases do not fail startup before a plugin update declares them.
 
 ### Native Paper Dialogs Parity
 Full support for modern Paper modal dialogs (`use_dialogs: true`). Dialog menus render directly on client viewports with styled pastel themes (`PASTEL_MINT`, `PASTEL_CORAL`, `PASTEL_GOLD`, `SOFT_BLUE`, `PASTEL_PURPLE`), eliminating inventory clicking glitches and container desynchronization.
@@ -275,23 +276,24 @@ lockable_entities:
 ```
 Full documentation: [`docs/MODERN SYNTAX AND LEGACY/BLOCK_FAMILY_SYNTAX.md`](docs/MODERN%20SYNTAX%20AND%20LEGACY/BLOCK_FAMILY_SYNTAX.md).
 
-### Item Frame and Vehicle Protection
-Item frames, glowing item frames, chest boats, storage minecarts, and hopper minecarts are protected using the standard sneak-right-click interaction. Frames mounted directly onto locked containers link to the underlying container automatically, sharing ownership and friends without requiring duplicate protection.
+### Environmental, Block, Item Frame, and Vehicle Protection
+Beyond standard chest and container locks, BlockProt Reloaded guards against griefing vectors across blocks and entities:
+- **Item frames and storage vehicles:** Item frames, glowing item frames, chest boats, storage minecarts, and hopper minecarts support sneak-right-click protection. Frames mounted directly onto locked containers link to the container automatically (respecting `BlockAccessMenuEvent` and sharing owner, friends, and redstone rules).
+- **Special containers:** Decorated pots are protected from projectiles and item insertion/extraction; chiseled bookshelves enforce per-slot deposit (`WRITE`) and withdrawal (`READ`) permissions.
+- **Fire, fluids, pistons, and falling blocks:** Locked blocks are shielded from fire ignition/spread, water/lava flow (`BlockFromToEvent`), unauthorized bucket emptying/filling or waterlogging, piston crushing/movement, and gravity blocks landing on locked targets.
+- **Entities and dispensers:** Dispenser/dropper redstone checks verify the source block against container rules, and protected entities gain damage, projectile, and leash protection.
 
 ### Villager Workstation Protection
-Villagers whose job-site points to a protected workstation inherit its protection. Non-owners cannot trade with or damage the linked villager, and cannot break blocks in the configured radius around the workstation. An Emerald button in the workstation menu initiates a particle indicator pointing to the linked villager.
+Villagers whose job-site points to a protected workstation inherit its protection. Non-owners cannot trade with or damage the linked villager, and cannot break blocks in the configured radius around the workstation. An Emerald button in the workstation menu initiates a Folia-safe particle indicator pointing to the linked villager.
 
-### High-Performance Hopper Protection
-Hoppers are checked using a thread-safe Caffeine cache and `ProtectedBlockCache`, resolving server tick lag without needing to completely disable hopper extraction. Provides bidirectional protection by blocking both unauthorized extraction and illegal item insertion into locked containers and storage vehicles (chest minecarts, hopper minecarts).
+### High-Performance Hopper and Item Pickup Protection
+Hoppers are evaluated through a bounded, thread-safe Caffeine cache (`ProtectedBlockCache`), preventing server tick lag without disabling hopper transfers. Protection is bidirectional (blocking unauthorized extraction and illegal insertion into locked containers and storage vehicles, as well as unauthorized `InventoryPickupItemEvent` siphoning), while `simplified_hopper_logic` provides an optimized source-extraction fast path that still enforces container siphon protection.
 
 ### Hybrid MySQL / SQLite Access Audit
-Stores block protections in PersistentDataContainer / NBT on the block itself. An optional MySQL / MariaDB index mirrors block locations and trust lists so large servers can search them without scanning region files; NBT stays the source of truth. An asynchronous SQLite audit log (`blockprot_audit.sqlite`) records open, item take, item place, and access denied events.
+Stores block protections in PersistentDataContainer / NBT on the block itself. An optional MySQL / MariaDB index mirrors block locations and trust lists with bounded non-blocking cache lookups so large servers can query them without stalling server or Folia region threads; NBT remains the source of truth. A thread-safe SQLite audit log (`blockprot_audit.sqlite`, serialized WAL pooling) records open, item take, item place, and access denied events for `/bp logs`.
 
-### Per-World Configuration (`worlds.yml`)
-Enable `per_worlds_config: true` to configure independent block whitelists, protection rules, and feature toggles per world.
-
-### Inactivity Cleanup and World Expiry
-Configurable automated cleanup (`inactivity_cleanup_days`) that unregisters protections belonging to players who have been offline for extended periods.
+### Per-World Configuration, Expiry, and Folia Scheduling
+Enable `per_worlds_config: true` to configure independent block whitelists, protection rules, and feature toggles per world, alongside `world_expiry` and `inactivity_cleanup_days` background maintenance. All scheduled tasks (expiry scans, inactivity cleanup, villager particle indicators, and Towny unclaim cleanup) dispatch through FoliaLib region/entity schedulers cleanly.
 
 ## Integrations
 

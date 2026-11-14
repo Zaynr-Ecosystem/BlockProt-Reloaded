@@ -17,7 +17,7 @@ Admins get a separate toolset: a paged block browser (`/bp lockables`), per-play
 
 Only blocks and entities that exist on your Minecraft version can be locked; the lists below name the complete set across editions.
 
-**Tile entities (storage):** all chest variants, all 17 shulker box colors, furnace, smoker, blast furnace, hopper, dispenser, dropper, barrel, brewing stand, decorated pot, chiseled bookshelf, jukebox, lectern, beehive, bee nest.
+**Tile entities (storage):** all chest variants, all 17 shulker box colors, all 12 shelf variants (1.21.9+), furnace, smoker, blast furnace, hopper, dispenser, dropper, barrel, brewing stand, decorated pot, chiseled bookshelf, crafter, jukebox, lectern, beehive, bee nest.
 
 **Interactive blocks:** doors, trapdoors, and fence gates (all wood variants plus iron and all copper oxidation stages), anvils, cauldrons, enchanting table, grindstone, stonecutter, loom, cartography table, smithing table, composter, bell, note block, dragon egg.
 
@@ -80,6 +80,11 @@ Monitors explosions near lockable blocks. Logs the event, alerts the owner via a
 - Audit log writes run asynchronously.
 
 ### Other additions
+- Access audit logs (`/bp logs [here|player <name>|<page>]`): paginated SQLite audit history for inspecting container opens, item transactions, and denied accesses.
+- Bidirectional hopper protection: prevents unauthorized extraction and illegal item insertion into locked containers and storage vehicles.
+- Piston crushing and movement protection: prevents pistons from moving or crushing locked blocks and containers.
+- Offline-mode UUID isolation: bypasses Mojang HTTP lookups when `online-mode: false` to ensure reliable offline-mode player caching without network hangs.
+- Dynamic feature gating: automatically hides and disables `/bp tiers`, `/bp friends`, and `/bp logs` when their corresponding feature subsystems are disabled.
 - Multi-tier staff permissions (`admin_tiers.enabled`) and standalone `admins.yml` hierarchy.
 - Native Paper Dialogs: not available in this edition. Every menu opens as a chest inventory.
 - Bedrock touch forms (Cumulus API via Geyser and Floodgate).
@@ -100,13 +105,22 @@ Monitors explosions near lockable blocks. Logs the event, alerts the owner via a
 
 | Command | Permission | Description |
 |---|---|---|
+| `/bp user` | `blockprot.user` | Main personal user menu or dialog |
+| `/bp admin` | `blockprot.user.admin` | Administrative control menu or dialog |
+| `/bp friends` | `blockprot.user` | Manage global default friends list |
+| `/bp settings` | `blockprot.user` | Personal player preferences interface |
+| `/bp logs [here\|player <name>\|<page>]` | `blockprot.user` / Admin | View access audit logs for self, targeted block, or another player |
+| `/bp transferall <player>` | `blockprot.user` | Transfer ownership of all your protected blocks to another player |
 | `/bp lockables` | `blockprot.user.admin` | Paged GUI listing all blocks and entities with active/inactive status |
 | `/bp tiers` | `blockprot.user.admin` or `blockprot.user.admin.owner` | Staff roles GUI and custom permissions manager |
 | `/bp info <player>` | `blockprot.user.admin` | All blocks owned by a player with teleport links |
 | `/bp unlock <player>` | `blockprot.user.admin` | Inspect or remove any player's protections (console: lists them) |
+| `/bp protdel [world]` | `blockprot.user.admin` | Bulk delete protections in a world with undo support |
 | `/bp reload` | `blockprot.user.admin` | Reload all config files and merge missing keys |
+| `/bp update` | `blockprot.user.admin` | Check and download GitHub release updates |
+| `/bp integrations` | `blockprot.user.admin` | Inspect status of all third-party integrations |
+| `/bp recommended <blocks\|config\|all>` | `blockprot.user.admin.owner` | Apply recommended configuration profiles |
 | `/bp debug run` | `blockprot.user.admin` or `blockprot.debug` | Run internal diagnostics (also from the console) |
-| `/bp transferall <player>` | `blockprot.user` | Transfer ownership of all your protected blocks to another player |
 
 
 ## Permissions
@@ -140,7 +154,7 @@ The staff tier nodes only apply with `admin_tiers.enabled: true`.
 
 ## Integrations
 
-Towny, WorldGuard, Lands, ClaimChunk, GriefPrevention, Residence, PlaceholderAPI, SkinsRestorer, WorldEdit/FAWE, Floodgate/Geyser, ViaVersion/ViaBackwards/ViaRewind, Folia.
+Towny, WorldGuard, Zelly's Guard, Lands, ClaimChunk, GriefPrevention, Residence, PlaceholderAPI, SkinsRestorer, WorldEdit/FAWE, Floodgate/Geyser, ViaVersion/ViaBackwards/ViaRewind, Folia.
 
 
 ## Install
