@@ -68,6 +68,10 @@ class TranslatorTest {
         for (TranslationKey key : TranslationKey.values()) {
             String result = Translator.get(key);
             assertNotNull(result, "TranslationKey." + key + " returned null");
+            assertNotEquals(key.toString(), result, "TranslationKey." + key + " returned unmapped raw key");
+            if (key != TranslationKey.INVENTORIES__BLOCK_INFO__LORE_PREFIX) {
+                assertFalse(result.isBlank(), "TranslationKey." + key + " returned blank");
+            }
         }
     }
 
@@ -78,8 +82,27 @@ class TranslatorTest {
     }
 
     @Test
-    void translatorFallsBackGracefully() {
-        String result = Translator.get(TranslationKey.MESSAGES__LOCK_ON_PLACE_SUCCESS);
-        assertNotNull(result);
+    void translatorFallsBackGracefully() throws Exception {
+        YamlConfiguration english = new YamlConfiguration();
+        var stream = TranslatorTest.class.getResourceAsStream("/lang/translations_en.yml");
+        assertNotNull(stream, "Bundled /lang/translations_en.yml must exist");
+        try (var reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+            english.load(reader);
+        }
+        String expected = english.getString(TranslationKey.MESSAGES__LOCK_ON_PLACE_SUCCESS.toString());
+        assertNotNull(expected);
+        assertFalse(expected.isBlank());
+
+        try {
+            Translator.loadFromConfigs(english, new YamlConfiguration());
+            String raw = Translator.getRaw(TranslationKey.MESSAGES__LOCK_ON_PLACE_SUCCESS);
+            String rendered = Translator.get(TranslationKey.MESSAGES__LOCK_ON_PLACE_SUCCESS);
+            assertEquals(expected, raw);
+            assertFalse(rendered.isBlank());
+            assertFalse(rendered.contains("<green>"));
+            assertTrue(rendered.contains("Block protected!"));
+        } finally {
+            Translator.loadFromConfigs(english, english);
+        }
     }
 }
