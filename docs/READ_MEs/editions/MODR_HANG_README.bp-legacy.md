@@ -1,7 +1,7 @@
-<img src="https://raw.githubusercontent.com/VictorGugug/BlockProt-Reloaded/main/images/RELEASE%20TITLES/BlockProtReloaded.png" alt="BlockProt Reloaded" />
+<img src="https://raw.githubusercontent.com/Zaynr-Ecosystem/BlockProt-Reloaded/main/images/RELEASE%20TITLES/BlockProtReloaded.png" alt="BlockProt Reloaded" />
 
 ---
-> **BlockProt Legacy (Minecraft 1.18.2 - 1.20.4)**. Looking for another Minecraft version? See the [version guide](https://github.com/VictorGugug/BlockProt-Reloaded/blob/main/docs/READ_MEs/VERSION_GUIDE.md).
+> **BlockProt Legacy (Minecraft 1.18.2 - 1.20.4)**. Looking for another Minecraft version? See the [version guide](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/blob/main/docs/READ_MEs/VERSION_GUIDE.md).
 
 BlockProt Legacy is a maintained fork of [BlockProt](https://github.com/spnda/BlockProt) for Paper, Purpur, and Folia servers (Minecraft 1.18.2 - 1.20.4). It preserves the original NBT-based protection core while adding stability fixes, performance improvements, and new features not present upstream.
 
@@ -63,7 +63,7 @@ lockable_entities:
 
 Sub-families: `CHEST`, `FURNACE`, `SHELF`, `TRANSPORT`, `MISC`, `SIGN` (tile entities); `SHULKERS`; `ANVIL`, `CAULDRON`, `WORKSTATION`, `TRAPDOOR`, `FENCE_GATE` (blocks); `DOORS`; `CHEST_BOATS`, `CHEST_MINECARTS`, `HOPPER_MINECARTS`, `ITEM_FRAMES` (entities).
 
-Full syntax: [`docs/MODERN SYNTAX AND LEGACY/BLOCK_FAMILY_SYNTAX.md`](https://github.com/VictorGugug/BlockProt-Reloaded/blob/main/docs/MODERN%20SYNTAX%20AND%20LEGACY/BLOCK_FAMILY_SYNTAX.md). Full material list: [`docs/MODERN SYNTAX AND LEGACY/LOCKABLE_BLOCKS_REFERENCE.md`](https://github.com/VictorGugug/BlockProt-Reloaded/blob/main/docs/MODERN%20SYNTAX%20AND%20LEGACY/LOCKABLE_BLOCKS_REFERENCE.md).
+Full syntax: [`docs/MODERN SYNTAX AND LEGACY/BLOCK_FAMILY_SYNTAX.md`](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/blob/main/docs/MODERN%20SYNTAX%20AND%20LEGACY/BLOCK_FAMILY_SYNTAX.md). Full material list: [`docs/MODERN SYNTAX AND LEGACY/LOCKABLE_BLOCKS_REFERENCE.md`](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/blob/main/docs/MODERN%20SYNTAX%20AND%20LEGACY/LOCKABLE_BLOCKS_REFERENCE.md).
 
 ### Config and blocks auto-merge on every reload
 On every startup and `/bp reload`, missing keys are added from JAR defaults and renamed keys are migrated. Existing values: including every family expression already written in `blocks.yml`: are never overwritten or reordered. In legacy flat-list mode, new material entries from a newer JAR are appended automatically so new block types become lockable without manual edits.
@@ -80,6 +80,11 @@ Monitors explosions near lockable blocks. Logs the event, alerts the owner via a
 - Audit log writes run asynchronously.
 
 ### Other additions
+- Access audit logs (`/bp logs [here|player <name>|<page>]`): paginated SQLite audit history for inspecting container opens, item transactions, and denied accesses.
+- Bidirectional hopper protection: prevents unauthorized extraction and illegal item insertion into locked containers and storage vehicles.
+- Piston crushing and movement protection: prevents pistons from moving or crushing locked blocks and containers.
+- Offline-mode UUID isolation: bypasses Mojang HTTP lookups when `online-mode: false` to ensure reliable offline-mode player caching without network hangs.
+- Dynamic feature gating: automatically hides and disables `/bp tiers`, `/bp friends`, and `/bp logs` when their corresponding feature subsystems are disabled.
 - Multi-tier staff permissions (`admin_tiers.enabled`) and standalone `admins.yml` hierarchy.
 - Native Paper Dialogs: not available in this edition. Every menu opens as a chest inventory.
 - Bedrock touch forms (Cumulus API via Geyser and Floodgate).
@@ -100,13 +105,22 @@ Monitors explosions near lockable blocks. Logs the event, alerts the owner via a
 
 | Command | Permission | Description |
 |---|---|---|
+| `/bp user` | `blockprot.user` | Main personal user menu or dialog |
+| `/bp admin` | `blockprot.user.admin` | Administrative control menu or dialog |
+| `/bp friends` | `blockprot.user` | Manage global default friends list |
+| `/bp settings` | `blockprot.user` | Personal player preferences interface |
+| `/bp logs [here\|player <name>\|<page>]` | `blockprot.user` / Admin | View access audit logs for self, targeted block, or another player |
+| `/bp transferall <player>` | `blockprot.user` | Transfer ownership of all your protected blocks to another player |
 | `/bp lockables` | `blockprot.user.admin` | Paged GUI listing all blocks and entities with active/inactive status |
 | `/bp tiers` | `blockprot.user.admin` or `blockprot.user.admin.owner` | Staff roles GUI and custom permissions manager |
 | `/bp info <player>` | `blockprot.user.admin` | All blocks owned by a player with teleport links |
 | `/bp unlock <player>` | `blockprot.user.admin` | Inspect or remove any player's protections (console: lists them) |
+| `/bp protdel [world]` | `blockprot.user.admin` | Bulk delete protections in a world with undo support |
 | `/bp reload` | `blockprot.user.admin` | Reload all config files and merge missing keys |
+| `/bp update` | `blockprot.user.admin` | Check and download GitHub release updates |
+| `/bp integrations` | `blockprot.user.admin` | Inspect status of all third-party integrations |
+| `/bp recommended <blocks\|config\|all>` | `blockprot.user.admin.owner` | Apply recommended configuration profiles |
 | `/bp debug run` | `blockprot.user.admin` or `blockprot.debug` | Run internal diagnostics (also from the console) |
-| `/bp transferall <player>` | `blockprot.user` | Transfer ownership of all your protected blocks to another player |
 
 
 ## Permissions
@@ -140,7 +154,7 @@ The staff tier nodes only apply with `admin_tiers.enabled: true`.
 
 ## Integrations
 
-Towny, WorldGuard, Lands, ClaimChunk, GriefPrevention, Residence, PlaceholderAPI, SkinsRestorer, WorldEdit/FAWE, Floodgate/Geyser, ViaVersion/ViaBackwards/ViaRewind, Folia.
+Towny, WorldGuard, Zelly's Guard, Lands, ClaimChunk, GriefPrevention, Residence, PlaceholderAPI, SkinsRestorer, WorldEdit/FAWE, Floodgate/Geyser, ViaVersion/ViaBackwards/ViaRewind, Folia.
 
 
 ## Install
@@ -150,12 +164,12 @@ Place the JAR in `plugins/` and restart. Requires Java 17+ and Paper, Purpur, or
 
 ## Documentation
 
-- Release history: [`docs/RELEASE_NOTES/`](https://github.com/VictorGugug/BlockProt-Reloaded/tree/main/docs/RELEASE_NOTES)
-- Block family syntax: [`docs/MODERN SYNTAX AND LEGACY/BLOCK_FAMILY_SYNTAX.md`](https://github.com/VictorGugug/BlockProt-Reloaded/blob/main/docs/MODERN%20SYNTAX%20AND%20LEGACY/BLOCK_FAMILY_SYNTAX.md)
-- Full lockable materials reference: [`docs/MODERN SYNTAX AND LEGACY/LOCKABLE_BLOCKS_REFERENCE.md`](https://github.com/VictorGugug/BlockProt-Reloaded/blob/main/docs/MODERN%20SYNTAX%20AND%20LEGACY/LOCKABLE_BLOCKS_REFERENCE.md)
-- Administrator guide: [`docs/READ_MEs/ADMIN_GUIDE.md`](https://github.com/VictorGugug/BlockProt-Reloaded/blob/main/docs/READ_MEs/ADMIN_GUIDE.md)
-- Player guide: [`docs/READ_MEs/PLAYER_GUIDE.md`](https://github.com/VictorGugug/BlockProt-Reloaded/blob/main/docs/READ_MEs/PLAYER_GUIDE.md)
+- Release history: [`docs/RELEASE_NOTES/`](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/tree/main/docs/RELEASE_NOTES)
+- Block family syntax: [`docs/MODERN SYNTAX AND LEGACY/BLOCK_FAMILY_SYNTAX.md`](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/blob/main/docs/MODERN%20SYNTAX%20AND%20LEGACY/BLOCK_FAMILY_SYNTAX.md)
+- Full lockable materials reference: [`docs/MODERN SYNTAX AND LEGACY/LOCKABLE_BLOCKS_REFERENCE.md`](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/blob/main/docs/MODERN%20SYNTAX%20AND%20LEGACY/LOCKABLE_BLOCKS_REFERENCE.md)
+- Administrator guide: [`docs/READ_MEs/ADMIN_GUIDE.md`](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/blob/main/docs/READ_MEs/ADMIN_GUIDE.md)
+- Player guide: [`docs/READ_MEs/PLAYER_GUIDE.md`](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/blob/main/docs/READ_MEs/PLAYER_GUIDE.md)
 
-Repository: https://github.com/VictorGugug/BlockProt-Reloaded
-Issues and contributions: https://github.com/VictorGugug/BlockProt-Reloaded/issues
+Repository: https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded
+Issues and contributions: https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/issues
 License: GNU General Public License v3 - based on [BlockProt](https://github.com/spnda/BlockProt) by spnda.

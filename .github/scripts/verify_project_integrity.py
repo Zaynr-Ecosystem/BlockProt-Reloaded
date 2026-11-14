@@ -89,38 +89,40 @@ def check_translation_parity(repo_root):
                 items[new_key] = v
         return items
 
-    en_file = repo_root / "spigot" / "src" / "main" / "resources" / "lang" / "translations_en.yml"
-    es_file = repo_root / "spigot" / "src" / "main" / "resources" / "lang" / "translations_es.yml"
-
-    if not en_file.exists() or not es_file.exists():
-        return False, ["Missing reference language files (translations_en.yml or translations_es.yml)"]
-
-    with open(en_file, "r", encoding="utf-8") as f:
-        en_dict = flatten(yaml.safe_load(f) or {})
-    with open(es_file, "r", encoding="utf-8") as f:
-        es_dict = flatten(yaml.safe_load(f) or {})
-
-    missing_en = []
-    missing_es = []
-    for _, dotted in keys:
-        if dotted not in en_dict:
-            missing_en.append(dotted)
-        if dotted not in es_dict:
-            missing_es.append(dotted)
-
-    details = [
-        f"Total declared translation keys: {len(keys)}",
-        f"translations_en.yml coverage: {len(keys) - len(missing_en)}/{len(keys)}",
-        f"translations_es.yml coverage: {len(keys) - len(missing_es)}/{len(keys)}"
+    edition_file = repo_root / ".github" / "EDITION"
+    edition_id = edition_file.read_text(encoding="utf-8").strip() if edition_file.is_file() else "bpr"
+    strict_de_fr = edition_id not in ("bpr-legacy", "bp-legacy")
+    tier1_langs = [
+        ("en", "translations_en.yml", True),
+        ("es", "translations_es.yml", True),
+        ("de", "translations_de.yml", strict_de_fr),
+        ("fr", "translations_fr.yml", strict_de_fr),
     ]
 
+    def is_invalid_value(val):
+        if val is None:
+            return True
+        s = str(val).strip()
+        return s == "" or s.lower() == "null"
+
+    details = [f"Total declared translation keys: {len(keys)}"]
     ok = True
-    if missing_en:
-        ok = False
-        details.append(f"Missing in translations_en.yml ({len(missing_en)}): {', '.join(missing_en[:5])}")
-    if missing_es:
-        ok = False
-        details.append(f"Missing in translations_es.yml ({len(missing_es)}): {', '.join(missing_es[:5])}")
+    for lang_code, filename, strict in tier1_langs:
+        lang_file = repo_root / "spigot" / "src" / "main" / "resources" / "lang" / filename
+        if not lang_file.exists():
+            if strict:
+                return False, [f"Missing reference language file: {filename}"]
+            continue
+        with open(lang_file, "r", encoding="utf-8") as f:
+            lang_dict = flatten(yaml.safe_load(f) or {})
+        missing = [dotted for _, dotted in keys if dotted not in lang_dict or is_invalid_value(lang_dict[dotted])]
+        details.append(f"{filename} coverage: {len(keys) - len(missing)}/{len(keys)}")
+        if missing:
+            if strict:
+                ok = False
+                details.append(f"Deficiencies in {filename} ({len(missing)}): {', '.join(missing[:5])}")
+            else:
+                details.append(f"Notice: Deficiencies in {filename} ({len(missing)}): {', '.join(missing[:5])}")
 
     return ok, details
 
@@ -263,7 +265,7 @@ def main():
     checks = [
         ("Version Metadata", check_version_metadata),
         ("YAML Configuration Syntax", check_yaml_syntax),
-        ("Translation Parity (EN & ES)", check_translation_parity),
+        ("Translation Parity (Tier-1: EN, ES, DE, FR)", check_translation_parity),
         ("GNU GPL v3 License Headers", check_gpl_license_headers),
         ("Absence of Placeholder Markers", check_no_placeholders),
         ("Architectural Boundary (:common)", check_architectural_boundary),

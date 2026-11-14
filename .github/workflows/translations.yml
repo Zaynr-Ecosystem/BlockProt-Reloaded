@@ -1,0 +1,48 @@
+name: Translations & i18n
+
+on:
+  push:
+    branches: [ main, BlockProt-Reloaded-Legacy, BlockProt-Legacy ]
+    paths:
+      - 'spigot/src/main/resources/lang/**'
+      - 'spigot/src/main/java/de/sean/blockprot/bukkit/TranslationKey.java'
+  pull_request:
+    branches: [ main, BlockProt-Reloaded-Legacy, BlockProt-Legacy ]
+    paths:
+      - 'spigot/src/main/resources/lang/**'
+      - 'spigot/src/main/java/de/sean/blockprot/bukkit/TranslationKey.java'
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      audit_only:
+        description: "Run audit only without external actions"
+        type: boolean
+        default: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Translation Parity & Completeness Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install --quiet pyyaml
+
+      - name: Audit translation files
+        run: python3 .github/scripts/audit_translations.py --summary

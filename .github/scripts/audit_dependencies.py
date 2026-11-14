@@ -331,7 +331,7 @@ def main():
         ("Plugin Integration", "GriefPrevention", gv.get("griefprevention", "16.18.7"), "github", "GriefPrevention/GriefPrevention"),
         ("Plugin Integration", "Floodgate API", gv.get("floodgate", "2.2.3-SNAPSHOT"), "maven", "https://repo.opencollab.dev/main/org/geysermc/floodgate/api/maven-metadata.xml"),
         ("Plugin Integration", "Cumulus (Geyser)", gv.get("cumulus", "1.1.2"), "maven", "https://repo.opencollab.dev/main/org/geysermc/cumulus/cumulus/maven-metadata.xml"),
-        ("Plugin Integration", "ViaVersion", "5.12.0", "github", "ViaVersion/ViaVersion"),
+        ("Plugin Integration", "ViaVersion", "5.12.2", "github", "ViaVersion/ViaVersion"),
 
         ("Core Dependency", "item-nbt-api", nbt_ver, "maven", "https://repo.codemc.org/repository/maven-public/de/tr7zw/item-nbt-api/maven-metadata.xml"),
         ("Core Dependency", "FoliaLib", gv.get("folialib", "0.5.1"), "maven", "https://repo.tcoded.com/releases/com/tcoded/FoliaLib/maven-metadata.xml"),
