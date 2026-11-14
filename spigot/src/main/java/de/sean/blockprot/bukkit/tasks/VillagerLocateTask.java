@@ -68,13 +68,15 @@ public final class VillagerLocateTask implements Consumer<WrappedTask> {
         }
 
         elapsed++;
+        Location particleLoc = villager.getLocation().add(0, 0.1, 0);
+        BlockProt.getFoliaLib().getScheduler().runAtEntity(viewer, t -> {
+            if (viewer.isOnline()) {
+                spawnParticles(particleLoc);
+            }
+        });
         if (elapsed >= maxTicks) {
-            spawnParticles(villager.getLocation().add(0, 0.1, 0));
             task.cancel();
-            return;
         }
-
-        spawnParticles(villager.getLocation().add(0, 0.1, 0));
     }
 
     private void spawnParticles(@NotNull Location loc) {
@@ -109,8 +111,8 @@ public final class VillagerLocateTask implements Consumer<WrappedTask> {
         if (villager == null) return false;
 
         int capped = Math.max(1, Math.min(10, durationSeconds));
-        BlockProt.getFoliaLib().getScheduler().runTimer(
-            new VillagerLocateTask(viewer, villager, workstation, capped), 0L, TICKS_PER_PULSE);
+        BlockProt.getFoliaLib().getScheduler().runAtEntityTimer(
+            villager, new VillagerLocateTask(viewer, villager, workstation, capped), 1L, TICKS_PER_PULSE);
         return true;
     }
 }

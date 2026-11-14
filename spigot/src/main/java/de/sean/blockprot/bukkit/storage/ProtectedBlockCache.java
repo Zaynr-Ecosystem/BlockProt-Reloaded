@@ -20,48 +20,80 @@
 
 package de.sean.blockprot.bukkit.storage;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import de.sean.blockprot.bukkit.BlockProt;
+import de.sean.blockprot.bukkit.nbt.BlockNBTHandler;
 import org.bukkit.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
- * In-memory set of all currently protected block locations.
+ * In-memory set of protected block locations, backed by the block NBT.
  *
  * <p>Keyed by the same packed long used in {@link de.sean.blockprot.bukkit.listeners.HopperEventListener}.
- * This set is the source of truth for "is this location protected at all?" and is updated
- * on every lock/unlock operation. Its only purpose is to provide an O(1) early-exit in
- * high-frequency event handlers (e.g. {@code InventoryMoveItemEvent}) so that blocks that
- * are not protected never trigger an NBT read.</p>
+ * It provides an O(1) early-exit in high-frequency event handlers (e.g. {@code InventoryMoveItemEvent}).
+ * A location missing from the set is verified against the block NBT and the result is remembered,
+ * so locks that survived a restart are protected without depending on the startup population.</p>
  *
- * <p>Thread-safe: all mutations use {@link ConcurrentHashMap} and are called from the
- * server main thread, but reads may happen from any thread.</p>
+ * <p>Thread-safe: all mutations use Caffeine caches and may be called from
+ * region/main threads while reads may happen from any thread.</p>
  */
 public final class ProtectedBlockCache {
 
-    private static final ConcurrentHashMap<Long, Boolean> PROTECTED = new ConcurrentHashMap<>(256);
+    private static final Cache<Long, UUID> PROTECTED = Caffeine.newBuilder()
+        .maximumSize(100_000)
+        .build();
+
+    private static final Cache<Long, Boolean> VERIFIED_UNPROTECTED = Caffeine.newBuilder()
+        .maximumSize(8192)
+        .expireAfterWrite(1, TimeUnit.SECONDS)
+        .build();
 
     private ProtectedBlockCache() {}
 
     public static void mark(@NotNull Block block) {
-        PROTECTED.put(key(block), Boolean.TRUE);
+        long key = key(block);
+        PROTECTED.put(key, block.getWorld().getUID());
+        VERIFIED_UNPROTECTED.invalidate(key);
     }
 
     public static void unmark(@NotNull Block block) {
-        PROTECTED.remove(key(block));
+        long key = key(block);
+        PROTECTED.invalidate(key);
+        VERIFIED_UNPROTECTED.invalidate(key);
     }
 
     public static boolean isProtected(@NotNull Block block) {
-        return PROTECTED.containsKey(key(block));
+        long key = key(block);
+        if (PROTECTED.getIfPresent(key) != null) return true;
+        if (VERIFIED_UNPROTECTED.getIfPresent(key) != null) return false;
+        boolean nbtProtected;
+        try {
+            nbtProtected = BlockProt.getDefaultConfig().isLockable(block.getType(), block.getWorld())
+                && new BlockNBTHandler(block).isProtected();
+        } catch (RuntimeException e) {
+            VERIFIED_UNPROTECTED.put(key, Boolean.TRUE);
+            return false;
+        }
+        if (nbtProtected) PROTECTED.put(key, block.getWorld().getUID());
+        else VERIFIED_UNPROTECTED.put(key, Boolean.TRUE);
+        return nbtProtected;
+    }
+
+    public static void clearWorld(@NotNull UUID worldUid) {
+        PROTECTED.asMap().values().removeIf(uid -> uid.equals(worldUid));
     }
 
     public static void clear() {
-        PROTECTED.clear();
+        PROTECTED.invalidateAll();
+        VERIFIED_UNPROTECTED.invalidateAll();
     }
 
     public static int size() {
-        return PROTECTED.size();
+        return PROTECTED.asMap().size();
     }
 
     private static long key(@NotNull Block block) {

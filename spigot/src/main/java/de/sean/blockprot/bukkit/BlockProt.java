@@ -321,7 +321,7 @@ public final class BlockProt extends JavaPlugin {
 
         if (defaultConfig.isWorldExpiryEnabled()) {
             int interval = Math.max(1, defaultConfig.getWorldExpiryCheckInterval());
-            foliaLib.getScheduler().runTimer(new WorldExpiryTask(), 0L, interval * 60L * 20L);
+            foliaLib.getScheduler().runTimer(new WorldExpiryTask(), 1L, interval * 60L * 20L);
         }
 
         metrics = new Metrics(this, pluginId);
@@ -560,6 +560,12 @@ public final class BlockProt extends JavaPlugin {
         if (auditLogger    != null) auditLogger.close();
         if (hybridDatabase != null) hybridDatabase.close();
         de.sean.blockprot.bukkit.admin.AdminTierManager.save();
+        de.sean.blockprot.bukkit.storage.ProtectedBlockCache.clear();
+        HopperEventListener.clear();
+        de.sean.blockprot.bukkit.inventories.InventoryState.clear();
+        de.sean.blockprot.bukkit.nbt.PlayerInventoryClipboard.clear();
+        de.sean.blockprot.bukkit.dialogs.DialogState.clearAll();
+        RaidDetectionListener.clear();
         BlockProtLogger.close();
         super.onDisable();
     }

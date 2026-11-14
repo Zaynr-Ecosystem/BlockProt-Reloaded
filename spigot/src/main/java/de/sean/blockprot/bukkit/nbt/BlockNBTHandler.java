@@ -588,6 +588,8 @@ public final class BlockNBTHandler extends FriendSupportingHandler<NBTCompound> 
         this.setFriends(Collections.emptyList());
         this.getRedstoneHandler().reset();
         unlinkItemFrameIfPresent();
+        de.sean.blockprot.bukkit.storage.ProtectedBlockCache.unmark(block);
+        de.sean.blockprot.bukkit.listeners.HopperEventListener.invalidate(block);
     }
 
     /**

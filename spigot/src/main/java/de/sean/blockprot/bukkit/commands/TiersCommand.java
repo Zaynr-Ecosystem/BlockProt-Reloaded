@@ -32,6 +32,7 @@ import de.sean.blockprot.bukkit.dialogs.DialogOrigin;
 import de.sean.blockprot.bukkit.inventories.AdminTiersInventory;
 import de.sean.blockprot.bukkit.inventories.InventoryState;
 import de.sean.blockprot.bukkit.util.ComponentMessages;
+import de.sean.blockprot.bukkit.util.PlayerNameResolver;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -110,9 +111,8 @@ public final class TiersCommand implements CommandExecutor {
         }
         boolean isOp = false;
         if (targetUuid == null) {
-            @SuppressWarnings("deprecation")
-            OfflinePlayer op = Bukkit.getOfflinePlayer(targetName);
-            if (op.hasPlayedBefore() || op.isOnline()) {
+            OfflinePlayer op = PlayerNameResolver.findOfflinePlayer(targetName);
+            if (op != null) {
                 targetUuid = op.getUniqueId();
                 isOp = op.isOp();
             }

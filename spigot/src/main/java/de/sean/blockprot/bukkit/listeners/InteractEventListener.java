@@ -136,6 +136,9 @@ public class InteractEventListener implements Listener {
                                 sendMessage(player, Translator.get(TranslationKey.MESSAGES__NO_PERMISSION));
                             }
                         }
+                    } else if ("CHISELED_BOOKSHELF".equals(event.getClickedBlock().getType().name())
+                            && !handleChiseledBookshelfInteract(event, player, handler)) {
+                        return;
                     } else if (!(new PlayerSettingsHandler(player).hasPlayerInteractedWithMenu())) {
                         Long timestamp = LockHintMessageCooldown.getTimestamp(player);
                         if (timestamp == null || timestamp < System.currentTimeMillis() - (BlockProt.getDefaultConfig().getLockHintCooldown() * 1000)) {
@@ -193,6 +196,70 @@ public class InteractEventListener implements Listener {
                 }
             }
         }
+    }
+
+    private boolean handleChiseledBookshelfInteract(@NotNull PlayerInteractEvent event,
+                                                    @NotNull Player player,
+                                                    @NotNull BlockNBTHandler handler) {
+        if (!handler.isProtected()) return true;
+        org.bukkit.block.Block block = event.getClickedBlock();
+        if (block == null) return true;
+        org.bukkit.block.BlockState state = block.getState();
+        if (!(state instanceof org.bukkit.inventory.InventoryHolder holder)) {
+            return true;
+        }
+        int slot;
+        try {
+            Class<?> shelfClass = Class.forName("org.bukkit.block.ChiseledBookshelf");
+            if (!shelfClass.isInstance(state)) return true;
+            Object clickedPos = PlayerInteractEvent.class.getMethod("getClickedPosition").invoke(event);
+            if (!(clickedPos instanceof org.bukkit.util.Vector vec)) return true;
+            slot = (int) shelfClass.getMethod("getSlot", org.bukkit.util.Vector.class).invoke(state, vec);
+        } catch (ReflectiveOperationException e) {
+            return true;
+        }
+        if (slot < 0) return true;
+
+        org.bukkit.inventory.ItemStack existing = holder.getInventory().getItem(slot);
+        boolean isWithdraw = existing != null && !existing.getType().isAir();
+        org.bukkit.inventory.ItemStack held = event.getItem();
+        boolean isDeposit = !isWithdraw && held != null && isBookshelfBook(held.getType());
+        if (!isWithdraw && !isDeposit) return true;
+
+        String playerUuid = player.getUniqueId().toString();
+        boolean bypass = handler.isOwner(playerUuid)
+            || de.sean.blockprot.bukkit.admin.AdminTierManager.hasPermission(player, de.sean.blockprot.bukkit.admin.AdminAction.CONTAINER_BYPASS);
+        if (!bypass) {
+            var friendOpt = handler.getFriend(playerUuid);
+            if (friendOpt.isEmpty()) {
+                event.setCancelled(true);
+                sendMessage(player, Translator.get(TranslationKey.MESSAGES__NO_PERMISSION));
+                return false;
+            }
+            var friend = friendOpt.get();
+            if (!friend.canOpenContainer() || !friend.canWrite()) {
+                event.setCancelled(true);
+                sendMessage(player, Translator.get(TranslationKey.MESSAGES__NO_PERMISSION));
+                return false;
+            }
+        }
+
+        de.sean.blockprot.bukkit.audit.AuditLogger audit = BlockProt.getAuditLogger();
+        if (audit != null) {
+            audit.log(player.getUniqueId(), player.getName(), block.getLocation(),
+                isWithdraw ? de.sean.blockprot.bukkit.audit.AuditLogger.Action.ITEM_TAKEN
+                    : de.sean.blockprot.bukkit.audit.AuditLogger.Action.ITEM_PLACED);
+        }
+        return true;
+    }
+
+    private static boolean isBookshelfBook(@NotNull Material type) {
+        org.bukkit.Tag<Material> tag = org.bukkit.Bukkit.getTag("items", org.bukkit.NamespacedKey.minecraft("bookshelf_books"), Material.class);
+        if (tag != null) {
+            return tag.isTagged(type);
+        }
+        String name = type.name();
+        return type == Material.BOOK || type == Material.WRITABLE_BOOK || type == Material.WRITTEN_BOOK || type == Material.ENCHANTED_BOOK || "KNOWLEDGE_BOOK".equals(name);
     }
 
     private void sendMessage(@NotNull Player player, @NotNull String text) {

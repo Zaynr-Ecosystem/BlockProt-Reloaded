@@ -190,21 +190,42 @@ public final class TownyIntegration extends PluginIntegration implements Listene
         }
 
         World world = worldCoord.getBukkitWorld();
-        int height = world.getMaxHeight() - 1;
+        if (world == null) {
+            return;
+        }
+        int minHeight = world.getMinHeight();
+        int maxHeight = world.getMaxHeight() - 1;
         int size = TownySettings.getTownBlockSize();
-        for (int x = 0; x < size; ++x) {
-            for (int z = 0; z < size; ++z) {
-                for (int y = height; y > 0; --y) {
-                    int blockX = worldCoord.getX() * size + x;
-                    int blockZ = worldCoord.getZ() * size + z;
-                    Block block = world.getBlockAt(blockX, y, blockZ);
-                    if (!BlockProt.getDefaultConfig()
-                        .isLockable(block.getType())) {
-                        continue;
+        int startX = worldCoord.getX() * size;
+        int startZ = worldCoord.getZ() * size;
+        int endX = startX + size - 1;
+        int endZ = startZ + size - 1;
+        int minChunkX = Math.floorDiv(startX, 16);
+        int maxChunkX = Math.floorDiv(endX, 16);
+        int minChunkZ = Math.floorDiv(startZ, 16);
+        int maxChunkZ = Math.floorDiv(endZ, 16);
+
+        for (int cx = minChunkX; cx <= maxChunkX; cx++) {
+            for (int cz = minChunkZ; cz <= maxChunkZ; cz++) {
+                int chunkStartX = Math.max(startX, cx << 4);
+                int chunkEndX = Math.min(endX, (cx << 4) + 15);
+                int chunkStartZ = Math.max(startZ, cz << 4);
+                int chunkEndZ = Math.min(endZ, (cz << 4) + 15);
+                org.bukkit.Location anchor = new org.bukkit.Location(world, chunkStartX, minHeight, chunkStartZ);
+                BlockProt.getFoliaLib().getScheduler().runAtLocation(anchor, task -> {
+                    for (int x = chunkStartX; x <= chunkEndX; x++) {
+                        for (int z = chunkStartZ; z <= chunkEndZ; z++) {
+                            for (int y = maxHeight; y >= minHeight; y--) {
+                                Block block = world.getBlockAt(x, y, z);
+                                if (!BlockProt.getDefaultConfig().isLockable(block.getType())) {
+                                    continue;
+                                }
+                                BlockNBTHandler handler = new BlockNBTHandler(block);
+                                handler.clear();
+                            }
+                        }
                     }
-                    BlockNBTHandler handler = new BlockNBTHandler(block);
-                    handler.clear();
-                }
+                });
             }
         }
     }

@@ -230,4 +230,20 @@ class EntityProtectionTest {
         assertFalse(handler.isNoDamage());
         assertFalse(strangerDamageCancelled(wolf));
     }
+
+    @Test
+    @SuppressWarnings("removal")
+    void testHostileMobDamageCancelledWhenNoDamageEnabled() {
+        Wolf wolf = world.spawn(owner.getLocation(), Wolf.class);
+        wolf.setOwner(owner);
+        EntityProtectionHandler handler = EntityProtectionHandler.forEntityOrNull(wolf);
+        assertNotNull(handler);
+        handler.enable(owner.getUniqueId());
+        handler.setNoDamage(true);
+
+        var zombie = world.spawn(owner.getLocation(), org.bukkit.entity.Zombie.class);
+        var mobDamage = new EntityDamageByEntityEvent(zombie, wolf, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 4.0);
+        new EntityProtectionListener().onEntityDamage(mobDamage);
+        assertTrue(mobDamage.isCancelled());
+    }
 }
