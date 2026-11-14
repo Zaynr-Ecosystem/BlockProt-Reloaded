@@ -92,14 +92,17 @@ def wait_for(path, predicate, timeout):
     return read_log(path)
 
 
-WATCHDOG_MARKER = "DO NOT REPORT THIS TO PAPER"
+WATCHDOG_MARKERS = (
+    "DO NOT REPORT THIS TO PAPER",
+    "DO NOT REPORT THIS TO PURPUR",
+)
 
 
 def plugin_error_lines(text):
     errors = []
     in_dump = False
     for line in text.splitlines():
-        if WATCHDOG_MARKER in line:
+        if any(marker in line for marker in WATCHDOG_MARKERS):
             in_dump = not in_dump
             continue
         if in_dump:
