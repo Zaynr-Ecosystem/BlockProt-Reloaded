@@ -180,7 +180,7 @@ raid_detection:
 
 # Send a notification to server operators when an update is available.
 # Route: Dialog: /bp admin -> Config -> Notifications | Menu: /bp admin -> Config -> Notifications (slot 12)
-notify_op_of_updates: false
+notify_op_of_updates: true
 
 owner_notifications:
   # Allow owners to receive notifications about their blocks.

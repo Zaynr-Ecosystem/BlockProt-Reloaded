@@ -127,7 +127,9 @@ public final class Translator {
             ? Locale.ROOT
             : Locale.forLanguageTag(localeStr.replace('_', '-'));
 
-        final String langFile = BlockProt.getDefaultConfig().getLanguageFile();
+        final String langFile = BlockProt.getDefaultConfigOrNull() != null
+            ? BlockProt.getDefaultConfigOrNull().getLanguageFile()
+            : "translations_en.yml";
         TranslationKey[] translations = TranslationKey.values();
 
         List<String> missingInBoth   = new ArrayList<>();
@@ -138,7 +140,9 @@ public final class Translator {
 
             if (!defaultConfig.contains(translationKey, true)
                     && !config.contains(translationKey, true)) {
-                String fallback = BlockProt.getDefaultConfig().getTranslationFallbackString();
+                String fallback = BlockProt.getDefaultConfigOrNull() != null
+                    ? BlockProt.getDefaultConfigOrNull().getTranslationFallbackString()
+                    : null;
                 values.put(translation, (fallback == null || fallback.isBlank())
                     ? new TranslationValue(translationKey)
                     : new TranslationValue(fallback));
@@ -232,7 +236,9 @@ public final class Translator {
     public static String get(@NotNull final TranslationKey key) {
         TranslationValue value = values.get(key);
         if (value == null) {
-            String fallback = BlockProt.getDefaultConfig().getTranslationFallbackString();
+            String fallback = BlockProt.getDefaultConfigOrNull() != null
+                ? BlockProt.getDefaultConfigOrNull().getTranslationFallbackString()
+                : null;
             return process((fallback == null || fallback.isBlank()) ? key.toString() : fallback);
         }
         return process(value.getValue());
