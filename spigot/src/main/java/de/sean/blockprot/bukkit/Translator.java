@@ -140,7 +140,9 @@ public final class Translator {
 
             if (!defaultConfig.contains(translationKey, true)
                     && !config.contains(translationKey, true)) {
-                String fallback = BlockProt.getDefaultConfig().getTranslationFallbackString();
+                String fallback = BlockProt.getDefaultConfigOrNull() != null
+                    ? BlockProt.getDefaultConfigOrNull().getTranslationFallbackString()
+                    : null;
                 values.put(translation, (fallback == null || fallback.isBlank())
                     ? new TranslationValue(translationKey)
                     : new TranslationValue(fallback));

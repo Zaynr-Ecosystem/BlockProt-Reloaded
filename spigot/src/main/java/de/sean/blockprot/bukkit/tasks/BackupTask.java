@@ -85,18 +85,28 @@ public final class BackupTask implements Runnable {
 
     private final File    dataFolder;
     /**
-     * When true, the caller explicitly requested a backup (e.g. /bp reload).
-     * When false, the backup is opportunistic: only runs if prior data exists.
+     * When true, skips {@link #hasPriorData(File)} because the caller already verified
+     * an explicit backup request or an upgrade/migration from an earlier version.
      */
     private final boolean forced;
+    private final boolean startupNotice;
 
     public BackupTask(@NotNull File dataFolder) {
-        this(dataFolder, false);
+        this(dataFolder, false, true);
     }
 
     public BackupTask(@NotNull File dataFolder, boolean forced) {
+        this(dataFolder, forced, false);
+    }
+
+    private BackupTask(@NotNull File dataFolder, boolean forced, boolean startupNotice) {
         this.dataFolder = dataFolder;
-        this.forced     = forced;
+        this.forced = forced;
+        this.startupNotice = startupNotice;
+    }
+
+    public static @NotNull BackupTask forStartupUpgrade(@NotNull File dataFolder) {
+        return new BackupTask(dataFolder, true, true);
     }
 
     @Override
@@ -142,7 +152,7 @@ public final class BackupTask implements Runnable {
 
             // Write minimal metadata: no network calls on the main thread.
             String meta = "plugin: " + edition.displayName() + "\nversion: " + version + "\n"
-                + "edition: " + edition.id() + "\nminecraft: " + VersionCompat.getVersionString() + "\n";
+                + "edition: " + edition.id() + "\nminecraft: " + safeMinecraftVersion() + "\n";
             if (transition.migration()) {
                 meta += "from_edition: " + transition.fromEdition() + "\nfrom_version: " + transition.fromVersion()
                     + "\nfrom_minecraft: " + transition.fromMinecraft() + "\n";
@@ -163,7 +173,7 @@ public final class BackupTask implements Runnable {
             zos.closeEntry();
 
             BlockProtLogger.log("backup", "Backup created: " + zipFile.getName());
-            if (transition.changed()) {
+            if (transition.changed() && org.bukkit.Bukkit.getServer() != null) {
                 TranslationKey key = transition.downgrade()
                     ? TranslationKey.CONSOLE__EDITION_DOWNGRADE
                     : TranslationKey.CONSOLE__EDITION_MIGRATION;
@@ -177,23 +187,47 @@ public final class BackupTask implements Runnable {
                     BlockProtConsole.info(message);
                 }
             }
-            if (!forced) {
+            if (startupNotice) {
                 BlockProtLogger.log("backup", Translator.get(TranslationKey.CONSOLE__BACKUP_REVIEW_CONFIG));
             }
         } catch (IOException e) {
-            BlockProt.getInstance().getLogger().warning(
-                Translator.get(TranslationKey.CONSOLE__BACKUP_FAILED)
-                    .replace("{error}", e.getMessage()));
+            if (BlockProt.getInstanceOrNull() != null) {
+                BlockProt.getInstance().getLogger().warning(
+                    Translator.get(TranslationKey.CONSOLE__BACKUP_FAILED)
+                        .replace("{error}", e.getMessage()));
+            }
         }
     }
 
     public static @NotNull Transition currentTransition(@NotNull File dataFolder) {
         return decide(readMarker(dataFolder), Edition.current(), BlockProt.getPluginVersion(),
-            VersionCompat.getVersionString());
+            safeMinecraftVersion());
+    }
+
+    public static boolean isVersionChanged(@NotNull Transition transition, @NotNull String currentVersion) {
+        String fromVersion = transition.fromVersion();
+        if (fromVersion == null || fromVersion.isBlank() || currentVersion.isBlank()) {
+            return false;
+        }
+        return !fromVersion.equals(currentVersion);
+    }
+
+    public static boolean isStartupUpgradeOrMigration(boolean legacyMigrated,
+                                                      boolean dataLayoutMigrated,
+                                                      @NotNull Transition transition,
+                                                      @NotNull String currentVersion) {
+        return legacyMigrated
+            || dataLayoutMigrated
+            || transition.changed()
+            || isVersionChanged(transition, currentVersion);
     }
 
     public static void recordCurrentEdition(@NotNull File dataFolder) {
-        writeMarker(dataFolder, Edition.current(), BlockProt.getPluginVersion(), VersionCompat.getVersionString());
+        writeMarker(dataFolder, Edition.current(), BlockProt.getPluginVersion(), safeMinecraftVersion());
+    }
+
+    private static @NotNull String safeMinecraftVersion() {
+        return org.bukkit.Bukkit.getServer() != null ? VersionCompat.getVersionString() : "unknown";
     }
 
     static @NotNull Transition decide(@Nullable Properties marker, @NotNull Edition to,

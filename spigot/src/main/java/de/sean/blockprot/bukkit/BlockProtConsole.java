@@ -49,6 +49,8 @@ public final class BlockProtConsole {
     public static final String PASTEL_PURPLE  = hex("C8A0E0");
     public static final String PASTEL_COFFEE  = hex("D8B994");
     public static final String PASTEL_ORANGE  = hex("FFB703");
+    public static final String BRIGHT_RED     = hex("FF3B3B");
+    public static final String BOLD_RED       = BRIGHT_RED + "§l";
     public static final String PASTEL_GRAY    = "§7";
     public static final String CONNECTOR_GRAY = "§8";
 
@@ -144,6 +146,25 @@ public final class BlockProtConsole {
             previousWasWarning = line.isWarning();
         }
         raw("");
+    }
+
+    public static void printUnsupportedEditionBanner(
+            @NotNull Edition edition,
+            @NotNull String pluginVersion,
+            int major, int minor, int patch,
+            @NotNull String mcVersion,
+            @NotNull String summary,
+            @NotNull Logger logger) {
+        raw("");
+        for (Edition.BannerLine line : edition.unsupportedBannerLines(pluginVersion, major, minor, patch, mcVersion)) {
+            String color = switch (line.style()) {
+                case BORDER, TITLE, HIGHLIGHT, URL -> BOLD_RED;
+                case INFO, STATUS -> BRIGHT_RED;
+            };
+            raw(color + "  " + line.text());
+        }
+        raw("");
+        logger.severe(summary);
     }
 
     /**

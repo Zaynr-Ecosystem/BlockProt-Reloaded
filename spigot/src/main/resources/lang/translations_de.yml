@@ -510,7 +510,7 @@ messages:
     just_now: gerade eben
     empty_contents: "<dark_gray>Leer"
   update:
-    outdated: "<#F08080>BlockProt Reloaded ist veraltet! Neue stabile Version: {version}"
+    outdated: "<#FF6B6B>BlockProt Reloaded ist veraltet! Neue stabile Version: {version} (ein Update wird schon bei 1 Build Rückstand empfohlen)."
     outdated_hotfix: "<red>WICHTIG: Ein wichtiger Bugfix (Hotfix) ist verfügbar: {version}!\
       \ Er behebt Fehler der aktuellen Version ({base_version}). Klicke zum Herunterladen."
     outdated_dev: "<yellow>BlockProt hat einen neuen experimentellen Entwicklungs-Build\
@@ -568,6 +568,14 @@ console:
   minecraft_newer_available: "Minecraft {mc} ist neuer als der unterstützte Bereich\
     \ von {edition} ({edition_range}). Siehe Versionsübersicht: {guide} . Die Edition\
     \ für deine Version ist {recommended}: {url}"
+  unsupported_banner_title: "INKOMPATIBLE MINECRAFT-VERSION - {edition} DEAKTIVIERT"
+  unsupported_banner_installed: "Installiert   : {edition} v{version} (Minecraft {edition_range})"
+  unsupported_banner_server: "Server MC     : Minecraft {mc}"
+  unsupported_banner_recommended: "Benoetigt     : {recommended} (Minecraft {range})"
+  unsupported_banner_none: "Benoetigt     : Keine BlockProt-Edition unterstützt Minecraft {mc}"
+  unsupported_banner_download: "Download      : {url}"
+  unsupported_banner_guide: "Versionsguide : {guide}"
+  unsupported_banner_disabled: "Status        : Plugin sauber deaktiviert. Der Server läuft normal weiter."
   edition_migration: "Migration erkannt: {from} zu {to}. Backup: {path}"
   edition_downgrade: "{to} ist älter als {from}. Von der neueren Version geschriebene\
     \ Daten könnten Einstellungen enthalten, die ignoriert werden. Downgrades werden\
@@ -585,7 +593,7 @@ console:
   migration_failed: "Migration von {source} fehlgeschlagen: {error}"
   saving_statistics: Statistiken werden auf der Festplatte gespeichert...
   update:
-    available: "Eine neuere STABILE Version von BlockProt Reloaded ist verfügbar: {version}"
+    available: "Eine neuere STABILE Version von BlockProt Reloaded ist verfügbar: {version} (ein Update wird schon ab 1 Build Rückstand empfohlen)"
     available_hotfix: "WICHTIG: Ein wichtiger Bugfix (Hotfix) von BlockProt Reloaded\
       \ ist verfügbar: {version}! Er behebt Fehler der aktuellen Version ({base_version})."
     available_dev: "Ein neuer experimenteller Entwicklungs-Build (BEDev) von BlockProt\

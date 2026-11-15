@@ -335,7 +335,7 @@ public final class DefaultConfig extends BlockProtConfig {
     }
 
     public boolean shouldNotifyOpOfUpdates() {
-        return config.contains("notify_op_of_updates") && config.getBoolean("notify_op_of_updates");
+        return config.getBoolean("notify_op_of_updates", true);
     }
 
     public boolean disallowRedstoneOnPlace() {

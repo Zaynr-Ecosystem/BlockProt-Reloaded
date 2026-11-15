@@ -83,6 +83,17 @@ public final class UpdateChecker implements Runnable {
         return RELEASES_URL + "/tag/" + edition.tagPrefix() + rawVersion;
     }
 
+    public static @Nullable SemanticVersion getAvailableUpdate(@NotNull String currentPluginVersion) {
+        SemanticVersion cached = latestVersion;
+        if (cached == null) return null;
+        try {
+            SemanticVersion current = new SemanticVersion(currentPluginVersion);
+            return cached.compareTo(current) > 0 ? cached : null;
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
     /**
      * Cached result of the last successful GitHub API call.
      * Package-accessible so {@link BackupTask} can read the cached value

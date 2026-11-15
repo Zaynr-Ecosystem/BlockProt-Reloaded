@@ -2,6 +2,7 @@
 
 ---
 > **BlockProt Reloaded Legacy (Minecraft 1.20.5 - 1.21.6)**. Looking for another Minecraft version? See the [version guide](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/blob/main/docs/READ_MEs/VERSION_GUIDE.md).
+> **Stay on the latest build!** Updating is always recommended, even when only 1 build behind, for security, Folia, and compatibility fixes. Download the latest **BlockProt Reloaded Legacy** build from [GitHub Releases](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/releases) or [Modrinth](https://modrinth.com/plugin/blockprot-reloaded-legacy).
 
 BlockProt Reloaded Legacy is a maintained fork of [BlockProt](https://github.com/spnda/BlockProt) for Paper, Purpur, and Folia servers (Minecraft 1.20.5 - 1.21.6). It preserves the original NBT-based protection core while adding stability fixes, performance improvements, and new features not present upstream.
 

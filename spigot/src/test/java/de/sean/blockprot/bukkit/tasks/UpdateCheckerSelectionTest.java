@@ -163,4 +163,21 @@ class UpdateCheckerSelectionTest {
         assertEquals("https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/releases/tag/bprl-1.4.4",
             UpdateChecker.tagReleaseUrl("1.4.4", Edition.BPR_LEGACY));
     }
+
+    @Test
+    void getAvailableUpdateReturnsOnlyWhenCachedVersionExceedsCurrent() {
+        SemanticVersion previous = UpdateChecker.latestVersion;
+        try {
+            UpdateChecker.latestVersion = null;
+            assertNull(UpdateChecker.getAvailableUpdate("1.4.5"));
+
+            UpdateChecker.latestVersion = new SemanticVersion("1.4.5");
+            assertNull(UpdateChecker.getAvailableUpdate("1.4.5"));
+
+            UpdateChecker.latestVersion = new SemanticVersion("1.4.6");
+            assertEquals("1.4.6", UpdateChecker.getAvailableUpdate("1.4.5").toString());
+        } finally {
+            UpdateChecker.latestVersion = previous;
+        }
+    }
 }

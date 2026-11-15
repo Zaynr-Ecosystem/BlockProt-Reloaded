@@ -105,4 +105,14 @@ class TranslatorTest {
             Translator.loadFromConfigs(english, english);
         }
     }
+
+    @Test
+    void notifyOpOfUpdatesDefaultsTrueAndHonorsExplicitFalse() {
+        YamlConfiguration unset = new YamlConfiguration();
+        assertTrue(new DefaultConfig(unset, tempFolder).shouldNotifyOpOfUpdates());
+
+        YamlConfiguration disabled = new YamlConfiguration();
+        disabled.set("notify_op_of_updates", false);
+        assertFalse(new DefaultConfig(disabled, tempFolder).shouldNotifyOpOfUpdates());
+    }
 }

@@ -27,6 +27,8 @@ import de.sean.blockprot.bukkit.admin.AdminAction;
 import de.sean.blockprot.bukkit.admin.AdminTierManager;
 import de.sean.blockprot.bukkit.config.ReloadCoordinator;
 import de.sean.blockprot.bukkit.config.ReloadReport;
+import de.sean.blockprot.bukkit.tasks.UpdateChecker;
+import de.sean.blockprot.util.SemanticVersion;
 import static de.sean.blockprot.bukkit.dialogs.BpDialogStyles.PASTEL_CORAL;
 import static de.sean.blockprot.bukkit.dialogs.BpDialogStyles.PASTEL_GOLD;
 import static de.sean.blockprot.bukkit.dialogs.BpDialogStyles.PASTEL_MINT;
@@ -75,9 +77,18 @@ public final class AdminMenuDialog {
         String worldExpiry = stripColor(Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__WORLD_EXPIRY));
         String unlock = stripColor(Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__UNLOCK));
 
+        SemanticVersion pendingUpdate = UpdateChecker.getAvailableUpdate(BlockProt.getPluginVersion());
+
         List<DialogBodyEntry> body = new ArrayList<>();
         body.add(DialogBodyEntry.text(Component.text(
             stripColor(Translator.get(TranslationKey.DIALOGS__ADMIN_MENU__HEADER)), SOFT_GRAY)));
+        if (pendingUpdate != null) {
+            LegacyComponentSerializer legacy = LegacyComponentSerializer.builder()
+                .character('§').hexColors().useUnusualXRepeatedCharacterHexFormat().build();
+            body.add(DialogBodyEntry.text(legacy.deserialize(
+                Translator.get(TranslationKey.MESSAGES__UPDATE__OUTDATED)
+                    .replace("{version}", pendingUpdate.toString()))));
+        }
         body.add(DialogBodyEntry.text(Component.text(
             stripColor(Translator.get(TranslationKey.DIALOGS__ADMIN_CHOOSE)), TextColor.color(0x888888))));
 
@@ -145,9 +156,16 @@ public final class AdminMenuDialog {
             }
         );
 
+        Component updateLabel = pendingUpdate != null
+            ? Component.text(stripColor(Translator.get(TranslationKey.ICON__SEARCH)) + update + " (v" + pendingUpdate + ")",
+                PASTEL_GOLD, TextDecoration.BOLD)
+            : Component.text(stripColor(Translator.get(TranslationKey.ICON__SEARCH)) + update, NamedTextColor.WHITE);
+        Component updateTooltip = pendingUpdate != null
+            ? tooltip(Translator.get(TranslationKey.DIALOGS__UPDATE__OUTDATED) + " (v" + pendingUpdate + ")", PASTEL_GOLD)
+            : tooltip(stripColor(Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__UPDATE)), SOFT_BLUE);
         DialogButton updateBtn = new DialogButton("update",
-            Component.text(stripColor(Translator.get(TranslationKey.ICON__SEARCH)) + update, NamedTextColor.WHITE),
-            tooltip(stripColor(Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__UPDATE)), SOFT_BLUE),
+            updateLabel,
+            updateTooltip,
             p -> { if (!AdminTierManager.deny(p, AdminAction.UPDATE)) UpdateDialog.show(p, DialogOrigin.ADMIN_MENU); }
         );
 

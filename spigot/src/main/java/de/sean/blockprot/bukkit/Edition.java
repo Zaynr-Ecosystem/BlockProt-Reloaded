@@ -24,6 +24,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -136,6 +138,92 @@ public enum Edition {
 
     public boolean supportsDialogs() {
         return this == BPR;
+    }
+
+    public enum BannerStyle {
+        BORDER,
+        TITLE,
+        INFO,
+        HIGHLIGHT,
+        URL,
+        STATUS
+    }
+
+    public record BannerLine(@NotNull BannerStyle style, @NotNull String text) {}
+
+    public @NotNull String unsupportedSummary(
+            @NotNull String pluginVersion,
+            int major, int minor, int patch,
+            @NotNull String mcVersion) {
+        Optional<Edition> recommended = recommendedFor(major, minor, patch);
+        if (isNewerThanRange(major, minor, patch)) {
+            Edition target = recommended.orElse(BPR);
+            return Translator.get(TranslationKey.CONSOLE__MINECRAFT_NEWER_AVAILABLE)
+                .replace("{edition}", displayName)
+                .replace("{version}", pluginVersion)
+                .replace("{mc}", mcVersion)
+                .replace("{recommended}", target.displayName)
+                .replace("{range}", target.rangeLabel())
+                .replace("{edition_range}", rangeLabel())
+                .replace("{url}", target.downloadUrl)
+                .replace("{guide}", GUIDE_URL);
+        }
+        return recommended
+            .map(target -> Translator.get(TranslationKey.CONSOLE__MINECRAFT_UNSUPPORTED)
+                .replace("{edition}", displayName)
+                .replace("{version}", pluginVersion)
+                .replace("{mc}", mcVersion)
+                .replace("{recommended}", target.displayName)
+                .replace("{range}", target.rangeLabel())
+                .replace("{edition_range}", rangeLabel())
+                .replace("{url}", target.downloadUrl)
+                .replace("{guide}", GUIDE_URL))
+            .orElseGet(() -> Translator.get(TranslationKey.CONSOLE__MINECRAFT_UNSUPPORTED_NONE)
+                .replace("{mc}", mcVersion)
+                .replace("{guide}", GUIDE_URL));
+    }
+
+    public @NotNull List<BannerLine> unsupportedBannerLines(
+            @NotNull String pluginVersion,
+            int major, int minor, int patch,
+            @NotNull String mcVersion) {
+        List<BannerLine> lines = new ArrayList<>();
+        Optional<Edition> recommended = recommendedFor(major, minor, patch);
+        String divider = "==========================================================================";
+        lines.add(new BannerLine(BannerStyle.BORDER, divider));
+        lines.add(new BannerLine(BannerStyle.TITLE,
+            "[!] " + Translator.get(TranslationKey.CONSOLE__UNSUPPORTED_BANNER_TITLE)
+                .replace("{edition}", displayName) + " [!]"));
+        lines.add(new BannerLine(BannerStyle.BORDER, divider));
+        lines.add(new BannerLine(BannerStyle.INFO,
+            Translator.get(TranslationKey.CONSOLE__UNSUPPORTED_BANNER_INSTALLED)
+                .replace("{edition}", displayName)
+                .replace("{version}", pluginVersion)
+                .replace("{edition_range}", rangeLabel())));
+        lines.add(new BannerLine(BannerStyle.INFO,
+            Translator.get(TranslationKey.CONSOLE__UNSUPPORTED_BANNER_SERVER)
+                .replace("{mc}", mcVersion)));
+        if (recommended.isPresent()) {
+            Edition target = recommended.get();
+            lines.add(new BannerLine(BannerStyle.HIGHLIGHT,
+                Translator.get(TranslationKey.CONSOLE__UNSUPPORTED_BANNER_RECOMMENDED)
+                    .replace("{recommended}", target.displayName)
+                    .replace("{range}", target.rangeLabel())));
+            lines.add(new BannerLine(BannerStyle.URL,
+                Translator.get(TranslationKey.CONSOLE__UNSUPPORTED_BANNER_DOWNLOAD)
+                    .replace("{url}", target.downloadUrl)));
+        } else {
+            lines.add(new BannerLine(BannerStyle.HIGHLIGHT,
+                Translator.get(TranslationKey.CONSOLE__UNSUPPORTED_BANNER_NONE)
+                    .replace("{mc}", mcVersion)));
+        }
+        lines.add(new BannerLine(BannerStyle.URL,
+            Translator.get(TranslationKey.CONSOLE__UNSUPPORTED_BANNER_GUIDE)
+                .replace("{guide}", GUIDE_URL)));
+        lines.add(new BannerLine(BannerStyle.STATUS,
+            Translator.get(TranslationKey.CONSOLE__UNSUPPORTED_BANNER_DISABLED)));
+        lines.add(new BannerLine(BannerStyle.BORDER, divider));
+        return lines;
     }
 
     private static int compare(int major, int minor, int patch, int[] bound) {

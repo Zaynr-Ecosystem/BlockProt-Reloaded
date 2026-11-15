@@ -95,6 +95,34 @@ class BackupTaskEditionMarkerTest {
     }
 
     @Test
+    void patchUpgradeAndDataLayoutMigrationTriggerStartupBackup() {
+        BackupTask.Transition patch = BackupTask.decide(marker("bpr", "1.4.4", "26.3"), Edition.BPR, "1.4.5", "26.3");
+        assertFalse(patch.changed());
+        assertTrue(BackupTask.isVersionChanged(patch, "1.4.5"));
+        assertTrue(BackupTask.isStartupUpgradeOrMigration(false, false, patch, "1.4.5"));
+
+        BackupTask.Transition same = BackupTask.decide(marker("bpr", "1.4.5", "26.3"), Edition.BPR, "1.4.5", "26.3");
+        assertFalse(BackupTask.isVersionChanged(same, "1.4.5"));
+        assertFalse(BackupTask.isStartupUpgradeOrMigration(false, false, same, "1.4.5"));
+        assertTrue(BackupTask.isStartupUpgradeOrMigration(false, true, same, "1.4.5"));
+
+        BackupTask.Transition fresh = BackupTask.decide(null, Edition.BPR, "1.4.5", "26.3");
+        assertFalse(BackupTask.isVersionChanged(fresh, "1.4.5"));
+        assertFalse(BackupTask.isStartupUpgradeOrMigration(false, false, fresh, "1.4.5"));
+    }
+
+    @Test
+    void forStartupUpgradeCreatesZipWithoutAuditDbWhenMarkerPresent() throws Exception {
+        Files.writeString(new File(dir, "config.yml").toPath(), "language_file: translations_en.yml\n");
+        BackupTask.writeMarker(dir, Edition.BPR, "1.4.4", "26.3");
+
+        BackupTask.forStartupUpgrade(dir).run();
+
+        File[] zips = new File(dir, "backups").listFiles((d, name) -> name.endsWith(".zip"));
+        assertTrue(zips != null && zips.length == 1);
+    }
+
+    @Test
     void unreadableMarkerIsIgnored() throws Exception {
         Files.writeString(new File(dir, ".edition").toPath(), "no edition key here\n");
         Properties read = BackupTask.readMarker(dir);

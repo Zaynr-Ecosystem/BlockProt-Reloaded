@@ -512,7 +512,7 @@ messages:
     just_now: "à l'instant"
     empty_contents: "<dark_gray>Vide"
   update:
-    outdated: "<#F08080>BlockProt Reloaded est obsolète ! Nouvelle version stable : {version}"
+    outdated: "<#FF6B6B>BlockProt Reloaded est obsolète ! Nouvelle version stable : {version} (mettre à jour même avec 1 seul build de retard est recommandé pour les correctifs et améliorations)."
     outdated_hotfix: "<red>IMPORTANT: BlockProt a un correctif important (hotfix)\
       \ disponible: {version}! Il corrige des bugs de la version actuelle ({base_version}).\
       \ Cliquez pour le télécharger."
@@ -569,6 +569,14 @@ console:
   minecraft_newer_available: "Minecraft {mc} est plus récent que la plage de {edition}\
     \ ({edition_range}). Consultez le guide: {guide} . L'édition recommandée est {recommended}:\
     \ {url}"
+  unsupported_banner_title: "VERSION MINECRAFT INCOMPATIBLE - {edition} DESACTIVE"
+  unsupported_banner_installed: "JAR installe  : {edition} v{version} (Minecraft {edition_range})"
+  unsupported_banner_server: "MC serveur    : Minecraft {mc}"
+  unsupported_banner_recommended: "JAR requis    : {recommended} (Minecraft {range})"
+  unsupported_banner_none: "JAR requis    : Aucune édition de BlockProt ne supporte Minecraft {mc}"
+  unsupported_banner_download: "Telecharger   : {url}"
+  unsupported_banner_guide: "Guide versions: {guide}"
+  unsupported_banner_disabled: "Statut        : Plugin désactivé proprement. Le serveur continue normalement."
   edition_migration: "Migration détectée: {from} vers {to}. Sauvegarde: {path}"
   edition_downgrade: "{to} est plus ancien que {from}. Les données écrites par la\
     \ version plus récente peuvent contenir des paramètres ignorés. Rétrogradation\
@@ -586,7 +594,7 @@ console:
   migration_failed: "Échec de la migration depuis {source} : {error}"
   saving_statistics: Enregistrement des statistiques sur le disque...
   update:
-    available: "Une version STABLE plus récente de BlockProt Reloaded est disponible : {version}"
+    available: "Une version STABLE plus récente de BlockProt Reloaded est disponible : {version} (la mise à jour est recommandée même avec 1 seul build de retard)"
     available_hotfix: "IMPORTANT: un correctif important (hotfix) de BlockProt Reloaded\
       \ est disponible: {version}! Il corrige des bugs de la version actuelle ({base_version})."
     available_dev: "Une nouvelle version de développement expérimentale (BEDev) de\

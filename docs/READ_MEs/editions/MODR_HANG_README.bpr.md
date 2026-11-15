@@ -2,6 +2,7 @@
 
 ---
 > **Looking for another Minecraft version?** See the [version guide](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/blob/main/docs/READ_MEs/VERSION_GUIDE.md).
+> **Updating from 1.4.1-hotfix.2 or older?** Those older builds still check the previous repository URL and will not notify you automatically due to the GitHub redirect. Download **1.4.5** manually from [GitHub Releases](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/releases), [Modrinth](https://modrinth.com/plugin/blockprot-reloaded), [CurseForge](https://www.curseforge.com/minecraft/bukkit-plugins/blockprot-reloaded), or [Hangar](https://hangar.papermc.io/Zaynr-Ecosystem/BlockProt-Reloaded) to restore automatic update alerts, startup backups, and the latest fixes. Updating is always recommended, even when only 1 build behind.
 
 BlockProt Reloaded is a maintained fork of [BlockProt](https://github.com/spnda/BlockProt) for Paper, Purpur, and Folia servers (Minecraft 1.21.7 through 26.3). It preserves the original NBT-based protection core while adding stability fixes, performance improvements, and new features not present upstream.
 
