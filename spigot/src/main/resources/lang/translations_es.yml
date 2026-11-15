@@ -445,10 +445,10 @@ messages:
   update:
     outdated: "<#FF6B6B>¡BlockProt Reloaded está desactualizado! Nueva versión estable: {version} (se recomienda actualizar incluso si solo estás 1 build atrás para recibir correcciones y mejoras)."
     outdated_hotfix: "<#FF6B6B>IMPORTANTE: ¡BlockProt Reloaded tiene un parche de errores (hotfix) disponible: {version}! Arregla bugs de la versión actual ({base_version}). Clic para descargarlo."
-    outdated_dev: "<#F0E6A0>BlockProt Reloaded tiene una nueva build de desarrollo experimental (BEDev) disponible: {version}. NO es una versión estable y solo se publica en GitHub."
-    actionbar_outdated: "<#F0E6A0>¡BlockProt Reloaded v{version} disponible! <#7EC8E3>Usa /bp update"
+    outdated_dev: "<#FF8C69>BlockProt Reloaded tiene una nueva build de desarrollo experimental (BEDev) disponible: {version}. NO es una versión estable y solo se publica en GitHub."
+    actionbar_outdated: "<#FF6B6B>¡BlockProt Reloaded v{version} disponible! <#7EC8E3>Usa /bp update"
     actionbar_outdated_hotfix: "<#FF6B6B>¡Hotfix v{version} disponible para BlockProt Reloaded! <#7EC8E3>Usa /bp update"
-    actionbar_outdated_dev: "<#F0E6A0>¡Build BEDev {version} disponible! <#7EC8E3>Usa /bp update"
+    actionbar_outdated_dev: "<#FF8C69>¡Build BEDev {version} disponible! <#7EC8E3>Usa /bp update"
     ahead: "<#F0E6A0>BlockProt Reloaded está por delante del lanzamiento publicado ({version})"
     ahead_hotfix: "<#F0E6A0>BlockProt Reloaded está ejecutando el hotfix {version}, por delante del lanzamiento publicado ({base_version})"
     up_to_date: "<#98FF98>BlockProt Reloaded está actualizado."

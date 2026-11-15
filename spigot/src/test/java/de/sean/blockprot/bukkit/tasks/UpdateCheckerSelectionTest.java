@@ -197,5 +197,24 @@ class UpdateCheckerSelectionTest {
         String plain = PlainTextComponentSerializer.plainText().serialize(comp);
         assertTrue(plain.contains("1.4.6"));
         assertTrue(plain.contains("/bp update"));
+        assertEquals(UpdateChecker.PASTEL_CORAL, UpdateChecker.outdatedAlertColor(new SemanticVersion("1.4.6")));
+        assertEquals(UpdateChecker.PASTEL_CORAL, UpdateChecker.outdatedAlertColor(new SemanticVersion("1.4.6-hotfix")));
+        assertEquals(UpdateChecker.REDDISH_GOLD, UpdateChecker.outdatedAlertColor(new SemanticVersion("1.4.6-BEDev.1")));
+
+        Component devComp = UpdateChecker.buildActionBarUpdateComponent(new SemanticVersion("1.4.6-BEDev.1"));
+        assertTrue(containsColor(comp, UpdateChecker.PASTEL_CORAL));
+        assertTrue(containsColor(devComp, UpdateChecker.REDDISH_GOLD));
+    }
+
+    private static boolean containsColor(Component component, net.kyori.adventure.text.format.TextColor target) {
+        if (target.equals(component.color())) {
+            return true;
+        }
+        for (Component child : component.children()) {
+            if (containsColor(child, target)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

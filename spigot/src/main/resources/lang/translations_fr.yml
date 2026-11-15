@@ -513,15 +513,15 @@ messages:
     empty_contents: "<dark_gray>Vide"
   update:
     outdated: "<#FF6B6B>BlockProt Reloaded est obsolète ! Nouvelle version stable : {version} (mettre à jour même avec 1 seul build de retard est recommandé pour les correctifs et améliorations)."
-    outdated_hotfix: "<red>IMPORTANT: BlockProt a un correctif important (hotfix)\
+    outdated_hotfix: "<#FF6B6B>IMPORTANT: BlockProt a un correctif important (hotfix)\
       \ disponible: {version}! Il corrige des bugs de la version actuelle ({base_version}).\
       \ Cliquez pour le télécharger."
-    outdated_dev: "<yellow>BlockProt a une nouvelle version de développement expérimentale\
+    outdated_dev: "<#FF8C69>BlockProt a une nouvelle version de développement expérimentale\
       \ (BEDev) disponible: {version}. Ce n'est PAS une version stable et elle est\
       \ publiée uniquement sur GitHub."
-    actionbar_outdated: "<#F0E6A0>BlockProt Reloaded v{version} disponible ! <#7EC8E3>Utilisez /bp update"
+    actionbar_outdated: "<#FF6B6B>BlockProt Reloaded v{version} disponible ! <#7EC8E3>Utilisez /bp update"
     actionbar_outdated_hotfix: "<#FF6B6B>Correctif v{version} disponible pour BlockProt Reloaded ! <#7EC8E3>Utilisez /bp update"
-    actionbar_outdated_dev: "<#F0E6A0>Version BEDev {version} disponible ! <#7EC8E3>Utilisez /bp update"
+    actionbar_outdated_dev: "<#FF8C69>Version BEDev {version} disponible ! <#7EC8E3>Utilisez /bp update"
     ahead: "<#F0E6A0>BlockProt Reloaded est en avance sur la version publiée ({version})"
     ahead_hotfix: "<yellow>BlockProt Reloaded exécute le correctif {version}, en avance\
       \ sur la version publiée ({base_version})"

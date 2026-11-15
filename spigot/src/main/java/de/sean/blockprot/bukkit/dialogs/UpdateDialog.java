@@ -93,17 +93,21 @@ public final class UpdateDialog {
                 ? cachedRelease.getHtmlUrl()
                 : fallbackNotesUrl;
 
+            TextColor latestValueColor = outdated
+                ? UpdateChecker.outdatedAlertColor(cached)
+                : NamedTextColor.WHITE;
+
             body.add(DialogBodyEntry.text(Component.empty()));
             body.add(DialogBodyEntry.text(
                 Component.text()
                     .append(Component.text(stripColor(Translator.get(TranslationKey.DIALOGS__UPDATE__LATEST)), SOFT_GRAY))
-                    .append(Component.text(stripColor(Translator.get(TranslationKey.DIALOGS__UPDATE__VERSION_PREFIX)) + cached.toString(), NamedTextColor.WHITE, TextDecoration.BOLD))
+                    .append(Component.text(stripColor(Translator.get(TranslationKey.DIALOGS__UPDATE__VERSION_PREFIX)) + cached.toString(), latestValueColor, TextDecoration.BOLD))
                     .build()
             ));
 
             if (outdated) {
                 body.add(DialogBodyEntry.text(
-                    Component.text(stripColor(Translator.get(TranslationKey.DIALOGS__UPDATE__OUTDATED)), PASTEL_CORAL, TextDecoration.BOLD)
+                    Component.text(stripColor(Translator.get(TranslationKey.DIALOGS__UPDATE__OUTDATED)), latestValueColor, TextDecoration.BOLD)
                 ));
             } else if (cached.compareTo(currentVersion) < 0) {
                 body.add(DialogBodyEntry.text(
@@ -260,7 +264,7 @@ public final class UpdateDialog {
             return Component.text(
                 stripColor(Translator.get(TranslationKey.DIALOGS__UPDATE__KIND_DEV))
                     .replace("{version}", version.toString()),
-                PASTEL_GOLD, TextDecoration.BOLD);
+                UpdateChecker.REDDISH_GOLD, TextDecoration.BOLD);
         }
         return Component.text(
             stripColor(Translator.get(TranslationKey.DIALOGS__UPDATE__KIND_STABLE))

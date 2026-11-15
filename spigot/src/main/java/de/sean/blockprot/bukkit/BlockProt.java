@@ -534,15 +534,21 @@ public final class BlockProt extends JavaPlugin {
                 && !UpdateChecker.latestRelease.getHtmlUrl().isBlank()
                 ? UpdateChecker.latestRelease.getHtmlUrl()
                 : "https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/releases/latest";
+            String statusColor = latest.isPreRelease()
+                ? BlockProtConsole.REDDISH_GOLD
+                : BlockProtConsole.BOLD_RED;
+            String linkColor = latest.isPreRelease()
+                ? BlockProtConsole.REDDISH_GOLD
+                : BlockProtConsole.BRIGHT_RED;
             BlockProtConsole.bootColored(
                 label,
                 Translator.get(TranslationKey.CONSOLE__BOOT_UPDATE_OUTDATED)
                     .replace("{version}", latest.toString()),
-                BlockProtConsole.PASTEL_CORAL);
+                statusColor);
             BlockProtConsole.bootIndented(
                 Translator.get(TranslationKey.CONSOLE__BOOT_UPDATE_DOWNLOAD)
                     .replace("{url}", releaseUrl),
-                BlockProtConsole.SOFT_BLUE);
+                linkColor);
         } else if (cmp < 0) {
             BlockProtConsole.bootColored(
                 label,

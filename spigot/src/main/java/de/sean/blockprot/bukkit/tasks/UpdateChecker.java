@@ -22,6 +22,7 @@ package de.sean.blockprot.bukkit.tasks;
 
 import com.google.gson.annotations.SerializedName;
 import de.sean.blockprot.bukkit.BlockProt;
+import de.sean.blockprot.bukkit.BlockProtConsole;
 import de.sean.blockprot.bukkit.BlockProtLogger;
 import de.sean.blockprot.bukkit.Edition;
 import de.sean.blockprot.bukkit.TranslationKey;
@@ -75,6 +76,9 @@ public final class UpdateChecker implements Runnable {
 
     private static final String RELEASES_URL =
         "https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/releases";
+
+    public static final TextColor PASTEL_CORAL = TextColor.color(0xFF6B6B);
+    public static final TextColor REDDISH_GOLD = TextColor.color(0xFF8C69);
 
     private static String releaseUrl() {
         return Edition.current().tagPrefix().isEmpty() ? RELEASES_URL + "/latest" : RELEASES_URL;
@@ -282,11 +286,11 @@ public final class UpdateChecker implements Runnable {
 
         if (isOutdated) {
             TranslationKey key = consoleOutdatedKey(latestVersion);
-            BlockProt.getInstance().getLogger().warning(
-                Translator.get(key)
-                    .replace("{version}", latestVersion.toString())
-                    .replace("{base_version}", latestVersion.baseVersion())
-                + " | " + releaseUrl);
+            String msg = Translator.get(key)
+                .replace("{version}", latestVersion.toString())
+                .replace("{base_version}", latestVersion.baseVersion())
+                + " | " + releaseUrl;
+            BlockProtConsole.updateAlert(msg, latestVersion.isPreRelease());
         } else if (this.recipients == null || this.recipients.isEmpty()) {
             if (latestVersion.compareTo(currentVersion) < 0) {
                 String aheadMessage = currentVersion.isHotfix()
@@ -327,14 +331,10 @@ public final class UpdateChecker implements Runnable {
                     .character('§').hexColors().useUnusualXRepeatedCharacterHexFormat().build();
                 Component comp;
                 if (isOutdated) {
-                    String message = Translator.get(outdatedMessageKey(latestVersion))
-                        .replace("{version}", latestVersion.toString())
-                        .replace("{base_version}", latestVersion.baseVersion());
+                    String message = formatOutdatedText(latestVersion);
                     String downloadLabel = stripTrailingColon(Translator.get(TranslationKey.DIALOGS__UPDATE__DOWNLOAD));
                     comp = legacy.deserialize(message)
-                        .color(latestVersion.isHotfix()
-                            ? TextColor.color(0xF08080)
-                            : TextColor.color(0xF0E6A0))
+                        .color(outdatedAlertColor(latestVersion))
                         .append(Component.text(" [" + downloadLabel + " v" + latestVersion + "]",
                             TextColor.color(0x7EC8E3), TextDecoration.UNDERLINED))
                         .clickEvent(ClickEvent.openUrl(releaseUrl))
@@ -436,10 +436,20 @@ public final class UpdateChecker implements Runnable {
      * get their own wording, everything else uses the standard outdated message.
      */
     @Contract("_ -> !null")
-    private static @NotNull TranslationKey outdatedMessageKey(@NotNull SemanticVersion version) {
+    public static @NotNull TranslationKey outdatedMessageKey(@NotNull SemanticVersion version) {
         if (version.isHotfix()) return TranslationKey.MESSAGES__UPDATE__OUTDATED_HOTFIX;
         if (version.isPreRelease()) return TranslationKey.MESSAGES__UPDATE__OUTDATED_DEV;
         return TranslationKey.MESSAGES__UPDATE__OUTDATED;
+    }
+
+    public static @NotNull TextColor outdatedAlertColor(@NotNull SemanticVersion version) {
+        return version.isPreRelease() ? REDDISH_GOLD : PASTEL_CORAL;
+    }
+
+    public static @NotNull String formatOutdatedText(@NotNull SemanticVersion version) {
+        return Translator.get(outdatedMessageKey(version))
+            .replace("{version}", version.toString())
+            .replace("{base_version}", version.baseVersion());
     }
 
     @Contract("_ -> !null")
@@ -453,9 +463,13 @@ public final class UpdateChecker implements Runnable {
         TranslationKey key = actionBarOutdatedKey(latestVersion);
         String raw = Translator.getRaw(key);
         if (raw.isBlank() || raw.equals(key.toString())) {
-            raw = latestVersion.isHotfix()
-                ? "<#FF6B6B>Hotfix v{version} available for BlockProt Reloaded! <#7EC8E3>Use /bp update"
-                : "<#F0E6A0>BlockProt Reloaded v{version} available! <#7EC8E3>Use /bp update";
+            if (latestVersion.isHotfix()) {
+                raw = "<#FF6B6B>Hotfix v{version} available for BlockProt Reloaded! <#7EC8E3>Use /bp update";
+            } else if (latestVersion.isPreRelease()) {
+                raw = "<#FF8C69>BEDev {version} available! <#7EC8E3>Use /bp update";
+            } else {
+                raw = "<#FF6B6B>BlockProt Reloaded v{version} available! <#7EC8E3>Use /bp update";
+            }
         }
         String formatted = raw
             .replace("{version}", latestVersion.toString())

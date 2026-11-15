@@ -88,8 +88,7 @@ public final class AdminMenuDialog {
             LegacyComponentSerializer legacy = LegacyComponentSerializer.builder()
                 .character('§').hexColors().useUnusualXRepeatedCharacterHexFormat().build();
             body.add(DialogBodyEntry.text(legacy.deserialize(
-                Translator.get(TranslationKey.MESSAGES__UPDATE__OUTDATED)
-                    .replace("{version}", pendingUpdate.toString()))));
+                UpdateChecker.formatOutdatedText(pendingUpdate))));
         }
         body.add(DialogBodyEntry.text(Component.text(
             stripColor(Translator.get(TranslationKey.DIALOGS__ADMIN_CHOOSE)), TextColor.color(0x888888))));
@@ -158,12 +157,15 @@ public final class AdminMenuDialog {
             }
         );
 
+        TextColor updateAlertColor = pendingUpdate != null
+            ? UpdateChecker.outdatedAlertColor(pendingUpdate)
+            : null;
         Component updateLabel = pendingUpdate != null
             ? Component.text(stripColor(Translator.get(TranslationKey.ICON__SEARCH)) + update + " (v" + pendingUpdate + ")",
-                PASTEL_GOLD, TextDecoration.BOLD)
+                updateAlertColor, TextDecoration.BOLD)
             : Component.text(stripColor(Translator.get(TranslationKey.ICON__SEARCH)) + update, NamedTextColor.WHITE);
         Component updateTooltip = pendingUpdate != null
-            ? tooltip(Translator.get(TranslationKey.DIALOGS__UPDATE__OUTDATED) + " (v" + pendingUpdate + ")", PASTEL_GOLD)
+            ? tooltip(Translator.get(TranslationKey.DIALOGS__UPDATE__OUTDATED) + " (v" + pendingUpdate + ")", updateAlertColor)
             : tooltip(stripColor(Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__UPDATE)), SOFT_BLUE);
         DialogButton updateBtn = new DialogButton("update",
             updateLabel,

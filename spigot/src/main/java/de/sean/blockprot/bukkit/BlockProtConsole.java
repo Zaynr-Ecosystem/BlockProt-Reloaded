@@ -51,6 +51,7 @@ public final class BlockProtConsole {
     public static final String PASTEL_ORANGE  = hex("FFB703");
     public static final String BRIGHT_RED     = hex("FF3B3B");
     public static final String BOLD_RED       = BRIGHT_RED + "§l";
+    public static final String REDDISH_GOLD   = hex("FF8C69");
     public static final String PASTEL_GRAY    = "§7";
     public static final String CONNECTOR_GRAY = "§8";
 
@@ -256,6 +257,16 @@ public final class BlockProtConsole {
 
     public static void integrationEnabled(@NotNull String integrationName) {
         emit("  " + integrationName + " hooked");
+    }
+
+    public static void updateAlert(@NotNull String message, boolean preRelease) {
+        String color = preRelease ? REDDISH_GOLD : BOLD_RED;
+        String colored = "  " + color + message;
+        if (startupBuffer != null) {
+            startupBuffer.add(new StartupLine(colored, true));
+        } else {
+            raw(prefix() + colored);
+        }
     }
 
     private static void emit(@NotNull String message) {

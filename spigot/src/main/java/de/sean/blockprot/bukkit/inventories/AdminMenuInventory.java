@@ -34,6 +34,8 @@ import de.sean.blockprot.bukkit.nbt.StatHandler;
 import de.sean.blockprot.bukkit.nbt.stats.PlayerBlocksStatistic;
 import de.sean.blockprot.bukkit.tasks.UpdateChecker;
 import de.sean.blockprot.bukkit.util.ComponentMessages;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -144,10 +146,12 @@ public class AdminMenuInventory extends BlockProtInventory {
             : null;
         if (pendingUpdate != null) {
             inventory.setItem(SLOT_UPDATE, item(Material.SPYGLASS,
-                Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__UPDATE) + " (v" + pendingUpdate + ")",
+                Component.text(
+                    stripColor(Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__UPDATE)) + " (v" + pendingUpdate + ")",
+                    UpdateChecker.outdatedAlertColor(pendingUpdate),
+                    TextDecoration.BOLD),
                 Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__UPDATE_LORE),
-                Translator.get(TranslationKey.MESSAGES__UPDATE__OUTDATED)
-                    .replace("{version}", pendingUpdate.toString())));
+                UpdateChecker.formatOutdatedText(pendingUpdate)));
         } else {
             inventory.setItem(SLOT_UPDATE, item(Material.SPYGLASS,
                 Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__UPDATE),
@@ -399,14 +403,17 @@ public class AdminMenuInventory extends BlockProtInventory {
     }
 
     private ItemStack item(Material mat, String name, String... lore) {
+        return item(mat, Component.text(name.replaceAll("[§&][0-9a-fk-orx]", "")), lore);
+    }
+
+    private ItemStack item(Material mat, Component displayName, String... lore) {
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return item;
-        ComponentMessages.displayName(meta, net.kyori.adventure.text.Component.text(
-            name.replaceAll("[§&][0-9a-fk-orx]", "")));
+        ComponentMessages.displayName(meta, displayName);
         LegacyComponentSerializer legacy = LegacyComponentSerializer.builder()
             .character('§').hexColors().useUnusualXRepeatedCharacterHexFormat().build();
-        List<net.kyori.adventure.text.Component> loreList = new ArrayList<>(lore.length);
+        List<Component> loreList = new ArrayList<>(lore.length);
         for (String s : lore) loreList.add(legacy.deserialize(s));
         ComponentMessages.lore(meta, loreList);
         item.setItemMeta(meta);
