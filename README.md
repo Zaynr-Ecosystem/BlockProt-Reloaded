@@ -114,9 +114,9 @@ The version suffix is controlled by `versionSuffix` in `gradle.properties`:
 
 | Value | Output |
 |---|---|
-| *(blank)* | `BlockProtReloaded-1.4.3.jar` - stable release |
-| `BEDev` | `BlockProtReloaded-1.4.3-BEDev.jar` - experimental pre-release |
-| `hotfix.N` | `BlockProtReloaded-1.4.3-hotfix.2.jar` - targeted bugfix release, numbered when a version has several |
+| *(blank)* | `BlockProtReloaded-1.4.5.jar` - stable release |
+| `BEDev` | `BlockProtReloaded-1.4.5-BEDev.jar` - experimental pre-release |
+| `hotfix.N` | `BlockProtReloaded-1.4.5-hotfix.2.jar` - targeted bugfix release, numbered when a version has several |
 
 ## File Layout
 
@@ -147,7 +147,7 @@ plugins/BlockProtReloaded/
 BlockProt Reloaded provides complete interface parity across three display engines:
 
 1. **Chest Inventory GUIs:** Classic inventory screens with click protection and pagination.
-2. **Native Paper Dialogs:** Seamless modal dialogs on modern Paper servers (`use_dialogs: true`), featuring an established pastel palette (`PASTEL_MINT`, `PASTEL_CORAL`, `PASTEL_GOLD`, `SOFT_BLUE`, `PASTEL_PURPLE`) without occupying the inventory.
+2. **Native Paper Dialogs:** Seamless modal dialogs on modern Paper servers (enable with `use_dialogs: true`; defaults to `false`), featuring an established pastel palette (`PASTEL_MINT`, `PASTEL_CORAL`, `PASTEL_GOLD`, `SOFT_BLUE`, `PASTEL_PURPLE`) without occupying the inventory.
 3. **Bedrock Forms (Cumulus API):** Native touch-friendly modal forms for players connecting via Geyser and Floodgate.
 
 ### Block Lock Menu
@@ -317,7 +317,7 @@ Enable `per_worlds_config: true` to configure independent block whitelists, prot
 
 ## Developer API
 
-Other plugins can query and react to BlockProt protections. The API is published through [JitPack](https://jitpack.io/#Zaynr-Ecosystem/BlockProt-Reloaded); use a release tag (for example `1.4.3`) as the version.
+Other plugins can query and react to BlockProt protections. The API is published through [JitPack](https://jitpack.io/#Zaynr-Ecosystem/BlockProt-Reloaded); use a release tag (for example `1.4.5`) as the version.
 
 Gradle (Kotlin DSL):
 
@@ -327,8 +327,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.Zaynr-Ecosystem.BlockProt-Reloaded:blockprot-spigot:1.4.3") { isTransitive = false }
-    compileOnly("com.github.Zaynr-Ecosystem.BlockProt-Reloaded:common:1.4.3")
+    compileOnly("com.github.Zaynr-Ecosystem.BlockProt-Reloaded:blockprot-spigot:1.4.5") { isTransitive = false }
+    compileOnly("com.github.Zaynr-Ecosystem.BlockProt-Reloaded:common:1.4.5")
 }
 ```
 
@@ -343,7 +343,7 @@ Maven:
 <dependency>
     <groupId>com.github.Zaynr-Ecosystem.BlockProt-Reloaded</groupId>
     <artifactId>blockprot-spigot</artifactId>
-    <version>1.4.3</version>
+    <version>1.4.5</version>
     <scope>provided</scope>
 </dependency>
 ```

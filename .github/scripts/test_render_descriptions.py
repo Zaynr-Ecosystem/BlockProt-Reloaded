@@ -18,6 +18,8 @@ class Render(unittest.TestCase):
         self.assertIn("BlockProt Reloaded Legacy is a maintained fork", text)
         self.assertNotIn("1.21.7 through 26.3", text)
         self.assertNotIn("use_dialogs: true", text)
+        self.assertNotIn("/bp logs", text)
+        self.assertNotIn("menu or dialog", text)
 
     def test_bp_legacy_uses_java_17(self):
         text = self.rendered("bp-legacy")

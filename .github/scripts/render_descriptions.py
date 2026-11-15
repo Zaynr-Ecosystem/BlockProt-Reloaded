@@ -72,6 +72,23 @@ def render(template, config):
                         "the lists below name the complete set across editions.\n\n")
     text = replace_once(text, MAIN_DIALOGS,
                         "- Native Paper Dialogs: not available in this edition. Every menu opens as a chest inventory.")
+    text = replace_once(
+        text,
+        "- Access audit logs (`/bp logs [here|player <name>|<page>]`): paginated SQLite audit history for inspecting container opens, item transactions, and denied accesses.",
+        "- Access audit log (lock menu Clock button): paginated SQLite audit history (`blockprot_audit.sqlite`) for inspecting container opens, item transactions, and denied accesses.",
+    )
+    text = replace_once(
+        text,
+        "hides disabled commands (`/bp tiers`, `/bp friends`, `/bp logs`) cleanly",
+        "hides disabled commands (`/bp tiers`, `/bp friends`) cleanly",
+    )
+    text = replace_once(text, "| `/bp user` | `blockprot.user` | Main personal user menu or dialog |", "| `/bp user` | `blockprot.user` | Main personal user chest menu |")
+    text = replace_once(text, "| `/bp admin` | `blockprot.user.admin` | Administrative control menu or dialog |", "| `/bp admin` | `blockprot.user.admin` | Administrative control chest menu |")
+    text = replace_once(
+        text,
+        "| `/bp logs [here\\|player <name>\\|<page>]` | `blockprot.user` / Admin | View access audit logs for self, targeted block, or another player |\n",
+        "",
+    )
     if "Folia" not in servers:
         text = replace_once(text, MAIN_FOLIA, "- Folia: not declared for this edition.")
     text = replace_once(text, MAIN_MINECRAFT_ROW, f"| Minecraft | {info['range']} |")

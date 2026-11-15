@@ -81,12 +81,12 @@ Monitors explosions near lockable blocks. Logs the event, alerts the owner via a
 - Thread-safe SQLite audit logging (`blockprot_audit.sqlite`) with serialized WAL connection handling.
 
 ### Other additions
-- Access audit logs (`/bp logs [here|player <name>|<page>]`): paginated SQLite audit history for inspecting container opens, item transactions, and denied accesses.
+- Access audit log (lock menu Clock button): paginated SQLite audit history (`blockprot_audit.sqlite`) for inspecting container opens, item transactions, and denied accesses.
 - Bidirectional hopper and item-pickup protection: prevents unauthorized extraction, illegal item insertion, and `InventoryPickupItemEvent` siphoning on locked containers and storage vehicles.
 - Environmental and special container protection: shields decorated pots from projectiles, enforces per-slot `READ`/`WRITE` access on chiseled bookshelves, blocks fire ignition/spread, liquid flow (`BlockFromToEvent`), unauthorized bucket waterlogging, falling blocks, and dispenser redstone activation against protected containers, and protects entities from damage, projectiles, and leashes.
 - Piston crushing and movement protection: prevents pistons from moving or crushing locked blocks and containers.
 - Offline-mode UUID isolation: bypasses Mojang HTTP lookups when `online-mode: false` and strips handshake query parameters on Bedrock prefix checks.
-- Dynamic feature gating and staff tier inheritance: hides disabled commands (`/bp tiers`, `/bp friends`, `/bp logs`) cleanly, restricts player `use_menus` chat commands to `/bp user` and `/bp admin`, enforces `t2` inheritance, and lets explicit permission negations override OP fallback.
+- Dynamic feature gating and staff tier inheritance: hides disabled commands (`/bp tiers`, `/bp friends`) cleanly, restricts player `use_menus` chat commands to `/bp user` and `/bp admin`, enforces `t2` inheritance, and lets explicit permission negations override OP fallback.
 - Multi-tier staff permissions (`admin_tiers.enabled`) and standalone `admins.yml` hierarchy.
 - Native Paper Dialogs: not available in this edition. Every menu opens as a chest inventory.
 - Bedrock touch forms (Cumulus API via Geyser and Floodgate).
@@ -107,11 +107,10 @@ Monitors explosions near lockable blocks. Logs the event, alerts the owner via a
 
 | Command | Permission | Description |
 |---|---|---|
-| `/bp user` | `blockprot.user` | Main personal user menu or dialog |
-| `/bp admin` | `blockprot.user.admin` | Administrative control menu or dialog |
+| `/bp user` | `blockprot.user` | Main personal user chest menu |
+| `/bp admin` | `blockprot.user.admin` | Administrative control chest menu |
 | `/bp friends` | `blockprot.user` | Manage global default friends list |
 | `/bp settings` | `blockprot.user` | Personal player preferences interface |
-| `/bp logs [here\|player <name>\|<page>]` | `blockprot.user` / Admin | View access audit logs for self, targeted block, or another player |
 | `/bp transferall <player>` | `blockprot.user` | Transfer ownership of all your protected blocks to another player |
 | `/bp lockables` | `blockprot.user.admin` | Paged GUI listing all blocks and entities with active/inactive status |
 | `/bp tiers` | `blockprot.user.admin` or `blockprot.user.admin.owner` | Staff roles GUI and custom permissions manager |
