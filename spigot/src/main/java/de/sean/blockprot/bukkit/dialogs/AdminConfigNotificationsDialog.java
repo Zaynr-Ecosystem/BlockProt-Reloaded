@@ -59,6 +59,12 @@ public final class AdminConfigNotificationsDialog {
             cfg.shouldNotifyOpOfUpdates(),
             colorblind,
             p -> { cfg.setNotifyOpOfUpdates(!cfg.shouldNotifyOpOfUpdates()); show(p, backOrigin); }));
+        buttons.add(AdminConfigDialog.toggleBtn("notify_admins_on_join", "notify_admins_on_join",
+            Translator.get(TranslationKey.DIALOGS__ADMIN_CONFIG__NOTIFICATIONS__NOTIFY_ADMINS_TITLE),
+            Translator.get(TranslationKey.DIALOGS__ADMIN_CONFIG__NOTIFICATIONS__NOTIFY_ADMINS),
+            cfg.isNotifyAdminsOnJoinSettingEnabled(),
+            colorblind,
+            p -> { cfg.setNotifyAdminsOnJoin(!cfg.isNotifyAdminsOnJoinSettingEnabled()); show(p, backOrigin); }));
         buttons.add(AdminConfigDialog.toggleBtn("owner_notifications.enabled", "owner_notifications.enabled",
             Translator.get(TranslationKey.DIALOGS__ADMIN_CONFIG__NOTIFICATIONS__OWNER_ENABLED_TITLE),
             Translator.get(TranslationKey.DIALOGS__ADMIN_CONFIG__NOTIFICATIONS__OWNER_ENABLED),

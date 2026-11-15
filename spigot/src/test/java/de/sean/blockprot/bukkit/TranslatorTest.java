@@ -109,10 +109,52 @@ class TranslatorTest {
     @Test
     void notifyOpOfUpdatesDefaultsTrueAndHonorsExplicitFalse() {
         YamlConfiguration unset = new YamlConfiguration();
-        assertTrue(new DefaultConfig(unset, tempFolder).shouldNotifyOpOfUpdates());
+        DefaultConfig unsetConfig = new DefaultConfig(unset, tempFolder);
+        assertTrue(unsetConfig.shouldNotifyOpOfUpdates());
+        assertTrue(unsetConfig.shouldNotifyAdminsOnJoin());
+        assertTrue(unsetConfig.isNotifyAdminsOnJoinSettingEnabled());
 
-        YamlConfiguration disabled = new YamlConfiguration();
-        disabled.set("notify_op_of_updates", false);
-        assertFalse(new DefaultConfig(disabled, tempFolder).shouldNotifyOpOfUpdates());
+        YamlConfiguration parentDisabled = new YamlConfiguration();
+        parentDisabled.set("notify_op_of_updates", false);
+        DefaultConfig parentDisabledConfig = new DefaultConfig(parentDisabled, tempFolder);
+        assertFalse(parentDisabledConfig.shouldNotifyOpOfUpdates());
+        assertFalse(parentDisabledConfig.shouldNotifyAdminsOnJoin());
+        assertTrue(parentDisabledConfig.isNotifyAdminsOnJoinSettingEnabled());
+
+        YamlConfiguration childDisabled = new YamlConfiguration();
+        childDisabled.set("notify_op_of_updates", true);
+        childDisabled.set("notify_admins_on_join", false);
+        DefaultConfig childDisabledConfig = new DefaultConfig(childDisabled, tempFolder);
+        assertTrue(childDisabledConfig.shouldNotifyOpOfUpdates());
+        assertFalse(childDisabledConfig.shouldNotifyAdminsOnJoin());
+        assertFalse(childDisabledConfig.isNotifyAdminsOnJoinSettingEnabled());
+    }
+
+    private static YamlConfiguration loadLangResource(String resourcePath) throws Exception {
+        YamlConfiguration cfg = new YamlConfiguration();
+        var stream = TranslatorTest.class.getResourceAsStream(resourcePath);
+        assertNotNull(stream, "Bundled " + resourcePath + " must exist");
+        try (var reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
+            cfg.load(reader);
+        }
+        return cfg;
+    }
+
+    @Test
+    void actionBarAndNotifyAdminsKeysLoadInEnglishAndSpanish() throws Exception {
+        YamlConfiguration english = loadLangResource("/lang/translations_en.yml");
+        YamlConfiguration spanish = loadLangResource("/lang/translations_es.yml");
+        try {
+            Translator.loadFromConfigs(english, spanish);
+            String esActionBar = Translator.getRaw(TranslationKey.MESSAGES__UPDATE__ACTIONBAR_OUTDATED);
+            assertTrue(esActionBar.contains("{version}"));
+            assertTrue(esActionBar.contains("/bp update"));
+
+            String esNotifyAdminsTitle = Translator.get(TranslationKey.DIALOGS__ADMIN_CONFIG__NOTIFICATIONS__NOTIFY_ADMINS_TITLE);
+            assertFalse(esNotifyAdminsTitle.isBlank());
+            assertNotEquals("DIALOGS__ADMIN_CONFIG__NOTIFICATIONS__NOTIFY_ADMINS_TITLE", esNotifyAdminsTitle);
+        } finally {
+            Translator.loadFromConfigs(english, english);
+        }
     }
 }

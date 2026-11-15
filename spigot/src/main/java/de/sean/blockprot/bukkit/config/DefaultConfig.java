@@ -338,6 +338,14 @@ public final class DefaultConfig extends BlockProtConfig {
         return config.getBoolean("notify_op_of_updates", true);
     }
 
+    public boolean shouldNotifyAdminsOnJoin() {
+        return shouldNotifyOpOfUpdates() && config.getBoolean("notify_admins_on_join", true);
+    }
+
+    public boolean isNotifyAdminsOnJoinSettingEnabled() {
+        return config.getBoolean("notify_admins_on_join", true);
+    }
+
     public boolean disallowRedstoneOnPlace() {
         return config.contains("redstone_disallowed_by_default") && config.getBoolean("redstone_disallowed_by_default");
     }
@@ -566,6 +574,7 @@ public final class DefaultConfig extends BlockProtConfig {
     public void setWorldExpiryEnabled(boolean value) { setAndSave("world_expiry.enabled", value); }
     public void setEntityProtectionEnabled(boolean value) { setAndSave("entity_protection.enabled", value); }
     public void setNotifyOpOfUpdates(boolean value) { setAndSave("notify_op_of_updates", value); }
+    public void setNotifyAdminsOnJoin(boolean value) { setAndSave("notify_admins_on_join", value); }
     public void setSessionLogEnabled(boolean value) { setAndSave("enable_session_log", value); }
     public void setBackupsEnabled(boolean value) { setAndSave("enable_backups", value); }
     public void setAutoReloadConfigs(boolean value) { setAndSave("auto_reload_configs", value); }

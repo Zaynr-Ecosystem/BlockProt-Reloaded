@@ -519,6 +519,9 @@ messages:
     outdated_dev: "<yellow>BlockProt a une nouvelle version de développement expérimentale\
       \ (BEDev) disponible: {version}. Ce n'est PAS une version stable et elle est\
       \ publiée uniquement sur GitHub."
+    actionbar_outdated: "<#F0E6A0>BlockProt Reloaded v{version} disponible ! <#7EC8E3>Utilisez /bp update"
+    actionbar_outdated_hotfix: "<#FF6B6B>Correctif v{version} disponible pour BlockProt Reloaded ! <#7EC8E3>Utilisez /bp update"
+    actionbar_outdated_dev: "<#F0E6A0>Version BEDev {version} disponible ! <#7EC8E3>Utilisez /bp update"
     ahead: "<#F0E6A0>BlockProt Reloaded est en avance sur la version publiée ({version})"
     ahead_hotfix: "<yellow>BlockProt Reloaded exécute le correctif {version}, en avance\
       \ sur la version publiée ({base_version})"
@@ -1006,8 +1009,10 @@ dialogs:
       enabled: Protéger les blocs contre les raids.
       enabled_title: Protection contre les raids
     notifications:
-      notify_ops: Notifier les opérateurs des mises à jour disponibles.
-      notify_ops_title: Notifier les opérateurs
+      notify_ops: "Activer les alertes de mise à jour en jeu (la console les affiche toujours)."
+      notify_ops_title: "Alertes de mise à jour en jeu"
+      notify_admins: "Afficher une alerte ActionBar aux admins à la connexion."
+      notify_admins_title: "Notifier les admins"
       owner_enabled: Autoriser les notifications au propriétaire.
       owner_enabled_title: "Notifications d'accès au propriétaire"
       owner_open: "Notifier lorsque quelqu'un ouvre votre bloc."

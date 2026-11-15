@@ -139,7 +139,9 @@ public class AdminMenuInventory extends BlockProtInventory {
         inventory.setItem(SLOT_RELOAD, item(Material.COMPARATOR,
             Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__RELOAD),
             Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__RELOAD_LORE)));
-        de.sean.blockprot.util.SemanticVersion pendingUpdate = UpdateChecker.getAvailableUpdate(BlockProt.getPluginVersion());
+        de.sean.blockprot.util.SemanticVersion pendingUpdate = BlockProt.getDefaultConfig().shouldNotifyOpOfUpdates()
+            ? UpdateChecker.getAvailableUpdate(BlockProt.getPluginVersion())
+            : null;
         if (pendingUpdate != null) {
             inventory.setItem(SLOT_UPDATE, item(Material.SPYGLASS,
                 Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__UPDATE) + " (v" + pendingUpdate + ")",

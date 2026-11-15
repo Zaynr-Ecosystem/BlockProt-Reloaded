@@ -77,7 +77,9 @@ public final class AdminMenuDialog {
         String worldExpiry = stripColor(Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__WORLD_EXPIRY));
         String unlock = stripColor(Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__UNLOCK));
 
-        SemanticVersion pendingUpdate = UpdateChecker.getAvailableUpdate(BlockProt.getPluginVersion());
+        SemanticVersion pendingUpdate = BlockProt.getDefaultConfig().shouldNotifyOpOfUpdates()
+            ? UpdateChecker.getAvailableUpdate(BlockProt.getPluginVersion())
+            : null;
 
         List<DialogBodyEntry> body = new ArrayList<>();
         body.add(DialogBodyEntry.text(Component.text(

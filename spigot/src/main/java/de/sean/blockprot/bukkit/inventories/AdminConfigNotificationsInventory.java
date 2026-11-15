@@ -40,17 +40,18 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class AdminConfigNotificationsInventory extends BlockProtInventory {
 
-    private static final int SLOT_NOTIFY_OPS = 12;
-    private static final int SLOT_OWNER_NOTIFICATIONS = 14;
-    private static final int SLOT_NOTIFY_OPEN = 20;
-    private static final int SLOT_NOTIFY_TAKE = 22;
-    private static final int SLOT_NOTIFY_PLACE = 24;
+    private static final int SLOT_NOTIFY_OPS = 11;
+    private static final int SLOT_NOTIFY_ADMINS = 20;
+    private static final int SLOT_OWNER_NOTIFICATIONS = 15;
+    private static final int SLOT_NOTIFY_OPEN = 23;
+    private static final int SLOT_NOTIFY_TAKE = 24;
+    private static final int SLOT_NOTIFY_PLACE = 25;
     private static final int SLOT_BACK = 49;
 
     private static final int[] SEPARATOR_SLOTS = {
         0,1,2,3,4,5,6,7,8,
-        9,10,11, 13, 15,16,17,
-        18,19, 21, 23, 25,26,
+        9,10, 12,13,14, 16,17,
+        18,19, 21,22, 26,
         27,28,29,30,31,32,33,34,35,
         36,37,38,39,40,41,42,43,44,
         45,46,47,48, 50,51,52,53
@@ -76,6 +77,11 @@ public final class AdminConfigNotificationsInventory extends BlockProtInventory 
             "notify_op_of_updates",
             Translator.get(TranslationKey.DIALOGS__ADMIN_CONFIG__NOTIFICATIONS__NOTIFY_OPS),
             cfg.shouldNotifyOpOfUpdates()));
+        inventory.setItem(SLOT_NOTIFY_ADMINS, AdminConfigInventory.toggleItem(
+            Translator.get(TranslationKey.DIALOGS__ADMIN_CONFIG__NOTIFICATIONS__NOTIFY_ADMINS_TITLE),
+            "notify_admins_on_join",
+            Translator.get(TranslationKey.DIALOGS__ADMIN_CONFIG__NOTIFICATIONS__NOTIFY_ADMINS),
+            cfg.isNotifyAdminsOnJoinSettingEnabled()));
         inventory.setItem(SLOT_OWNER_NOTIFICATIONS, AdminConfigInventory.toggleItem(
             Translator.get(TranslationKey.DIALOGS__ADMIN_CONFIG__NOTIFICATIONS__OWNER_ENABLED_TITLE),
             "owner_notifications.enabled",
@@ -119,6 +125,9 @@ public final class AdminConfigNotificationsInventory extends BlockProtInventory 
             player.openInventory(new AdminConfigInventory().fill(player));
         } else if (slot == SLOT_NOTIFY_OPS) {
             cfg.setNotifyOpOfUpdates(!cfg.shouldNotifyOpOfUpdates());
+            player.openInventory(fill(player));
+        } else if (slot == SLOT_NOTIFY_ADMINS) {
+            cfg.setNotifyAdminsOnJoin(!cfg.isNotifyAdminsOnJoinSettingEnabled());
             player.openInventory(fill(player));
         } else if (slot == SLOT_OWNER_NOTIFICATIONS) {
             cfg.setAndSave("owner_notifications.enabled", !cfg.isOwnerNotificationsEnabled());

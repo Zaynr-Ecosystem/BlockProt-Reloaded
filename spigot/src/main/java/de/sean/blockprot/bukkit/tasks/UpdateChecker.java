@@ -27,6 +27,7 @@ import de.sean.blockprot.bukkit.Edition;
 import de.sean.blockprot.bukkit.TranslationKey;
 import de.sean.blockprot.bukkit.Translator;
 import de.sean.blockprot.bukkit.util.ComponentMessages;
+import de.sean.blockprot.bukkit.util.TemporaryActionBar;
 import de.sean.blockprot.util.ReleaseNotesFormatter;
 import de.sean.blockprot.util.SemanticVersion;
 import net.kyori.adventure.text.Component;
@@ -129,41 +130,50 @@ public final class UpdateChecker implements Runnable {
 
     private final boolean forceRefresh;
 
+    private final boolean actionBarOnly;
+
     public UpdateChecker(@NotNull final String version) {
-        this(version, null, null, false);
+        this(version, null, null, false, false);
     }
 
     public UpdateChecker(@NotNull final String version,
                          @Nullable final List<Player> recipients) {
-        this(version, recipients, null, false);
+        this(version, recipients, null, false, false);
     }
 
     public UpdateChecker(@NotNull final String version,
                          @Nullable final List<Player> recipients,
                          final boolean forceRefresh) {
-        this(version, recipients, null, forceRefresh);
+        this(version, recipients, null, forceRefresh, false);
     }
 
     public UpdateChecker(@NotNull final String version,
                          @Nullable final Runnable onComplete) {
-        this(version, null, onComplete, false);
+        this(version, null, onComplete, false, false);
     }
 
     public UpdateChecker(@NotNull final String version,
                          final boolean forceRefresh,
                          @Nullable final Runnable onComplete) {
-        this(version, null, onComplete, forceRefresh);
+        this(version, null, onComplete, forceRefresh, false);
+    }
+
+    public static @NotNull UpdateChecker forJoinActionBar(@NotNull final String version,
+                                                          @NotNull final Player player) {
+        return new UpdateChecker(version, Collections.singletonList(player), null, false, true);
     }
 
     private UpdateChecker(@NotNull final String version,
                           @Nullable final List<Player> recipients,
                           @Nullable final Runnable onComplete,
-                          final boolean forceRefresh) {
+                          final boolean forceRefresh,
+                          final boolean actionBarOnly) {
         this.pluginVersion = version;
         this.recipients = recipients;
         this.onComplete = onComplete;
         this.currentVersion = new SemanticVersion(version);
         this.forceRefresh = forceRefresh;
+        this.actionBarOnly = actionBarOnly;
     }
 
     @Override
@@ -293,42 +303,63 @@ public final class UpdateChecker implements Runnable {
         }
 
         if (this.recipients != null && !this.recipients.isEmpty()) {
-            LegacyComponentSerializer legacy = LegacyComponentSerializer.builder()
-                .character('§').hexColors().useUnusualXRepeatedCharacterHexFormat().build();
-            Component comp;
-            if (isOutdated) {
-                String message = Translator.get(outdatedMessageKey(latestVersion))
-                    .replace("{version}", latestVersion.toString())
-                    .replace("{base_version}", latestVersion.baseVersion());
-                String downloadLabel = stripTrailingColon(Translator.get(TranslationKey.DIALOGS__UPDATE__DOWNLOAD));
-                comp = legacy.deserialize(message)
-                    .color(latestVersion.isHotfix()
-                        ? TextColor.color(0xF08080)
-                        : TextColor.color(0xF0E6A0))
-                    .append(Component.text(" [" + downloadLabel + " v" + latestVersion + "]",
-                        TextColor.color(0x7EC8E3), TextDecoration.UNDERLINED))
-                    .clickEvent(ClickEvent.openUrl(releaseUrl))
-                    .hoverEvent(HoverEvent.showText(
-                        Component.text(Translator.get(TranslationKey.MESSAGES__UPDATE__CLICK_HINT))));
-            } else if (latestVersion.compareTo(currentVersion) < 0) {
-                String message = currentVersion.isHotfix()
-                    ? Translator.get(TranslationKey.MESSAGES__UPDATE__AHEAD_HOTFIX)
-                        .replace("{version}", currentVersion.toString())
-                        .replace("{base_version}", currentVersion.baseVersion())
-                    : Translator.get(TranslationKey.MESSAGES__UPDATE__AHEAD)
-                        .replace("{version}", latestVersion.toString());
-                comp = legacy.deserialize(message);
-            } else {
-                String raw = Translator.getRaw(TranslationKey.MESSAGES__UPDATE__UP_TO_DATE);
-                if (raw.isBlank()) {
-                    raw = "<#98FF98>BlockProt Reloaded is up to date.";
+            if (this.actionBarOnly) {
+                if (isOutdated) {
+                    Component actionBarComp = buildActionBarUpdateComponent(latestVersion);
+                    long durationTicks = BlockProt.getDefaultConfig() != null
+                        ? BlockProt.getDefaultConfig().getActionBarDurationTicks()
+                        : 120L;
+                    for (Player player : recipients) {
+                        if (!player.isOnline()) continue;
+                        if (BlockProt.hasFoliaLib()) {
+                            BlockProt.getFoliaLib().getScheduler().runAtEntityLater(player, task -> {
+                                if (player.isOnline()) {
+                                    TemporaryActionBar.show(player, actionBarComp, durationTicks);
+                                }
+                            }, 20L);
+                        } else {
+                            TemporaryActionBar.show(player, actionBarComp, durationTicks);
+                        }
+                    }
                 }
-                comp = MiniMessage.miniMessage().deserialize(raw);
-            }
-            for (Player player : recipients) {
-                ComponentMessages.send(player, comp);
-                if (isOutdated && release != null) {
-                    sendHighlightLines(player, release, 4);
+            } else {
+                LegacyComponentSerializer legacy = LegacyComponentSerializer.builder()
+                    .character('§').hexColors().useUnusualXRepeatedCharacterHexFormat().build();
+                Component comp;
+                if (isOutdated) {
+                    String message = Translator.get(outdatedMessageKey(latestVersion))
+                        .replace("{version}", latestVersion.toString())
+                        .replace("{base_version}", latestVersion.baseVersion());
+                    String downloadLabel = stripTrailingColon(Translator.get(TranslationKey.DIALOGS__UPDATE__DOWNLOAD));
+                    comp = legacy.deserialize(message)
+                        .color(latestVersion.isHotfix()
+                            ? TextColor.color(0xF08080)
+                            : TextColor.color(0xF0E6A0))
+                        .append(Component.text(" [" + downloadLabel + " v" + latestVersion + "]",
+                            TextColor.color(0x7EC8E3), TextDecoration.UNDERLINED))
+                        .clickEvent(ClickEvent.openUrl(releaseUrl))
+                        .hoverEvent(HoverEvent.showText(
+                            Component.text(Translator.get(TranslationKey.MESSAGES__UPDATE__CLICK_HINT))));
+                } else if (latestVersion.compareTo(currentVersion) < 0) {
+                    String message = currentVersion.isHotfix()
+                        ? Translator.get(TranslationKey.MESSAGES__UPDATE__AHEAD_HOTFIX)
+                            .replace("{version}", currentVersion.toString())
+                            .replace("{base_version}", currentVersion.baseVersion())
+                        : Translator.get(TranslationKey.MESSAGES__UPDATE__AHEAD)
+                            .replace("{version}", latestVersion.toString());
+                    comp = legacy.deserialize(message);
+                } else {
+                    String raw = Translator.getRaw(TranslationKey.MESSAGES__UPDATE__UP_TO_DATE);
+                    if (raw.isBlank()) {
+                        raw = "<#98FF98>BlockProt Reloaded is up to date.";
+                    }
+                    comp = MiniMessage.miniMessage().deserialize(raw);
+                }
+                for (Player player : recipients) {
+                    ComponentMessages.send(player, comp);
+                    if (isOutdated && release != null) {
+                        sendHighlightLines(player, release, 4);
+                    }
                 }
             }
         }
@@ -409,6 +440,30 @@ public final class UpdateChecker implements Runnable {
         if (version.isHotfix()) return TranslationKey.MESSAGES__UPDATE__OUTDATED_HOTFIX;
         if (version.isPreRelease()) return TranslationKey.MESSAGES__UPDATE__OUTDATED_DEV;
         return TranslationKey.MESSAGES__UPDATE__OUTDATED;
+    }
+
+    @Contract("_ -> !null")
+    static @NotNull TranslationKey actionBarOutdatedKey(@NotNull SemanticVersion version) {
+        if (version.isHotfix()) return TranslationKey.MESSAGES__UPDATE__ACTIONBAR_OUTDATED_HOTFIX;
+        if (version.isPreRelease()) return TranslationKey.MESSAGES__UPDATE__ACTIONBAR_OUTDATED_DEV;
+        return TranslationKey.MESSAGES__UPDATE__ACTIONBAR_OUTDATED;
+    }
+
+    static @NotNull Component buildActionBarUpdateComponent(@NotNull SemanticVersion latestVersion) {
+        TranslationKey key = actionBarOutdatedKey(latestVersion);
+        String raw = Translator.getRaw(key);
+        if (raw.isBlank() || raw.equals(key.toString())) {
+            raw = latestVersion.isHotfix()
+                ? "<#FF6B6B>Hotfix v{version} available for BlockProt Reloaded! <#7EC8E3>Use /bp update"
+                : "<#F0E6A0>BlockProt Reloaded v{version} available! <#7EC8E3>Use /bp update";
+        }
+        String formatted = raw
+            .replace("{version}", latestVersion.toString())
+            .replace("{base_version}", latestVersion.baseVersion());
+        if (formatted.indexOf('\u00A7') >= 0) {
+            return LegacyComponentSerializer.legacySection().deserialize(formatted);
+        }
+        return MiniMessage.miniMessage().deserialize(formatted);
     }
 
     /**

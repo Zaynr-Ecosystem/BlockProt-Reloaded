@@ -326,9 +326,11 @@ public final class BedrockAdminConfigForm {
         String title = stripColor(Translator.get(TranslationKey.DIALOGS__ADMIN_CONFIG__CAT_NOTIFICATIONS));
 
         boolean ops = cfg.shouldNotifyOpOfUpdates();
+        boolean admins = cfg.isNotifyAdminsOnJoinSettingEnabled();
         boolean owner = cfg.isOwnerNotificationsEnabled();
 
         String opsLabel = (ops ? "[ON] " : "[OFF] ") + stripColor(Translator.get(TranslationKey.DIALOGS__ADMIN_CONFIG__NOTIFICATIONS__NOTIFY_OPS));
+        String adminsLabel = (admins ? "[ON] " : "[OFF] ") + stripColor(Translator.get(TranslationKey.DIALOGS__ADMIN_CONFIG__NOTIFICATIONS__NOTIFY_ADMINS));
         String ownLabel = (owner ? "[ON] " : "[OFF] ") + stripColor(Translator.get(TranslationKey.DIALOGS__ADMIN_CONFIG__NOTIFICATIONS__OWNER_ENABLED));
         String back = stripColor(Translator.get(TranslationKey.DIALOGS__BACK));
 
@@ -341,6 +343,12 @@ public final class BedrockAdminConfigForm {
         builder.button(opsLabel, FormImage.Type.PATH, ops ? "textures/ui/check" : "textures/ui/cancel");
         actions.add(() -> {
             cfg.setNotifyOpOfUpdates(!ops);
+            showNotificationsCategory(player);
+        });
+
+        builder.button(adminsLabel, FormImage.Type.PATH, admins ? "textures/ui/check" : "textures/ui/cancel");
+        actions.add(() -> {
+            cfg.setNotifyAdminsOnJoin(!admins);
             showNotificationsCategory(player);
         });
 

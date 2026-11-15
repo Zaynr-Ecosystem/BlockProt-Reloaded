@@ -21,7 +21,10 @@
 package de.sean.blockprot.bukkit.tasks;
 
 import de.sean.blockprot.bukkit.Edition;
+import de.sean.blockprot.bukkit.TranslationKey;
 import de.sean.blockprot.util.SemanticVersion;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -179,5 +182,20 @@ class UpdateCheckerSelectionTest {
         } finally {
             UpdateChecker.latestVersion = previous;
         }
+    }
+
+    @Test
+    void actionBarOutdatedKeyAndComponentMatchReleaseChannel() {
+        assertEquals(TranslationKey.MESSAGES__UPDATE__ACTIONBAR_OUTDATED,
+            UpdateChecker.actionBarOutdatedKey(new SemanticVersion("1.4.6")));
+        assertEquals(TranslationKey.MESSAGES__UPDATE__ACTIONBAR_OUTDATED_HOTFIX,
+            UpdateChecker.actionBarOutdatedKey(new SemanticVersion("1.4.6-hotfix")));
+        assertEquals(TranslationKey.MESSAGES__UPDATE__ACTIONBAR_OUTDATED_DEV,
+            UpdateChecker.actionBarOutdatedKey(new SemanticVersion("1.4.6-BEDev.1")));
+
+        Component comp = UpdateChecker.buildActionBarUpdateComponent(new SemanticVersion("1.4.6"));
+        String plain = PlainTextComponentSerializer.plainText().serialize(comp);
+        assertTrue(plain.contains("1.4.6"));
+        assertTrue(plain.contains("/bp update"));
     }
 }

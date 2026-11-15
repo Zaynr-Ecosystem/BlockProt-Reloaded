@@ -76,8 +76,8 @@ public class JoinEventListener implements Listener {
                     UpdateChecker.sendHighlightLines(player, installed, 4);
                 }
             }
-            if (BlockProt.getDefaultConfig().shouldNotifyOpOfUpdates()) {
-                UpdateChecker checker = new UpdateChecker(BlockProt.getPluginVersion(), Collections.singletonList(player));
+            if (BlockProt.getDefaultConfig().shouldNotifyAdminsOnJoin()) {
+                UpdateChecker checker = UpdateChecker.forJoinActionBar(BlockProt.getPluginVersion(), player);
                 BlockProt.getFoliaLib().getScheduler().runAsync(asyncTask -> checker.run());
             }
         }

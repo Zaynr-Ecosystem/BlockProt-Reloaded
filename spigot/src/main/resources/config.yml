@@ -179,9 +179,15 @@ raid_detection:
 
 # [Notifications]
 
-# Send a notification to server operators when an update is available.
-# Route: Dialog: /bp admin -> Config -> Notifications | Menu: /bp admin -> Config -> Notifications (slot 12)
+# Enable in-game update alerts (for example, pending update banners in /bp admin).
+# Console startup and update checks always log updates regardless of this setting.
+# Route: Dialog: /bp admin -> Config -> Notifications | Menu: /bp admin -> Config -> Notifications (slot 11)
 notify_op_of_updates: true
+
+# Show a concise ActionBar notice above the hotbar to admins/operators on join when an update is available.
+# Child option of notify_op_of_updates; console update logging always runs regardless.
+# Route: Dialog: /bp admin -> Config -> Notifications | Menu: /bp admin -> Config -> Notifications (slot 20)
+notify_admins_on_join: true
 
 owner_notifications:
   # Allow owners to receive notifications about their blocks.
