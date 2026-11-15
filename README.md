@@ -21,6 +21,8 @@ Java 21 bytecode (JDK 25 toolchain), Paper 1.21.7 through 26.3, Folia support, N
 
 > **Looking for another Minecraft version?** See the [version guide](docs/READ_MEs/VERSION_GUIDE.md).
 
+> **Updating from 1.4.1-hotfix.2 or older?** Those older builds still check the previous repository URL and will not notify you automatically due to the GitHub redirect. Download **1.4.5** manually from [GitHub Releases](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/releases), [Modrinth](https://modrinth.com/plugin/blockprot-reloaded), [CurseForge](https://www.curseforge.com/minecraft/bukkit-plugins/blockprot-reloaded), or [Hangar](https://hangar.papermc.io/Zaynr-Ecosystem/BlockProt-Reloaded) to restore automatic update alerts, startup backups, and the latest fixes. Updating is always recommended, even when only 1 build behind.
+
 > **Maintenance notice:** the maintainer is taking a break to focus on other projects. Issues and pull requests are welcome for any change and are reviewed as time allows. Read [CONTRIBUTING.md](CONTRIBUTING.md) first, and see the [starting points](docs/READ_MEs/CONTRIBUTOR_STARTING_POINTS.md) for open issues anyone can take.
 
 Block protection plugin for Paper, Purpur, and Folia servers. Players protect chests, furnaces, barrels, doors, trapdoors, item frames, vehicles, and workstations through chest menus or native Paper Dialogs, without typing commands. This fork keeps the original NBT storage and adds the features described below.
@@ -435,7 +437,7 @@ raid_detection:
   enabled: false
 
 # [Notifications]
-notify_op_of_updates: false
+notify_op_of_updates: true
 owner_notifications:
   enabled: true
   notify_on_open: true
