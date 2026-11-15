@@ -137,6 +137,11 @@ public final class BlockProt extends JavaPlugin {
     }
 
     @Nullable
+    public static DefaultConfig getDefaultConfigOrNull() {
+        return defaultConfig;
+    }
+
+    @Nullable
     public ConfigFileWatcher getFileWatcher() {
         return fileWatcher;
     }
@@ -190,53 +195,68 @@ public final class BlockProt extends JavaPlugin {
     }
 
     private static boolean isUnsupportedMinecraft() {
-        Edition edition = Edition.current();
-        return !edition.isNewerThanRange(VersionCompat.MAJOR, VersionCompat.MINOR, VersionCompat.PATCH)
-            && !edition.supports(VersionCompat.MAJOR, VersionCompat.MINOR, VersionCompat.PATCH);
+        return !Edition.current().supports(VersionCompat.MAJOR, VersionCompat.MINOR, VersionCompat.PATCH);
     }
 
     private static @NotNull String unsupportedMinecraftMessage(@NotNull Edition edition) {
-        return Edition.recommendedFor(VersionCompat.MAJOR, VersionCompat.MINOR, VersionCompat.PATCH)
-            .map(recommended -> editionMessage(TranslationKey.CONSOLE__MINECRAFT_UNSUPPORTED, edition, recommended))
-            .orElseGet(() -> Translator.get(TranslationKey.CONSOLE__MINECRAFT_UNSUPPORTED_NONE)
-                .replace("{mc}", VersionCompat.getVersionString())
-                .replace("{guide}", Edition.guideUrl()));
+        return edition.unsupportedSummary(
+            getPluginVersion(),
+            VersionCompat.MAJOR,
+            VersionCompat.MINOR,
+            VersionCompat.PATCH,
+            VersionCompat.getVersionString()
+        );
     }
 
-    private static @NotNull String editionMessage(@NotNull TranslationKey key, @NotNull Edition edition,
-                                                  @NotNull Edition recommended) {
-        return Translator.get(key)
-            .replace("{edition}", edition.displayName())
-            .replace("{version}", getPluginVersion())
-            .replace("{mc}", VersionCompat.getVersionString())
-            .replace("{recommended}", recommended.displayName())
-            .replace("{range}", recommended.rangeLabel())
-            .replace("{edition_range}", edition.rangeLabel())
-            .replace("{url}", recommended.downloadUrl())
-            .replace("{guide}", Edition.guideUrl());
+    private void loadBundledTranslationsForStartupError() {
+        Translator.resetTranslations();
+        try {
+            InputStream defaultStream = this.getResource("lang/" + defaultLanguageFile);
+            if (defaultStream == null) return;
+            YamlConfiguration defaultCfg = YamlConfiguration.loadConfiguration(
+                new java.io.BufferedReader(new java.io.InputStreamReader(defaultStream, StandardCharsets.UTF_8)));
+            YamlConfiguration activeCfg = defaultCfg;
+            File existingConfig = new File(this.getDataFolder(), "config.yml");
+            if (existingConfig.isFile()) {
+                String configuredLang = YamlConfiguration.loadConfiguration(existingConfig).getString("language_file");
+                if (configuredLang != null && !configuredLang.isEmpty()) {
+                    InputStream langStream = this.getResource("lang/" + configuredLang);
+                    if (langStream != null) {
+                        activeCfg = YamlConfiguration.loadConfiguration(
+                            new java.io.BufferedReader(new java.io.InputStreamReader(langStream, StandardCharsets.UTF_8)));
+                    }
+                }
+            }
+            Translator.loadFromConfigs(activeCfg, defaultCfg);
+        } catch (Exception ignored) {}
     }
 
     @Override
     public void onEnable() {
         final Edition edition = Edition.current();
-        boolean newerThanRange = edition.isNewerThanRange(VersionCompat.MAJOR, VersionCompat.MINOR, VersionCompat.PATCH);
-        boolean unsupportedVersion = isUnsupportedMinecraft();
-        if (isRunningCraftBukkit() || unsupportedVersion) {
+        if (isUnsupportedMinecraft()) {
+            loadBundledTranslationsForStartupError();
+            BlockProtLogger.init(this.getDataFolder(), true);
+            String summary = unsupportedMinecraftMessage(edition);
+            BlockProtConsole.printUnsupportedEditionBanner(
+                edition,
+                getPluginVersion(),
+                VersionCompat.MAJOR,
+                VersionCompat.MINOR,
+                VersionCompat.PATCH,
+                VersionCompat.getVersionString(),
+                summary,
+                getLogger()
+            );
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+        if (isRunningCraftBukkit()) {
             this.saveDefaultConfig();
             this.reloadConfig();
             defaultConfig = new DefaultConfig(this.getConfig(), this.getDataFolder());
-            Translator.resetTranslations();
-            try {
-                InputStream s = this.getResource("lang/" + defaultLanguageFile);
-                if (s != null) {
-                    YamlConfiguration cfg = YamlConfiguration.loadConfiguration(
-                        new java.io.BufferedReader(new java.io.InputStreamReader(s, StandardCharsets.UTF_8)));
-                    Translator.loadFromConfigs(cfg, cfg);
-                }
-            } catch (Exception ignored) {}
-            final var message = unsupportedVersion
-                ? unsupportedMinecraftMessage(edition)
-                : Translator.get(TranslationKey.CONSOLE__CRAFTBUKKIT_UNSUPPORTED);
+            loadBundledTranslationsForStartupError();
+            final var message = Translator.get(TranslationKey.CONSOLE__CRAFTBUKKIT_UNSUPPORTED);
             getLogger().severe(message);
             getServer().getPluginManager().registerEvents(new ErrorEventListener(message), this);
             return;
@@ -255,11 +275,6 @@ public final class BlockProt extends JavaPlugin {
         saveResourceSilent("blocks.yml", false);
         this.reloadConfigAndTranslations();
         this.flushMigrationLog();
-
-        if (newerThanRange) {
-            BlockProtConsole.warn(editionMessage(TranslationKey.CONSOLE__MINECRAFT_NEWER_AVAILABLE, edition,
-                Edition.recommendedFor(VersionCompat.MAJOR, VersionCompat.MINOR, VersionCompat.PATCH).orElse(Edition.BPR)));
-        }
 
         boolean sessionLogEnabled = defaultConfig.isSessionLogEnabled();
         BlockProtLogger.init(this.getDataFolder(), sessionLogEnabled);
@@ -547,6 +562,7 @@ public final class BlockProt extends JavaPlugin {
     @Override
     public void onDisable() {
         if (isUnsupportedMinecraft()) {
+            BlockProtLogger.close();
             super.onDisable();
             return;
         }

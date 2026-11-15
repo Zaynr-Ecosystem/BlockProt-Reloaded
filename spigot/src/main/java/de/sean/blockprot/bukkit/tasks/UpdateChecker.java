@@ -67,7 +67,7 @@ public final class UpdateChecker implements Runnable {
      * {@code /releases} (list) is used instead so pre-releases are also detected.
      */
     private static final String GITHUB_API_URL =
-        "https://api.github.com/repos/Zaynr-Ecosystem/BlockProt-Reloaded/releases";
+        "https://api.github.com/repos/Zaynr-Ecosystem/BlockProt-Reloaded/releases?per_page=100";
 
     private static final String RELEASES_URL =
         "https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/releases";
@@ -75,6 +75,20 @@ public final class UpdateChecker implements Runnable {
     private static String releaseUrl() {
         return Edition.current().tagPrefix().isEmpty() ? RELEASES_URL + "/latest" : RELEASES_URL;
     }
+
+    public static @Nullable SemanticVersion getAvailableUpdate(@NotNull String currentPluginVersion) {
+        SemanticVersion cached = latestVersion;
+        if (cached == null) return null;
+        try {
+            SemanticVersion current = new SemanticVersion(currentPluginVersion);
+            return cached.compareTo(current) > 0 ? cached : null;
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    private static final long CACHE_TTL_MILLIS = 30 * 60 * 1000L;
+    private static volatile long lastCheckTimeMillis = 0L;
 
     /**
      * Cached result of the last successful GitHub API call.
@@ -128,13 +142,14 @@ public final class UpdateChecker implements Runnable {
 
     @Override
     public void run() {
-        if (latestVersion != null) {
+        if (latestVersion != null && (System.currentTimeMillis() - lastCheckTimeMillis) < CACHE_TTL_MILLIS) {
             this.sendMessage(currentVersion, latestVersion, latestRelease);
             return;
         }
 
         try {
             HttpClient client = HttpClient.newBuilder()
+                .followRedirects(HttpClient.Redirect.NORMAL)
                 .connectTimeout(Duration.ofSeconds(5))
                 .build();
 
@@ -160,6 +175,7 @@ public final class UpdateChecker implements Runnable {
             SemanticVersion best = bestRelease.asSemantic(Edition.current());
             UpdateChecker.latestVersion = best;
             UpdateChecker.latestRelease = bestRelease;
+            UpdateChecker.lastCheckTimeMillis = System.currentTimeMillis();
             this.sendMessage(currentVersion, best, bestRelease);
 
         } catch (Exception ignored) { }
@@ -178,7 +194,7 @@ public final class UpdateChecker implements Runnable {
             if (rel.draft || !rel.belongsTo(edition)) continue;
             SemanticVersion v = rel.asSemantic(edition);
             if (v.isExperimental()) continue;
-            if (!current.isPreRelease() && (rel.prerelease || v.isPreRelease())) continue;
+            if (!current.isPreRelease() && !v.isHotfix() && (rel.prerelease || v.isPreRelease())) continue;
             if (best == null || v.compareTo(best) > 0) {
                 best = v;
                 bestRelease = rel;

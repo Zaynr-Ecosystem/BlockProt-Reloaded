@@ -135,9 +135,19 @@ public class AdminMenuInventory extends BlockProtInventory {
         inventory.setItem(SLOT_RELOAD, item(Material.COMPARATOR,
             Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__RELOAD),
             Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__RELOAD_LORE)));
-        inventory.setItem(SLOT_UPDATE, item(Material.SPYGLASS,
-            Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__UPDATE),
-            Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__UPDATE_LORE)));
+        de.sean.blockprot.util.SemanticVersion pendingUpdate =
+            de.sean.blockprot.bukkit.tasks.UpdateChecker.getAvailableUpdate(BlockProt.getPluginVersion());
+        if (pendingUpdate != null) {
+            inventory.setItem(SLOT_UPDATE, item(Material.SPYGLASS,
+                Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__UPDATE) + " (v" + pendingUpdate + ")",
+                Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__UPDATE_LORE),
+                Translator.get(TranslationKey.MESSAGES__UPDATE__OUTDATED)
+                    .replace("{version}", pendingUpdate.toString())));
+        } else {
+            inventory.setItem(SLOT_UPDATE, item(Material.SPYGLASS,
+                Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__UPDATE),
+                Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__UPDATE_LORE)));
+        }
         inventory.setItem(SLOT_DEBUG, item(Material.COMMAND_BLOCK,
             Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__DEBUG),
             Translator.get(TranslationKey.INVENTORIES__ADMIN_MENU__DEBUG_LORE)));
@@ -376,8 +386,10 @@ public class AdminMenuInventory extends BlockProtInventory {
         if (meta == null) return item;
         ComponentMessages.displayName(meta, net.kyori.adventure.text.Component.text(
             name.replaceAll("[§&][0-9a-fk-orx]", "")));
+        LegacyComponentSerializer legacy = LegacyComponentSerializer.builder()
+            .character('§').hexColors().useUnusualXRepeatedCharacterHexFormat().build();
         List<net.kyori.adventure.text.Component> loreList = new ArrayList<>(lore.length);
-        for (String s : lore) loreList.add(LegacyComponentSerializer.legacySection().deserialize(s));
+        for (String s : lore) loreList.add(legacy.deserialize(s));
         ComponentMessages.lore(meta, loreList);
         item.setItemMeta(meta);
         return item;

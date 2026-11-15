@@ -2,6 +2,7 @@
 
 ---
 > **BlockProt Legacy (Minecraft 1.18.2 - 1.20.4)**. Looking for another Minecraft version? See the [version guide](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/blob/main/docs/READ_MEs/VERSION_GUIDE.md).
+> **Stay on the latest build!** Updating is always recommended, even when only 1 build behind, for security, Folia, and compatibility fixes. Download the latest **BlockProt Legacy** build from [GitHub Releases](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/releases) or [Modrinth](https://modrinth.com/plugin/blockprot-legacy).
 
 BlockProt Legacy is a maintained fork of [BlockProt](https://github.com/spnda/BlockProt) for Paper, Purpur, and Folia servers (Minecraft 1.18.2 - 1.20.4). It preserves the original NBT-based protection core while adding stability fixes, performance improvements, and new features not present upstream.
 
@@ -85,7 +86,7 @@ Monitors explosions near lockable blocks. Logs the event, alerts the owner via a
 - Environmental and special container protection: shields decorated pots from projectiles, enforces per-slot `READ`/`WRITE` access on chiseled bookshelves, blocks fire ignition/spread, liquid flow (`BlockFromToEvent`), unauthorized bucket waterlogging, falling blocks, and dispenser redstone activation against protected containers, and protects entities from damage, projectiles, and leashes.
 - Piston crushing and movement protection: prevents pistons from moving or crushing locked blocks and containers.
 - Offline-mode UUID isolation: bypasses Mojang HTTP lookups when `online-mode: false` and strips handshake query parameters on Bedrock prefix checks.
-- Dynamic feature gating and staff tier inheritance: hides disabled commands (`/bp tiers`, `/bp friends`, `/bp logs`) cleanly, keeps OP `/bp update` access in menu mode, enforces `t2` inheritance, and lets explicit permission negations override OP fallback.
+- Dynamic feature gating and staff tier inheritance: hides disabled commands (`/bp tiers`, `/bp friends`, `/bp logs`) cleanly, restricts player `use_menus` chat commands to `/bp user` and `/bp admin`, enforces `t2` inheritance, and lets explicit permission negations override OP fallback.
 - Multi-tier staff permissions (`admin_tiers.enabled`) and standalone `admins.yml` hierarchy.
 - Native Paper Dialogs: not available in this edition. Every menu opens as a chest inventory.
 - Bedrock touch forms (Cumulus API via Geyser and Floodgate).

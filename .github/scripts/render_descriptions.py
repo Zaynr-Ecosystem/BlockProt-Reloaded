@@ -15,6 +15,15 @@ GUIDE_URL = "https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/blob/main/doc
 RENDERED = ("bpr-legacy", "bp-legacy")
 
 MAIN_BOX = f"> **Looking for another Minecraft version?** See the [version guide]({GUIDE_URL})."
+MAIN_UPDATE_NOTICE = (
+    "> **Updating from 1.4.1-hotfix.2 or older?** Those older builds still check the previous repository URL "
+    "and will not notify you automatically due to the GitHub redirect. Download **1.4.5** manually from "
+    "[GitHub Releases](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/releases), "
+    "[Modrinth](https://modrinth.com/plugin/blockprot-reloaded), "
+    "[CurseForge](https://www.curseforge.com/minecraft/bukkit-plugins/blockprot-reloaded), or "
+    "[Hangar](https://hangar.papermc.io/Zaynr-Ecosystem/BlockProt-Reloaded) to restore automatic update alerts, "
+    "startup backups, and the latest fixes. Updating is always recommended, even when only 1 build behind."
+)
 MAIN_INTRO = ("BlockProt Reloaded is a maintained fork of [BlockProt](https://github.com/spnda/BlockProt) "
               "for Paper, Purpur, and Folia servers (Minecraft 1.21.7 through 26.3).")
 MAIN_PROTECTED_HEADING = "## What is protected\n\n"
@@ -43,9 +52,18 @@ def replace_once(text, old, new):
 def render(template, config):
     info = config["description"]
     servers = info["servers"]
+    modrinth_id = config["platforms"]["modrinth"]["id"]
     text = template
     text = replace_once(text, MAIN_BOX,
                         f"> **{info['title']}**. Looking for another Minecraft version? See the [version guide]({GUIDE_URL}).")
+    text = replace_once(
+        text,
+        MAIN_UPDATE_NOTICE,
+        f"> **Stay on the latest build!** Updating is always recommended, even when only 1 build behind, "
+        f"for security, Folia, and compatibility fixes. Download the latest **{config['displayName']}** build from "
+        f"[GitHub Releases](https://github.com/Zaynr-Ecosystem/BlockProt-Reloaded/releases) or "
+        f"[Modrinth](https://modrinth.com/plugin/{modrinth_id}).",
+    )
     text = replace_once(text, MAIN_INTRO,
                         f"{config['displayName']} is a maintained fork of [BlockProt](https://github.com/spnda/BlockProt) "
                         f"for {join_and(servers)} servers (Minecraft {info['range']}).")
