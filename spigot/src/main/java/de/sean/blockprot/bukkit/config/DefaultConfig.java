@@ -835,6 +835,12 @@ public final class DefaultConfig extends BlockProtConfig {
         return BlocksConfigModifier.hasConfiguredBlocks(blocksConfig);
     }
 
+    public boolean hasLockableTileEntities() { return !lockableTileEntities.isEmpty(); }
+    public boolean hasLockableShulkerBoxes() { return !shulkerBoxes.isEmpty(); }
+    public boolean hasLockableBlocksOnly()   { return lockableBlocks.stream().anyMatch(m -> !lockableDoorsSet.contains(m)); }
+    public boolean hasLockableDoors()        { return !lockableDoors.isEmpty(); }
+    public boolean hasLockableEntities()     { return !lockableEntities.isEmpty(); }
+
     @Nullable
     public static String configKeyForMaterial(@NotNull Material material) {
         return BlocksConfigModifier.configKeyForMaterial(material);

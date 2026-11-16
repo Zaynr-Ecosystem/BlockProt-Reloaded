@@ -45,5 +45,13 @@ class LegacyReport(unittest.TestCase):
             self.assertEqual([], weekly_maintenance.legacy_edition_sections(mock.Mock(jar="x.jar"), config))
 
 
+class BstatsTelemetrySection(unittest.TestCase):
+    def test_bstats_section_handles_network_failure_gracefully(self):
+        with mock.patch.object(weekly_maintenance.audit_bstats, "fetch_live_snapshot", side_effect=OSError("offline")):
+            section = weekly_maintenance.bstats_section()
+        self.assertIn("## Code Telemetry Coverage", section)
+        self.assertIn("Unavailable: offline", section)
+
+
 if __name__ == "__main__":
     unittest.main()

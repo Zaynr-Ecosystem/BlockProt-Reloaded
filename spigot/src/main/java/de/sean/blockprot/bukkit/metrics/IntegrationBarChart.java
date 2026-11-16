@@ -21,15 +21,14 @@
 package de.sean.blockprot.bukkit.metrics;
 
 import de.sean.blockprot.bukkit.BlockProt;
+import de.sean.blockprot.bukkit.config.IntegrationConfig;
 import org.bstats.charts.SimpleBarChart;
+import org.bukkit.plugin.PluginManager;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-/**
- * Simple bar chart that shows how many people are using an integration together with BlockProt.
- */
 public final class IntegrationBarChart extends SimpleBarChart {
     public IntegrationBarChart() {
         super("integrations", new IntegrationBarChartData());
@@ -39,13 +38,14 @@ public final class IntegrationBarChart extends SimpleBarChart {
         @Override
         public Map<String, Integer> call() {
             HashMap<String, Integer> map = new HashMap<>();
-            for (var integration : BlockProt.getInstance().getIntegrations()) {
-                if (integration.isEnabled()) {
-                    map.put(integration.name, 1);
-                } else {
-                    map.put(integration.name, 0);
-                }
+            BlockProt instance = BlockProt.getInstance();
+            for (var integration : instance.getIntegrations()) {
+                map.put(integration.name, integration.isEnabled() ? 1 : 0);
             }
+            PluginManager pm = instance.getServer().getPluginManager();
+            boolean worldEditPresent = pm.isPluginEnabled("WorldEdit") || pm.isPluginEnabled("FastAsyncWorldEdit");
+            boolean worldEditActive = worldEditPresent && IntegrationConfig.getBoolean("worldedit.enabled", true);
+            map.put("worldedit", worldEditActive ? 1 : 0);
             return map;
         }
     }

@@ -20,6 +20,7 @@ package de.sean.blockprot.bukkit.metrics;
 
 import de.sean.blockprot.bukkit.BlockProt;
 import de.sean.blockprot.bukkit.config.DefaultConfig;
+import de.sean.blockprot.bukkit.config.IntegrationConfig;
 import org.bstats.charts.SimpleBarChart;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,6 +35,11 @@ public final class FeatureUsageBarChart extends SimpleBarChart {
     }
 
     public static @NotNull Map<String, Integer> collect(@NotNull DefaultConfig cfg) {
+        return collect(cfg, false);
+    }
+
+    public static @NotNull Map<String, Integer> collect(@NotNull DefaultConfig cfg,
+                                                        boolean worldEditPasteAutolock) {
         Map<String, Integer> map = new LinkedHashMap<>();
         map.put("Lock On Place", boolInt(cfg.lockOnPlaceByDefault()));
         map.put("Modern Family Blocks", boolInt(cfg.isModernFamilyBlocks()));
@@ -49,6 +55,26 @@ public final class FeatureUsageBarChart extends SimpleBarChart {
         map.put("Auto Drop", boolInt(cfg.isAutoDropToInventoryEnabled()));
         map.put("Owner Notifications", boolInt(cfg.isOwnerNotificationsEnabled()));
         map.put("Auto Reload", boolInt(cfg.isAutoReloadEnabled()));
+        map.put("Notify Admins On Join", boolInt(cfg.shouldNotifyAdminsOnJoin()));
+        map.put("Auto Backups", boolInt(cfg.isBackupsEnabled()));
+        map.put("Session Log", boolInt(cfg.isSessionLogEnabled()));
+        map.put("Inactivity Cleanup", boolInt(cfg.getBukkitConfig().getInt("inactivity_cleanup_days", -1) > 0));
+        map.put("Max Locks Limit", boolInt(cfg.getMaxLockedBlockCount() != null));
+        map.put("Explosion Protection", boolInt(cfg.shouldProtectLockedBlocksFromExplosions()));
+        map.put("Piston Protection", boolInt(cfg.shouldBlockProtectedBlockPistonMovement()));
+        map.put("Redstone Disallowed", boolInt(cfg.disallowRedstoneOnPlace()));
+        map.put("Clear Shulker On Break", boolInt(cfg.shouldClearProtectionOnShulkerBreak()));
+        map.put("Break Unowned", boolInt(cfg.shouldAllowBreakProtectedBlocks()));
+        map.put("Spawn Protection", boolInt(cfg.shouldRespectSpawnProtection()));
+        map.put("Villager Workstations", boolInt(cfg.isVillagerWorkstationProtectionEnabled()));
+        map.put("Entity Auto-Protect Tame", boolInt(cfg.isEntityProtectionEnabled() && cfg.isEntityProtectionAutoProtectOnTame()));
+        map.put("Public As Friend", boolInt(cfg.publicIsFriendByDefault()));
+        map.put("Lock Effects", boolInt(cfg.isLockEffectEnabled()));
+        map.put("Lock Sounds", boolInt(cfg.isLockSoundEnabled()));
+        map.put("Notify On Open", boolInt(cfg.isNotifyOnOpen()));
+        map.put("Notify On Take", boolInt(cfg.isNotifyOnTake()));
+        map.put("Notify On Place", boolInt(cfg.isNotifyOnPlace()));
+        map.put("WorldEdit Paste Autolock", boolInt(worldEditPasteAutolock));
         return map;
     }
 
@@ -59,7 +85,9 @@ public final class FeatureUsageBarChart extends SimpleBarChart {
     public static class FeatureUsageBarChartData implements Callable<Map<String, Integer>> {
         @Override
         public Map<String, Integer> call() {
-            return collect(BlockProt.getDefaultConfig());
+            boolean worldEditPaste = IntegrationConfig.getBoolean("worldedit.enabled", true)
+                && IntegrationConfig.getBoolean("worldedit.paste_autolock.enabled", false);
+            return collect(BlockProt.getDefaultConfig(), worldEditPaste);
         }
     }
 }

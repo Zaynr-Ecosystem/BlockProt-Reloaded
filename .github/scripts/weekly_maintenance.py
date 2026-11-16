@@ -11,6 +11,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCRIPTS = REPO_ROOT / ".github" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
+import audit_bstats  # noqa: E402
 import edition as editions  # noqa: E402
 
 STABLE_VERSION = re.compile(r"^\d+(\.\d+){1,2}$")
@@ -90,7 +91,21 @@ def main_edition_sections(args):
         rows = [f"| {d['name']} | {d['category']} | `{d['current']}` | `{d['latest']}` |" for d in outdated]
         sections.append("## Outdated dependencies\n\n| Dependency | Category | Current | Latest |\n"
                         "| :--- | :--- | :--- | :--- |\n" + "\n".join(rows))
+    telemetry = bstats_section()
+    if telemetry:
+        sections.append(telemetry)
     return sections
+
+
+def bstats_section():
+    coverage = audit_bstats.audit_code_coverage(REPO_ROOT)
+    snapshot = None
+    live_error = None
+    try:
+        snapshot = audit_bstats.fetch_live_snapshot()
+    except Exception as exc:
+        live_error = str(exc)
+    return audit_bstats.format_markdown_report(coverage, snapshot=snapshot, live_error=live_error).strip()
 
 
 def legacy_edition_sections(args, config):
